@@ -86,7 +86,6 @@ public class BeanManager {
     scannerList.add(new MethodAnnotationsScanner());
     scannerList.add(new MethodParameterScanner());
     scannerList.add(new MethodParameterNamesScanner());
-    scannerList.add(new SubTypesScanner(false));
     scannerList.add(new MemberUsageScanner());
     return scannerList;
   }
