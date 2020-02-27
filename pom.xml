@@ -17,7 +17,7 @@
         <classgraph.version>4.8.37</classgraph.version>
         <junit.version>4.12</junit.version>
         <logback.version>1.2.3</logback.version>
-        <netty.version>4.1.42.Final</netty.version>
+        <netty.version>4.1.45.Final</netty.version>
         <logback.version>1.2.3</logback.version>
         <javassist.version>3.26.0-GA</javassist.version>
         <guice.version>4.2.2</guice.version>
