@@ -4,14 +4,13 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import org.reflections.Reflections;
+import org.reflections.scanners.Scanner;
 import org.reflections.scanners.*;
 import org.reflections.util.ConfigurationBuilder;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BeanManager {
@@ -35,7 +34,7 @@ public class BeanManager {
   }
 
   private ConfigurationBuilder getConfigurationBuilder(String scanPath) {
-    return new ConfigurationBuilder().forPackages(scanPath).addScanners(getScanners());
+    return new ConfigurationBuilder().forPackages(scanPath).addScanners(getScanners().toArray(new Scanner[8]));
   }
 
   private Set<Class<? extends Annotation>> getScanAnnotationSet() {
@@ -79,14 +78,16 @@ public class BeanManager {
     }
   }
 
-  private Scanner[] getScanners() {
-    return new Scanner[]{
-            new SubTypesScanner(false),
-            new TypeAnnotationsScanner(),
-            new FieldAnnotationsScanner(),
-            new MethodAnnotationsScanner(),
-            new MethodParameterScanner(),
-            new MethodParameterNamesScanner(),
-            new MemberUsageScanner()};
+  private List<Scanner> getScanners() {
+    List<Scanner> scannerList = new ArrayList<>();
+    scannerList.add(new SubTypesScanner(false));
+    scannerList.add(new TypeAnnotationsScanner());
+    scannerList.add(new FieldAnnotationsScanner());
+    scannerList.add(new MethodAnnotationsScanner());
+    scannerList.add(new MethodParameterScanner());
+    scannerList.add(new MethodParameterNamesScanner());
+    scannerList.add(new SubTypesScanner(false));
+    scannerList.add(new MemberUsageScanner());
+    return scannerList;
   }
 }
