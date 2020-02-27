@@ -48,24 +48,32 @@ public class BeanManager {
   public void start() throws IllegalAccessException, InstantiationException {
     Injector injector = Guice.createInjector(new AutoScanModule(reflections, scanAnnotationSet));
     for (Class<? extends Annotation> annotationCls : scanAnnotationSet) {
-      Set<Class<?>> typesAnnotatedWith = this.reflections.getTypesAnnotatedWith(annotationCls, true);
-      for (Class<?> typeClass : typesAnnotatedWith) {
-        Object type = typeClass.newInstance();
-        this.beanMap.put(typeClass, type);
-      }
+      this.collectBeans(annotationCls);
     }
     for (Class<?> typeClass : beanMap.keySet()) {
       Field[] fields = typeClass.getDeclaredFields();
       if (fields.length == 0) {
         continue;
       }
-      for (Field field : fields) {
-        if (field.getAnnotation(JAVAX_INJECT) != null || field.getAnnotation(GOOGLE_INJECT) != null) {
-          field.setAccessible(true);
-          Provider<?> provider = injector.getProvider(field.getType());
-          if (provider != null && provider.get() != null) {
-            field.set(beanMap.get(typeClass), provider.get());
-          }
+      this.providerInject(injector, typeClass, fields);
+    }
+  }
+
+  private void collectBeans(Class<? extends Annotation> annotationCls) throws InstantiationException, IllegalAccessException {
+    Set<Class<?>> typesAnnotatedWith = this.reflections.getTypesAnnotatedWith(annotationCls, true);
+    for (Class<?> typeClass : typesAnnotatedWith) {
+      Object type = typeClass.newInstance();
+      this.beanMap.put(typeClass, type);
+    }
+  }
+
+  private void providerInject(Injector injector, Class<?> typeClass, Field[] fields) throws IllegalAccessException {
+    for (Field field : fields) {
+      if (field.getAnnotation(JAVAX_INJECT) != null || field.getAnnotation(GOOGLE_INJECT) != null) {
+        field.setAccessible(true);
+        Provider<?> provider = injector.getProvider(field.getType());
+        if (provider != null && provider.get() != null) {
+          field.set(beanMap.get(typeClass), provider.get());
         }
       }
     }
