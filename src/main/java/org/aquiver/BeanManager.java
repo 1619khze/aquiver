@@ -30,11 +30,13 @@ public class BeanManager {
       throw new IllegalArgumentException("Please use the correct path");
     }
     this.scanAnnotationSet = this.getScanAnnotationSet();
-    this.reflections       = new Reflections(getConfigurationBuilder(scanPath));
+    ConfigurationBuilder configurationBuilder = getConfigurationBuilder(scanPath);
+    this.reflections       = new Reflections(configurationBuilder);
   }
 
   private ConfigurationBuilder getConfigurationBuilder(String scanPath) {
-    return new ConfigurationBuilder().forPackages(scanPath).addScanners(getScanners().toArray(new Scanner[8]));
+    Scanner[] scanners = getScanners().toArray(new Scanner[0]);
+    return new ConfigurationBuilder().forPackages(scanPath).addScanners(scanners);
   }
 
   private Set<Class<? extends Annotation>> getScanAnnotationSet() {
