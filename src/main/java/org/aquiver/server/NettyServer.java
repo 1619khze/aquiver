@@ -169,7 +169,7 @@ public class NettyServer extends AbstractModule implements Server {
     final Boolean webSocket = environment.getBoolean(PATH_SERVER_WEBSOCKET, SERVER_WEBSOCKET);
     log.info("Websocket current state: {}", webSocket);
 
-    if (!webSocket) {
+    if (webSocket) {
       final String webSocketPath = environment.get(PATH_SERVER_WEBSOCKET_PATH, SERVER_WEBSOCKET_PATH);
       this.serverBootstrap.childHandler(new WebSocketServerInitializer(webSocketPath));
       log.info("Websocket path: {}", webSocketPath);
