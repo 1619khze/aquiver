@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.toolkit;
 
+import org.aquiver.Const;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;

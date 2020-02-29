@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.toolkit;
 
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
