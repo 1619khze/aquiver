@@ -26,6 +26,7 @@ package org.aquiver;
 import org.aquiver.server.Server;
 import org.aquiver.server.banner.BannerFont;
 import org.aquiver.server.NettyServer;
+import org.aquiver.toolkit.Propertys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,22 +91,6 @@ public final class Aquiver {
 
   public int port() {
     return port;
-  }
-
-  public boolean verbose() {
-    return this.environment.getBoolean(PATH_SCAN_VERBOSE, false);
-  }
-
-  public void verbose(boolean verbose) {
-    this.environment.add(PATH_SCAN_VERBOSE, verbose);
-  }
-
-  public boolean enableRealtimeLogging() {
-    return this.environment.getBoolean(PATH_SCAN_LOGGING, false);
-  }
-
-  public void enableRealtimeLogging(boolean enableRealtimeLogging) {
-    this.environment.add(PATH_SCAN_LOGGING, enableRealtimeLogging);
   }
 
   public String bannerText() {

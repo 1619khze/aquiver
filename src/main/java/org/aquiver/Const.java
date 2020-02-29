@@ -23,6 +23,8 @@
  */
 package org.aquiver;
 
+import org.aquiver.toolkit.Propertys;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -53,8 +55,6 @@ public interface Const {
   String  PATH_SERVER_BOOT_CONFIG        = "server.boot.conf";
   String  PATH_ENV_WATCHER               = "server.env.watcher";
   String  PATH_TASK_STORAGE              = "server.task.storage";
-  String  PATH_SCAN_VERBOSE              = "server.scan.verbose";
-  String  PATH_SCAN_LOGGING              = "server.scan.com.crispy.logging";
 
   // netty setting
   String PATH_SERVER_SSL_CERT                  = "server.ssl.cert-path";
