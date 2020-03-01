@@ -1,5 +1,11 @@
 package org.aquiver.annotation;
 
-public @interface HeadMapping {
+import java.lang.annotation.*;
 
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@RequestMapping(method = RequestMethod.HEAD)
+public @interface HeadMapping {
+  String value() default "";
 }
