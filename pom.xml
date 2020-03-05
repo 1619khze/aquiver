@@ -22,6 +22,8 @@
         <javassist.version>3.26.0-GA</javassist.version>
         <guice.version>4.2.2</guice.version>
         <reflections.version>0.9.12</reflections.version>
+        <java.version>8</java.version>
+        <spring-core.version>5.2.4.RELEASE</spring-core.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-license-plugin.version>1.9.0</maven-license-plugin.version>
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
@@ -70,11 +72,6 @@
             <version>${snakeyaml.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.classgraph</groupId>
-            <artifactId>classgraph</artifactId>
-            <version>${classgraph.version}</version>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
@@ -106,6 +103,17 @@
             <artifactId>reflections</artifactId>
             <version>${reflections.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring-core.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-jcl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
     <build>
@@ -115,9 +123,45 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.1</version>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>${maven-license-plugin.version}</version>
+                <configuration>
+                    <basedir>${basedir}</basedir>
+                    <header>src/main/resources/etc/header.txt</header>
+                    <quiet>false</quiet>
+                    <failIfMissing>true</failIfMissing>
+                    <aggregate>true</aggregate>
+                    <strictCheck>true</strictCheck>
+                    <includes>
+                        <include>**/src/main/java/**/*.java</include>
+                        <include>**/src/test/java/**/*.java</include>
+                        <include>**/src/main/resources/*.properties</include>
+                        <include>**/src/test/resources/*.properties</include>
+                        <include>**/src/main/resources/*.yml</include>
+                        <include>**/src/test/resources/*.yml</include>
+                    </includes>
+
+                    <useDefaultExcludes>true</useDefaultExcludes>
+                    <mapping>
+                        <java>SLASHSTAR_STYLE</java>
+                    </mapping>
+                    <useDefaultMapping>true</useDefaultMapping>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
 
