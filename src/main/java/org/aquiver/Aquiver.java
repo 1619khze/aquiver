@@ -45,8 +45,8 @@ public final class Aquiver {
 
   private static final Logger log = LoggerFactory.getLogger(Aquiver.class);
 
-  private Server      nettyServer = new NettyServer();
-  private Environment environment = Environment.of();
+  private Environment    environment    = Environment.of();
+  private Server         nettyServer    = new NettyServer();
   private Set<String>    packages       = new LinkedHashSet<>();
   private List<Class<?>> eventPool      = new LinkedList<>();
   private CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -175,22 +175,22 @@ public final class Aquiver {
    * 4. Support loading configuration from System.Property
    */
   private void loadConfig(String[] args) throws IllegalAccessException {
-    String              bootConf    = environment().get(PATH_SERVER_BOOT_CONFIG, PATH_CONFIG_PROPERTIES);
-    Environment         bootConfEnv = Environment.of(bootConf);
-    Map<String, String> argsMap     = this.loadMainArgs(args);
-    this.loadSystemProperty(bootConfEnv);
-    this.loadYamlConfig(bootConfEnv);
-    this.loadEnvConfig(argsMap);
-  }
+    String      bootConf    = environment().get(PATH_SERVER_BOOT_CONFIG, PATH_CONFIG_PROPERTIES);
+    Environment bootConfEnv = Environment.of(bootConf);
 
-  /**
-   * According to whether the configuration information of the specified
-   * environment exists in the main function, and then perform configuration
-   * loading according to this configuration information
-   *
-   * @param argsMap
-   */
-  private void loadEnvConfig(Map<String, String> argsMap) {
+    Map<String, String> argsMap    = this.loadMainArgs(args);
+    Map<String, String> constField = Propertys.confFieldMap();
+
+    this.loadPropsOrYaml(bootConfEnv, constField);
+
+    //Support loading configuration from args array of main function
+    if (!Objects.requireNonNull(bootConfEnv).isEmpty()) {
+      Map<String, String>            bootEnvMap = bootConfEnv.toStringMap();
+      Set<Map.Entry<String, String>> entrySet   = bootEnvMap.entrySet();
+      entrySet.forEach(entry -> this.environment.add(entry.getKey(), entry.getValue()));
+      this.masterConfig = true;
+    }
+
     if (argsMap.get(PATH_SERVER_PROFILE) != null) {
       String envNameArg = argsMap.get(PATH_SERVER_PROFILE);
       this.envConfig(envNameArg);
@@ -208,41 +208,15 @@ public final class Aquiver {
     }
   }
 
-  /**
-   * Load yaml configuration file to support yaml format syntax
-   * configuration, defaults to properties
-   *
-   * @param bootConfEnv
-   */
-  private void loadYamlConfig(Environment bootConfEnv) {
-    if (bootConfEnv.isEmpty()) {
-      TreeMap<String, Map<String, Object>> yamlConfigTreeMap = Propertys.yaml(PATH_CONFIG_YAML);
-      if (yamlConfigTreeMap != null) {
-        bootConfEnv.load(new StringReader(Propertys.toProperties(yamlConfigTreeMap)));
-        this.bootConfName = PATH_CONFIG_YAML;
-      }
-    }
-    if (!Objects.requireNonNull(bootConfEnv).isEmpty()) {
-      Map<String, String>            bootEnvMap = bootConfEnv.toStringMap();
-      Set<Map.Entry<String, String>> entrySet   = bootEnvMap.entrySet();
-      entrySet.forEach(entry -> this.environment.add(entry.getKey(), entry.getValue()));
-      this.masterConfig = true;
-    }
-  }
+  private void loadPropsOrYaml(Environment bootConfEnv, Map<String, String> constField) {
+    //Properties are configured by default, and the properties loaded by default are application.properties
+    constField.keySet().forEach(key -> Optional.of(System.getProperty(constField.get(key)))
+            .ifPresent(property -> bootConfEnv.add(key, property)));
 
-  /**
-   * Load the system property parameter and overwrite if the main configuration exists
-   *
-   * @param bootConfEnv
-   * @throws IllegalAccessException
-   */
-  private void loadSystemProperty(Environment bootConfEnv) throws IllegalAccessException {
-    Map<String, String> constField = Propertys.confFieldMap();
-    for (String key : constField.keySet()) {
-      final String property = System.getProperty(constField.get(key));
-      if (property != null) {
-        bootConfEnv.add(key, property);
-      }
+    //If there is no properties configuration, the yaml format is used, and the default yaml loaded is application.yml
+    if (bootConfEnv.isEmpty()) {
+      Optional.ofNullable(Propertys.yaml(PATH_CONFIG_YAML)).ifPresent(yamlConfigTreeMap ->
+              bootConfEnv.load(new StringReader(Propertys.toProperties(yamlConfigTreeMap))));
     }
   }
 
