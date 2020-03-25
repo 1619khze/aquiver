@@ -54,7 +54,8 @@ public interface Const {
   String  PATH_SERVER_PROFILE            = "server.profile";
   String  PATH_SERVER_BOOT_CONFIG        = "server.boot.conf";
   String  PATH_ENV_WATCHER               = "server.env.watcher";
-  String  PATH_TASK_STORAGE              = "server.task.storage";
+  String  PATH_SCANNER_VERBOSE           = "server.scanner.verbose";
+  String  PATH_SCANNER_LOGGING           = "server.scanner.logging";
 
   // netty setting
   String PATH_SERVER_SSL_CERT                  = "server.ssl.cert-path";

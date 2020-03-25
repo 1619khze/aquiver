@@ -31,10 +31,8 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.ResourceLeakDetector;
-import org.aquiver.Aquiver;
-import org.aquiver.Environment;
-import org.aquiver.Systems;
-import org.aquiver.BeanManager;
+import org.aquiver.*;
+import org.aquiver.toolkit.Systems;
 import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvObserver;
@@ -45,6 +43,8 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLException;
 import java.io.File;
 import java.security.cert.CertificateException;
+import java.util.List;
+import java.util.Set;
 
 import static org.aquiver.Const.*;
 
@@ -71,6 +71,7 @@ public class NettyServer extends AbstractModule implements Server {
   private          Aquiver         aquiver;
   private          Channel         channel;
   private          SslContext      sslContext;
+  private          BeanManager     beanManager;
 
   /**
    * start server and init setting
@@ -128,10 +129,17 @@ public class NettyServer extends AbstractModule implements Server {
    * init ioc container
    */
   private void initIoc() {
-    final String      scanPath    = aquiver.getBootCls().getPackage().getName() + ".bean";
-    final BeanManager beanManager = new BeanManager(scanPath);
+    final String scanPath = aquiver.getBootCls().getPackage().getName();
+
+    final ClassgraphOptions classgraphOptions = ClassgraphOptions.builder()
+            .verbose(aquiver.verbose()).enableRealtimeLogging(aquiver.realtimeLogging())
+            .scanPackages(aquiver.packages()).build();
+
+    final Discoverer discoverer = new ClassgraphDiscoverer(classgraphOptions);
+    this.beanManager = new BeanManager(discoverer, scanPath);
+
     try {
-      beanManager.start();
+      this.beanManager.start();
     } catch (IllegalAccessException | InstantiationException e) {
       log.error("An exception occurred while initializing the ioc container", e);
     }
@@ -158,7 +166,7 @@ public class NettyServer extends AbstractModule implements Server {
               setKeyCertFileAndPriKey(sslPrivateKey, ssc.privateKey()), sslPrivateKeyPass).build();
     }
 
-    log.info("Current com.crispy.service ssl startup status: {}", ssl);
+    log.info("Current netty server ssl startup status: {}", ssl);
     log.info("A valid ssl connection configuration is not configured and is rolled back to the default connection state.");
   }
 
@@ -197,7 +205,7 @@ public class NettyServer extends AbstractModule implements Server {
 
     ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
 
-    this.serverBootstrap.childHandler(new NettyServerInitializer(sslContext, environment));
+    this.serverBootstrap.childHandler(new NettyServerInitializer(sslContext, environment, beanManager));
 
     int acceptThreadCount = environment.getInteger(PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT, DEFAULT_ACCEPT_THREAD_COUNT);
     int ioThreadCount     = environment.getInteger(PATH_SERVER_NETTY_IO_THREAD_COUNT, DEFAULT_IO_THREAD_COUNT);
