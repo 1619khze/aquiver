@@ -129,7 +129,7 @@ public class NettyServer extends AbstractModule implements Server {
    * init ioc container
    */
   private void initIoc() {
-    final String scanPath = aquiver.getBootCls().getPackage().getName();
+    final String scanPath = aquiver.getBootCls().getPackage().getName() + ".bean";
 
     final ClassgraphOptions classgraphOptions = ClassgraphOptions.builder()
             .verbose(aquiver.verbose()).enableRealtimeLogging(aquiver.realtimeLogging())

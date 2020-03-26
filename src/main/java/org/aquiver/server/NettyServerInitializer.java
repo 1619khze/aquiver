@@ -34,6 +34,7 @@ import io.netty.handler.codec.http.cors.CorsConfig;
 import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.cors.CorsHandler;
 import io.netty.handler.ssl.SslContext;
+import org.aquiver.BeanManager;
 import org.aquiver.Const;
 import org.aquiver.Environment;
 
@@ -42,17 +43,18 @@ import org.aquiver.Environment;
  * @since 2019/6/5
  */
 public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
+  private final BeanManager beanManager;
+  private final SslContext  sslCtx;
+  private       boolean     cors;
+  private       boolean     compressor;
+  private       CorsConfig  corsConfig;
 
-  private final SslContext sslCtx;
-  private       boolean    cors;
-  private       boolean    compressor;
-  private       CorsConfig corsConfig;
-
-  NettyServerInitializer(SslContext sslCtx, Environment environment) {
+  NettyServerInitializer(SslContext sslCtx, Environment environment, BeanManager beanManager) {
     this.sslCtx = sslCtx;
     final Boolean cors = environment.getBoolean(Const.PATH_SERVER_CORS, Const.SERVER_CORS);
     final Boolean gzip = environment.getBoolean(Const.PATH_SERVER_CONTENT_COMPRESSOR, Const.SERVER_CONTENT_COMPRESSOR);
-    this.cors(cors).compressor(gzip);
+    this.cors(cors).gzip(gzip);
+    this.beanManager = beanManager;
   }
 
   private NettyServerInitializer cors(boolean cors) {
@@ -61,7 +63,7 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
     return this;
   }
 
-  private NettyServerInitializer compressor(boolean compressor) {
+  private NettyServerInitializer gzip(boolean compressor) {
     this.compressor = compressor;
     return this;
   }
@@ -75,5 +77,6 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
     channelPipeline.addLast(new HttpRequestDecoder());
     channelPipeline.addLast(new HttpResponseEncoder());
     channelPipeline.addLast(new HttpObjectAggregator(65536));
+    channelPipeline.addLast(new NettyStaticServerHandler());
   }
 }
