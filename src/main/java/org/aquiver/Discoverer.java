@@ -1,8 +1,8 @@
 package org.aquiver;
 
-import java.util.List;
+import java.util.Collection;
 
 @FunctionalInterface
 public interface Discoverer {
-  List<Class<?>> discover(String scanPath);
+  Collection<Class<?>> discover(String scanPath);
 }
