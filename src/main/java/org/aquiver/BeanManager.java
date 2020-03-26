@@ -1,94 +1,65 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2019 1619kHz
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.aquiver;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Provider;
-import org.reflections.Reflections;
-import org.reflections.scanners.Scanner;
-import org.reflections.scanners.*;
-import org.reflections.util.ConfigurationBuilder;
+import com.google.inject.AbstractModule;
+import org.aquiver.toolkit.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class BeanManager {
+public class BeanManager extends AbstractModule {
 
-  private final Map<Class<?>, Object> beanMap = new ConcurrentHashMap<>(64);
+  private static final Logger log = LoggerFactory.getLogger(BeanManager.class);
 
-  private static final Class<? extends Annotation> JAVAX_SINGLETON  = javax.inject.Singleton.class;
-  private static final Class<? extends Annotation> JAVAX_INJECT     = javax.inject.Inject.class;
-  private static final Class<? extends Annotation> GOOGLE_SINGLETON = com.google.inject.Singleton.class;
-  private static final Class<? extends Annotation> GOOGLE_INJECT    = com.google.inject.Inject.class;
+  private final Map<Class<?>, Object> beanPool = new ConcurrentHashMap<>(64);
 
-  private final Reflections                      reflections;
-  private final Set<Class<? extends Annotation>> scanAnnotationSet;
+  private final Discoverer discoverer;
+  private final String     scanPath;
 
-  public BeanManager(String scanPath) {
-    if (null == scanPath || scanPath.equals("") || !scanPath.contains(".")) {
-      throw new IllegalArgumentException("Please use the correct path");
-    }
-    this.scanAnnotationSet = this.getScanAnnotationSet();
-    ConfigurationBuilder configurationBuilder = getConfigurationBuilder(scanPath);
-    this.reflections       = new Reflections(configurationBuilder);
-  }
-
-  private ConfigurationBuilder getConfigurationBuilder(String scanPath) {
-    Scanner[] scanners = getScanners().toArray(new Scanner[0]);
-    return new ConfigurationBuilder().forPackages(scanPath).addScanners(scanners);
-  }
-
-  private Set<Class<? extends Annotation>> getScanAnnotationSet() {
-    Set<Class<? extends Annotation>> set = new HashSet<>();
-    set.add(JAVAX_SINGLETON);
-    set.add(GOOGLE_SINGLETON);
-    return set;
+  public BeanManager(Discoverer discoverer, String scanPath) {
+    this.discoverer = discoverer;
+    this.scanPath   = scanPath;
   }
 
   public void start() throws IllegalAccessException, InstantiationException {
-    Injector injector = Guice.createInjector(new AutoScanModule(reflections, scanAnnotationSet));
-    for (Class<? extends Annotation> annotationCls : scanAnnotationSet) {
-      this.collectBeans(annotationCls);
-    }
-    for (Class<?> typeClass : beanMap.keySet()) {
-      Field[] fields = typeClass.getDeclaredFields();
-      if (fields.length == 0) {
-        continue;
+    final Collection<Class<?>> discover = discoverer.discover(scanPath);
+    Iterator<Class<?>>         iterator = discover.iterator();
+    while (iterator.hasNext()) {
+      Class<?> next   = iterator.next();
+      boolean  normal = Reflections.isNormal(next);
+      if (!normal) {
+        iterator.remove();
       }
-      this.providerInject(injector, typeClass, fields);
-    }
-  }
-
-  private void collectBeans(Class<? extends Annotation> annotationCls) throws InstantiationException, IllegalAccessException {
-    Set<Class<?>> typesAnnotatedWith = this.reflections.getTypesAnnotatedWith(annotationCls, true);
-    for (Class<?> typeClass : typesAnnotatedWith) {
-      Object type = typeClass.newInstance();
-      this.beanMap.put(typeClass, type);
-    }
-  }
-
-  private void providerInject(Injector injector, Class<?> typeClass, Field[] fields) throws IllegalAccessException {
-    for (Field field : fields) {
-      if (field.getAnnotation(JAVAX_INJECT) != null || field.getAnnotation(GOOGLE_INJECT) != null) {
-        field.setAccessible(true);
-        Provider<?> provider = injector.getProvider(field.getType());
-        if (provider != null && provider.get() != null) {
-          field.set(beanMap.get(typeClass), provider.get());
-        }
+      if (log.isDebugEnabled()) {
+        log.trace("Is this class normal: {}", normal);
       }
     }
-  }
-
-  private List<Scanner> getScanners() {
-    List<Scanner> scannerList = new ArrayList<>();
-    scannerList.add(new SubTypesScanner(false));
-    scannerList.add(new TypeAnnotationsScanner());
-    scannerList.add(new FieldAnnotationsScanner());
-    scannerList.add(new MethodAnnotationsScanner());
-    scannerList.add(new MethodParameterScanner());
-    scannerList.add(new MethodParameterNamesScanner());
-    scannerList.add(new MemberUsageScanner());
-    return scannerList;
   }
 }
+
