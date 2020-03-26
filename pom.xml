@@ -21,7 +21,6 @@
         <logback.version>1.2.3</logback.version>
         <javassist.version>3.26.0-GA</javassist.version>
         <guice.version>4.2.2</guice.version>
-        <reflections.version>0.9.12</reflections.version>
         <java.version>8</java.version>
         <spring-core.version>5.2.4.RELEASE</spring-core.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
@@ -99,20 +98,9 @@
             <version>${guice.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>${reflections.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>${spring-core.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring-jcl</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>io.github.classgraph</groupId>
+            <artifactId>classgraph</artifactId>
+            <version>${classgraph.version}</version>
         </dependency>
     </dependencies>
 
