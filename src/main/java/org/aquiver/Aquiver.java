@@ -45,16 +45,18 @@ public final class Aquiver {
 
   private static final Logger log = LoggerFactory.getLogger(Aquiver.class);
 
-  private Environment    environment    = Environment.of();
-  private Server         nettyServer    = new NettyServer();
-  private Set<String>    packages       = new LinkedHashSet<>();
-  private List<Class<?>> eventPool      = new LinkedList<>();
-  private CountDownLatch countDownLatch = new CountDownLatch(1);
-  private String         bootConfName   = PATH_CONFIG_PROPERTIES;
-  private String         envName        = "default";
-  private boolean        envConfig      = false;
-  private boolean        masterConfig   = false;
-  private boolean        started        = false;
+  private Environment    environment     = Environment.of();
+  private Server         nettyServer     = new NettyServer();
+  private Set<String>    packages        = new LinkedHashSet<>();
+  private List<Class<?>> eventPool       = new LinkedList<>();
+  private CountDownLatch countDownLatch  = new CountDownLatch(1);
+  private String         bootConfName    = PATH_CONFIG_PROPERTIES;
+  private String         envName         = "default";
+  private boolean        envConfig        = false;
+  private boolean        masterConfig     = false;
+  private boolean        started         = false;
+  private boolean        verbose         = false;
+  private boolean        realtimeLogging = false;
   private int            port;
   private Class<?>       bootCls;
   private String         bannerText;
@@ -141,6 +143,24 @@ public final class Aquiver {
     return eventPool;
   }
 
+  public Aquiver verbose(boolean verbose) {
+    this.environment.add(PATH_SCANNER_VERBOSE, verbose);
+    return this;
+  }
+
+  public boolean verbose() {
+    return this.environment.getBoolean(PATH_SCANNER_VERBOSE, verbose);
+  }
+
+  public Aquiver realtimeLogging(boolean realtimeLogging) {
+    this.environment.add(PATH_SCANNER_LOGGING, realtimeLogging);
+    return this;
+  }
+
+  public boolean realtimeLogging() {
+    return this.environment.getBoolean(PATH_SCANNER_LOGGING, realtimeLogging);
+  }
+
   public void start(Class<?> bootClass, String[] args) {
     try {
       this.loadConfig(args);
@@ -208,9 +228,15 @@ public final class Aquiver {
     }
   }
 
+  /**
+   * load properties and yaml
+   *
+   * @param bootConfEnv
+   * @param constField
+   */
   private void loadPropsOrYaml(Environment bootConfEnv, Map<String, String> constField) {
     //Properties are configured by default, and the properties loaded by default are application.properties
-    constField.keySet().forEach(key -> Optional.of(System.getProperty(constField.get(key)))
+    constField.keySet().forEach(key -> Optional.ofNullable(System.getProperty(constField.get(key)))
             .ifPresent(property -> bootConfEnv.add(key, property)));
 
     //If there is no properties configuration, the yaml format is used, and the default yaml loaded is application.yml
