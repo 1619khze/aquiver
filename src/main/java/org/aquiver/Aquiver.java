@@ -45,15 +45,15 @@ public final class Aquiver {
 
   private static final Logger log = LoggerFactory.getLogger(Aquiver.class);
 
-  private Environment    environment     = Environment.of();
+  private Environment    environment     = new Environment();
   private Server         nettyServer     = new NettyServer();
   private Set<String>    packages        = new LinkedHashSet<>();
   private List<Class<?>> eventPool       = new LinkedList<>();
   private CountDownLatch countDownLatch  = new CountDownLatch(1);
   private String         bootConfName    = PATH_CONFIG_PROPERTIES;
   private String         envName         = "default";
-  private boolean        envConfig        = false;
-  private boolean        masterConfig     = false;
+  private boolean        envConfig       = false;
+  private boolean        masterConfig    = false;
   private boolean        started         = false;
   private boolean        verbose         = false;
   private boolean        realtimeLogging = false;
