@@ -41,7 +41,10 @@ public final class Environment {
 
   private Properties properties = new Properties();
 
-  private Environment() {
+  public Environment() {
+    Properties  sysProps = System.getProperties();
+    Set<String> keySet   = sysProps.stringPropertyNames();
+    keySet.forEach(key -> properties.put(key, sysProps.getProperty(key)));
   }
 
   public Environment(Properties properties) {
@@ -50,10 +53,6 @@ public final class Environment {
 
   public Environment(String location) {
     this.load(location);
-  }
-
-  public static Environment of() {
-    return new Environment();
   }
 
   public static Environment of(Properties properties) {
