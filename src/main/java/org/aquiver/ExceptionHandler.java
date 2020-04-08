@@ -25,5 +25,11 @@ package org.aquiver;
 
 @FunctionalInterface
 public interface ExceptionHandler {
-  void handler(Exception e);
+
+  /**
+   * @param request   Current request
+   * @param throwable The Throwable caused in handler
+   * @param handler   Target handler that handles current request
+   */
+  void handle(Request request, Throwable throwable, Object handler);
 }
