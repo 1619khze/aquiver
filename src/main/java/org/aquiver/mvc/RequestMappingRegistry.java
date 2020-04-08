@@ -20,7 +20,7 @@ public class RequestMappingRegistry extends AbstractRegistry {
 
   private static final Logger log = LoggerFactory.getLogger(RequestMappingRegistry.class);
 
-  private List<ArgsResolver>  argsResolvers  = new ArrayList<>();
+  private List<ArgsResolver>     argsResolvers  = new ArrayList<>();
   private List<ArgsConverter<?>> argsConverters = new ArrayList<>();
 
   public List<ArgsResolver> getArgsResolvers() {
@@ -59,8 +59,10 @@ public class RequestMappingRegistry extends AbstractRegistry {
       for (int i = 0; i < ps.length; i++) {
         List<ArgsResolver> argsResolvers = getArgsResolvers();
         for (ArgsResolver argsResolver : argsResolvers) {
-          RequestHandlerParam param = argsResolver.resolve(ps[i].getType(), paramNames[i]);
-          requestHandler.getParams().add(param);
+          RequestHandlerParam param = argsResolver.resolve(ps[i], paramNames[i]);
+          if (param != null) {
+            requestHandler.getParams().add(param);
+          }
         }
       }
     } catch (IOException e) {

@@ -1,6 +1,8 @@
 package org.aquiver.mvc;
 
+import java.lang.reflect.Parameter;
+
 @FunctionalInterface
 public interface ArgsResolver {
-  RequestHandlerParam resolve(Class<?> type, String paramName);
+  RequestHandlerParam resolve(Parameter parameter, String paramName);
 }
