@@ -72,6 +72,8 @@ public class BeanManager {
       }
     }
 
+    this.serviceLoad();
+
     for (Class<?> cls : discover) {
       String url = "/";
 
@@ -104,6 +106,20 @@ public class BeanManager {
     }
   }
 
+  private void serviceLoad() throws InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException, NoSuchMethodException {
+    ServiceLoader<ArgsResolver> argsResolverLoad = ServiceLoader.load(ArgsResolver.class);
+    for (ArgsResolver ser : argsResolverLoad) {
+      ArgsResolver argsResolver = ser.getClass().getDeclaredConstructor().newInstance();
+      mappingRegistry.getArgsResolvers().add(argsResolver);
+    }
+
+    ServiceLoader<ArgsConverter> argsConverterLoad = ServiceLoader.load(ArgsConverter.class);
+    for (ArgsConverter<?> ser : argsConverterLoad) {
+      ArgsConverter argsConverter = ser.getClass().getDeclaredConstructor().newInstance();
+      mappingRegistry.getArgsConverters().add(argsConverter);
+    }
+  }
+
   private void findArgsResolver(Class<?> cls) throws ReflectiveOperationException {
     Class<?>[] interfaces = cls.getInterfaces();
     if (interfaces.length == 0) {
@@ -115,10 +131,6 @@ public class BeanManager {
       }
       ArgsResolver argsResolver = (ArgsResolver) cls.getDeclaredConstructor().newInstance();
       mappingRegistry.getArgsResolvers().add(argsResolver);
-    }
-    ServiceLoader<ArgsResolver> load = ServiceLoader.load(ArgsResolver.class);
-    for (ArgsResolver ser : load) {
-      mappingRegistry.getArgsResolvers().add(ser);
     }
   }
 
@@ -133,11 +145,6 @@ public class BeanManager {
       }
       ArgsConverter<?> argsResolver = (ArgsConverter<?>) cls.getDeclaredConstructor().newInstance();
       mappingRegistry.getArgsConverters().add(argsResolver);
-    }
-
-    ServiceLoader<ArgsConverter> load = ServiceLoader.load(ArgsConverter.class);
-    for (ArgsConverter<?> ser : load) {
-      mappingRegistry.getArgsConverters().add(ser);
     }
   }
 
