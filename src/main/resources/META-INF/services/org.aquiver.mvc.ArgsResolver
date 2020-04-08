@@ -1,0 +1,5 @@
+org.aquiver.mvc.resolver.CookiesArgsResolver
+org.aquiver.mvc.resolver.HeaderArgsResolver
+org.aquiver.mvc.resolver.HttpRequestArgsResolver
+org.aquiver.mvc.resolver.RequestBodyArgsResolver
+org.aquiver.mvc.resolver.RequestParamArgsResolver
