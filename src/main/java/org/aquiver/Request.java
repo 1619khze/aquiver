@@ -9,6 +9,7 @@ import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http.multipart.MemoryAttribute;
+import org.aquiver.mvc.RequestHandlerParam;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -17,11 +18,11 @@ public class Request {
   private final FullHttpRequest  request;
   private       FullHttpResponse response;
 
-  private Map<String, Object>       cookies;
-  private Map<String, Object>       headers;
-  private Map<String, List<String>> queryString;
-  private Map<String, Object>       formData;
-  private Map<String, Object>       jsonData;
+  private Map<String, Object> cookies;
+  private Map<String, Object> headers;
+  private Map<String, String> queryString;
+  private Map<String, Object> formData;
+  private Map<String, Object> jsonData;
 
   private String uri;
   private String httpMethod;
@@ -86,7 +87,7 @@ public class Request {
     for (Map.Entry<String, List<String>> p : params.entrySet()) {
       String       key   = p.getKey();
       List<String> value = p.getValue();
-      this.queryString.put(key, value);
+      this.queryString.put(key, value.get(0));
     }
   }
 
@@ -124,7 +125,7 @@ public class Request {
     return headers;
   }
 
-  public Map<String, List<String>> getQueryString() {
+  public Map<String, String> getQueryString() {
     return queryString;
   }
 
@@ -156,7 +157,7 @@ public class Request {
     this.headers = headers;
   }
 
-  public void setQueryString(Map<String, List<String>> queryString) {
+  public void setQueryString(Map<String, String> queryString) {
     this.queryString = queryString;
   }
 
@@ -186,5 +187,17 @@ public class Request {
 
   public void setResponse(FullHttpResponse response) {
     this.response = response;
+  }
+
+  public FullHttpRequest getRequest() {
+    return request;
+  }
+
+  public Object assignment(RequestHandlerParam handlerParam) {
+    switch (handlerParam.getType()) {
+      case REQUEST_PARAM:
+        return handlerParam.getDataType().cast(queryString.get(handlerParam.getName()));
+    }
+    return null;
   }
 }
