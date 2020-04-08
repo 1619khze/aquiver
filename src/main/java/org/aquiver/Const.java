@@ -25,7 +25,6 @@ package org.aquiver;
 
 import org.aquiver.toolkit.Propertys;
 
-import java.lang.annotation.Annotation;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -83,10 +82,4 @@ public interface Const {
 
   // watch env
   Path SERVER_WATCHER_PATH = Paths.get(Objects.requireNonNull(Propertys.getCurrentClassPath()));
-
-  // inject annotation class
-  Class<? extends Annotation> JAVAX_SINGLETON  = javax.inject.Singleton.class;
-  Class<? extends Annotation> JAVAX_INJECT     = javax.inject.Inject.class;
-  Class<? extends Annotation> GOOGLE_SINGLETON = com.google.inject.Singleton.class;
-  Class<? extends Annotation> GOOGLE_INJECT    = com.google.inject.Inject.class;
 }
