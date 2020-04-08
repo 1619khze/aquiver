@@ -33,6 +33,11 @@ public enum RequestParamType {
   URL_ENCODED_FORM,
 
   /**
+   * Cookies
+   */
+  REQUEST_COOKIES,
+
+  /**
    * Http Request Header参数
    */
   REQUEST_HEADER,
