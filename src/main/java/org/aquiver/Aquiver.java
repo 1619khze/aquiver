@@ -23,9 +23,9 @@
  */
 package org.aquiver;
 
+import org.aquiver.server.NettyServer;
 import org.aquiver.server.Server;
 import org.aquiver.server.banner.BannerFont;
-import org.aquiver.server.NettyServer;
 import org.aquiver.toolkit.Propertys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -176,7 +176,7 @@ public final class Aquiver {
       } catch (BindException e) {
         log.error("Bind port is exception:", e);
       } catch (Exception e) {
-        log.error("An exception occurred while the com.crispy.service started", e);
+        log.error("An exception occurred while the service started", e);
       }
     });
 
@@ -287,7 +287,7 @@ public final class Aquiver {
   /**
    * Await web server started
    *
-   * @return return Crispy instance
+   * @return return Aquiver instance
    */
   public Aquiver await() {
     if (!this.started) {
