@@ -28,6 +28,7 @@ import io.github.classgraph.ClassGraph;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class ClassgraphDiscoverer implements Discoverer {
 
@@ -40,13 +41,14 @@ public class ClassgraphDiscoverer implements Discoverer {
   }
 
   @Override
-  public List<Class<?>> discover(String scanPackageName) {
+  public Set<Class<?>> discover(String scanPackageName) {
     this.classGraph.enableAllInfo();
     if (classgraphOptions != null) {
       this.scanPackageName(classgraphOptions.getScanPackages(), scanPackageName)
               .verbose(classgraphOptions.isVerbose()).enableRealtimeLogging(classgraphOptions.isEnableRealtimeLogging());
     }
-    return this.classGraph.scan().getAllClasses().loadClasses();
+    List<Class<?>> classes = this.classGraph.scan().getAllClasses().loadClasses();
+    return new CopyOnWriteArraySet<>(classes);
   }
 
   /**

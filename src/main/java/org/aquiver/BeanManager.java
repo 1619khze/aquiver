@@ -23,17 +23,24 @@
  */
 package org.aquiver;
 
-import com.google.inject.AbstractModule;
+import org.aquiver.annotation.Controller;
+import org.aquiver.annotation.RequestMapping;
+import org.aquiver.annotation.RestController;
+import org.aquiver.mvc.ArgsConverter;
+import org.aquiver.mvc.ArgsResolver;
+import org.aquiver.mvc.RequestMappingRegistry;
 import org.aquiver.toolkit.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Objects;
+import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class BeanManager extends AbstractModule {
+public class BeanManager {
 
   private static final Logger log = LoggerFactory.getLogger(BeanManager.class);
 
@@ -42,24 +49,100 @@ public class BeanManager extends AbstractModule {
   private final Discoverer discoverer;
   private final String     scanPath;
 
+  private final RequestMappingRegistry mappingRegistry;
+
   public BeanManager(Discoverer discoverer, String scanPath) {
-    this.discoverer = discoverer;
-    this.scanPath   = scanPath;
+    this.discoverer      = discoverer;
+    this.scanPath        = scanPath;
+    this.mappingRegistry = new RequestMappingRegistry();
   }
 
-  public void start() throws IllegalAccessException, InstantiationException {
-    final Collection<Class<?>> discover = discoverer.discover(scanPath);
-    Iterator<Class<?>>         iterator = discover.iterator();
-    while (iterator.hasNext()) {
-      Class<?> next   = iterator.next();
-      boolean  normal = Reflections.isNormal(next);
+  public void start() throws ReflectiveOperationException {
+    final Set<Class<?>> discover = discoverer.discover(scanPath);
+
+    for (Class<?> next : discover) {
+      boolean normal = Reflections.isNormal(next);
       if (!normal) {
-        iterator.remove();
+        discover.remove(next);
+      } else {
+        this.beanPool.put(next, next.getDeclaredConstructor().newInstance());
       }
       if (log.isDebugEnabled()) {
         log.trace("Is this class normal: {}", normal);
       }
     }
+
+    for (Class<?> cls : discover) {
+      String url = "/";
+
+      this.findArgsResolver(cls);
+      this.findArgsConverter(cls);
+
+      if (Objects.isNull(cls.getAnnotation(RestController.class)) &&
+              Objects.isNull(cls.getAnnotation(Controller.class))) {
+        continue;
+      }
+
+      RequestMapping classRequestMapping = cls.getAnnotation(RequestMapping.class);
+      if (classRequestMapping != null) {
+        String className = cls.getName();
+        String value     = classRequestMapping.value();
+        if (!"".equals(value)) {
+          url = value;
+        }
+        log.info("Registered rest controller:[{}:{}]", url, className);
+      }
+
+      Method[] methods = cls.getMethods();
+      for (Method method : methods) {
+        RequestMapping methodRequestMapping = method.getAnnotation(RequestMapping.class);
+        if (Objects.isNull(methodRequestMapping)) {
+          continue;
+        }
+        this.mappingRegistry.register(cls, url, method, methodRequestMapping);
+      }
+    }
+  }
+
+  private void findArgsResolver(Class<?> cls) throws ReflectiveOperationException {
+    Class<?>[] interfaces = cls.getInterfaces();
+    if (interfaces.length == 0) {
+      return;
+    }
+    for (Class<?> interfaceCls : interfaces) {
+      if (!interfaceCls.equals(ArgsResolver.class)) {
+        continue;
+      }
+      ArgsResolver argsResolver = (ArgsResolver) cls.getDeclaredConstructor().newInstance();
+      mappingRegistry.getArgsResolvers().add(argsResolver);
+    }
+    ServiceLoader<ArgsResolver> load = ServiceLoader.load(ArgsResolver.class);
+    for (ArgsResolver ser : load) {
+      mappingRegistry.getArgsResolvers().add(ser);
+    }
+  }
+
+  private void findArgsConverter(Class<?> cls) throws ReflectiveOperationException {
+    Class<?>[] interfaces = cls.getInterfaces();
+    if (interfaces.length == 0) {
+      return;
+    }
+    for (Class<?> interfaceCls : interfaces) {
+      if (!interfaceCls.equals(ArgsConverter.class)) {
+        continue;
+      }
+      ArgsConverter<?> argsResolver = (ArgsConverter<?>) cls.getDeclaredConstructor().newInstance();
+      mappingRegistry.getArgsConverters().add(argsResolver);
+    }
+
+    ServiceLoader<ArgsConverter> load = ServiceLoader.load(ArgsConverter.class);
+    for (ArgsConverter<?> ser : load) {
+      mappingRegistry.getArgsConverters().add(ser);
+    }
+  }
+
+  public RequestMappingRegistry getMappingRegistry() {
+    return mappingRegistry;
   }
 }
 
