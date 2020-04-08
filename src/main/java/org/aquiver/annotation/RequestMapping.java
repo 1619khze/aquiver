@@ -31,5 +31,5 @@ import java.lang.annotation.*;
 public @interface RequestMapping {
   String value() default "";
 
-  RequestMethod[] method();
+  RequestMethod method() default RequestMethod.GET;
 }
