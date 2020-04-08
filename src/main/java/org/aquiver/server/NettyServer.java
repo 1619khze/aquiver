@@ -23,7 +23,6 @@
  */
 package org.aquiver.server;
 
-import com.google.inject.AbstractModule;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
@@ -32,33 +31,31 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.ResourceLeakDetector;
 import org.aquiver.*;
-import org.aquiver.toolkit.Systems;
 import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvObserver;
 import org.aquiver.server.websocket.WebSocketServerInitializer;
+import org.aquiver.toolkit.Systems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
 import java.io.File;
 import java.security.cert.CertificateException;
-import java.util.List;
-import java.util.Set;
 
 import static org.aquiver.Const.*;
 
 /**
  * 1, open ssl {@code initSSL}
  * 2, open webSocket {@code initWebSocket}
- * 3, open the Http com.crispy.service {@code startServer}
+ * 3, open the Http com.aquiver.service {@code startServer}
  * 4, observe the environment {@code watchEnv}
- * 5, configure the shutdown thread to stop the com.crispy.service hook {@code shutdownHook}
+ * 5, configure the shutdown thread to stop the com.aquiver.service hook {@code shutdownHook}
  *
  * @author WangYi
  * @since 2019/6/5
  */
-public class NettyServer extends AbstractModule implements Server {
+public class NettyServer implements Server {
 
   private static final Logger log = LoggerFactory.getLogger(NettyServer.class);
 
@@ -112,14 +109,14 @@ public class NettyServer extends AbstractModule implements Server {
   /**
    * record the log loaded by the configuration
    *
-   * @param crispy
+   * @param aquiver
    * @param envName
    */
-  private void configLoadLog(Aquiver crispy, String envName) {
-    if (crispy.masterConfig()) {
+  private void configLoadLog(Aquiver aquiver, String envName) {
+    if (aquiver.masterConfig()) {
       log.info("Configuration information is loaded");
     }
-    if (!crispy.envConfig()) {
+    if (!aquiver.envConfig()) {
       log.info("No active profile set, falling back to default profiles: default");
     }
     log.info("The application startup env is: {}", envName);
@@ -137,10 +134,9 @@ public class NettyServer extends AbstractModule implements Server {
 
     final Discoverer discoverer = new ClassgraphDiscoverer(classgraphOptions);
     this.beanManager = new BeanManager(discoverer, scanPath);
-
     try {
       this.beanManager.start();
-    } catch (IllegalAccessException | InstantiationException e) {
+    } catch (ReflectiveOperationException e) {
       log.error("An exception occurred while initializing the ioc container", e);
     }
   }
@@ -186,13 +182,13 @@ public class NettyServer extends AbstractModule implements Server {
   }
 
   /**
-   * Open an com.crispy.http server and initialize the Netty configuration.
+   * Open an com.aquiver.http server and initialize the Netty configuration.
    * {@link NettyServerInitializer}
    * <p>
    * After initializing, the thread group is initialized according to the configuration parameters, including
    * {@code netty.accept-thread-count} 和 {@code netty.io-thread-count}
    * <p>
-   * Then, according to the current system, the choice of communication com.crispy.model for Mac or Windows, NIO mode on Windows.
+   * Then, according to the current system, the choice of communication model for Mac or Windows, NIO mode on Windows.
    * Judgment method in {@link EventLoopKit}, {@code nioGroup} is the judgment method under windows
    * {@code epollGroup} is the judgment method for Mac system or Linux system.
    * <p>
@@ -222,7 +218,8 @@ public class NettyServer extends AbstractModule implements Server {
 
     this.serverBootstrap.group(bossGroup, workerGroup).channel(nettyServerGroup.getChannelClass());
 
-    log.info("The IO mode of the application startup is: {}", EventLoopKit.judgeMode(nettyServerGroup.getChannelClass().getSimpleName()));
+    log.info("The IO mode of the application startup is: {}",
+            EventLoopKit.judgeMode(nettyServerGroup.getChannelClass().getSimpleName()));
 
     this.stop = false;
 
@@ -234,7 +231,7 @@ public class NettyServer extends AbstractModule implements Server {
     long startUpTime  = (endTime - startTime);
     long jvmStartTime = (endTime - Systems.getJvmStartUpTime());
 
-    log.info("Crispy isStop on port(s): {} (com.crispy.http) with context path ''", port);
+    log.info("aquiver isStop on port(s): {} (com.aquiver.http) with context path ''", port);
     log.info("Started {} in {} ms (JVM running for {} ms)", aquiver.bootClsName(), startUpTime, jvmStartTime);
   }
 
