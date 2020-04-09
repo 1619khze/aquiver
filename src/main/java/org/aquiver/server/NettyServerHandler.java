@@ -23,9 +23,12 @@
  */
 package org.aquiver.server;
 
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.*;
+import io.netty.util.CharsetUtil;
 import org.aquiver.BeanManager;
 import org.aquiver.Request;
 import org.aquiver.mvc.ArgsConverter;
@@ -40,8 +43,13 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static io.netty.handler.codec.http.HttpResponseStatus.OK;
+import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
@@ -71,7 +79,14 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     CompletableFuture<FullHttpRequest> future = CompletableFuture.completedFuture(fullHttpRequest);
     future.thenApply(this::thenApplyHttpEntity)
             .thenApply(this::thenExecutionLogic)
-            .thenApply(this::writeResponse);
+            .thenApply(result -> this.writeResponse(result, fullHttpRequest, ctx))
+            .whenComplete((refresh, throwable) -> refreshResponse(ctx, refresh));
+  }
+
+  private void refreshResponse(ChannelHandlerContext ctx, Boolean refresh) {
+    if (!refresh) {
+      ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+    }
   }
 
   private Request thenApplyHttpEntity(FullHttpRequest request) {
@@ -124,13 +139,23 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
     for (int i = 0; i < paramValues.length; i++) {
       RequestHandlerParam handlerParam = requestHandler.getParams().get(i);
-      paramTypes[i] = handlerParam.getDataType();
+      paramTypes[i]  = handlerParam.getDataType();
       paramValues[i] = request.assignment(handlerParam);
     }
     return new LogicExecutionWrapper(requestHandler, paramValues, paramTypes);
   }
 
-  private <U> U writeResponse(Object object) {
-    return null;
+  private boolean writeResponse(Object result, FullHttpRequest request, ChannelHandlerContext ctx) {
+    boolean keepAlive = HttpUtil.isKeepAlive(request);
+    FullHttpResponse response = new DefaultFullHttpResponse(
+            HTTP_1_1, request.decoderResult().isSuccess() ? OK : BAD_REQUEST,
+            Unpooled.copiedBuffer(Objects.isNull(result) ? "".getBytes(CharsetUtil.UTF_8) : result.toString().getBytes(CharsetUtil.UTF_8)));
+    response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+    if (keepAlive) {
+      response.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+      response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+    }
+    ctx.write(response);
+    return keepAlive;
   }
 }
