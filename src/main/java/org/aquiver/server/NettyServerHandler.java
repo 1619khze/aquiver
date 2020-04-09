@@ -35,7 +35,6 @@ import org.aquiver.mvc.ArgsConverter;
 import org.aquiver.mvc.LogicExecutionWrapper;
 import org.aquiver.mvc.RequestHandler;
 import org.aquiver.mvc.RequestHandlerParam;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +65,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   /**
    * Returns if the future has successfully completed.
    */
-  boolean isReady(@Nullable CompletableFuture<?> future) {
+  private boolean isReady(CompletableFuture<?> future) {
     return (future != null) && future.isDone()
             && !future.isCompletedExceptionally()
             && (future.join() != null);
@@ -76,7 +75,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
    * Returns the current value or null if either not done or failed.
    */
   @SuppressWarnings("NullAway")
-  @Nullable <V> V getIfReady(@Nullable CompletableFuture<V> future) {
+  private <V> V getIfReady(CompletableFuture<V> future) {
     return isReady(future) ? future.join() : null;
   }
 
