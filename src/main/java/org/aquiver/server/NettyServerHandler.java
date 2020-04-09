@@ -35,6 +35,7 @@ import org.aquiver.mvc.ArgsConverter;
 import org.aquiver.mvc.LogicExecutionWrapper;
 import org.aquiver.mvc.RequestHandler;
 import org.aquiver.mvc.RequestHandlerParam;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -61,6 +61,23 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   public NettyServerHandler(BeanManager beanManager) {
     this.requestHandlers = beanManager.getMappingRegistry().getRequestHandlers();
     this.argsConverters  = beanManager.getMappingRegistry().getArgsConverters();
+  }
+
+  /**
+   * Returns if the future has successfully completed.
+   */
+  boolean isReady(@Nullable CompletableFuture<?> future) {
+    return (future != null) && future.isDone()
+            && !future.isCompletedExceptionally()
+            && (future.join() != null);
+  }
+
+  /**
+   * Returns the current value or null if either not done or failed.
+   */
+  @SuppressWarnings("NullAway")
+  @Nullable <V> V getIfReady(@Nullable CompletableFuture<V> future) {
+    return isReady(future) ? future.join() : null;
   }
 
   @Override
@@ -95,15 +112,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
   private Object thenExecutionLogic(Request request) {
     CompletableFuture<Request> lookUpaFuture = CompletableFuture.completedFuture(request);
-    CompletableFuture<Object> objectCompletableFuture = lookUpaFuture.thenApplyAsync(this::lookupRequestHandler)
-            .thenApplyAsync(requestHandler -> this.assignmentParameters(requestHandler, request))
-            .thenApplyAsync(this::executionLogic);
-    try {
-      return objectCompletableFuture.get();
-    } catch (InterruptedException | ExecutionException e) {
-      log.error("An exception occurred while executing logic", e);
-    }
-    return null;
+    CompletableFuture<Object> resultFuture = lookUpaFuture.thenApplyAsync(this::lookupRequestHandler)
+            .thenApply(requestHandler -> this.assignmentParameters(requestHandler, request))
+            .thenApply(this::executionLogic);
+    return getIfReady(resultFuture);
   }
 
   private Object executionLogic(LogicExecutionWrapper logicExecutionWrapper) {
