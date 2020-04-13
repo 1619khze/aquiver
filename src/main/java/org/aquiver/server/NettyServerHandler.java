@@ -31,10 +31,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.aquiver.BeanManager;
 import org.aquiver.Request;
-import org.aquiver.mvc.ArgsConverter;
-import org.aquiver.mvc.LogicExecutionWrapper;
-import org.aquiver.mvc.RequestHandler;
-import org.aquiver.mvc.RequestHandlerParam;
+import org.aquiver.mvc.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +136,53 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     if (paramStartIndex > 0) {
       lookupPath = lookupPath.substring(0, paramStartIndex);
     }
-    return requestHandlers.get(lookupPath);
+
+    if (requestHandlers == null || requestHandlers.isEmpty()) {
+      return null;
+    }
+
+    if (requestHandlers.containsKey(lookupPath)) {
+      return this.requestHandlers.get(lookupPath);
+    }
+
+    for (Map.Entry<String, RequestHandler> entry : requestHandlers.entrySet()) {
+      String matcher = this.getMatch(entry.getKey());
+      if (!lookupPath.startsWith(matcher)) {
+        return null;
+      }
+      String[] lookupPathSplit = lookupPath.split("/");
+      String[] mappingUrlSplit = entry.getKey().split("/");
+      if (lookupPathSplit.length != mappingUrlSplit.length) {
+        continue;
+      }
+      if (checkMatch(lookupPathSplit, mappingUrlSplit)) {
+        return entry.getValue();
+      }
+    }
+    return null;
+  }
+
+  private boolean checkMatch(String[] lookupPathSplit, String... mappingUrlSplit) {
+    for (int i = 0; i < lookupPathSplit.length; i++) {
+      if (lookupPathSplit[i].equals(mappingUrlSplit[i])) {
+        continue;
+      }
+      if (!mappingUrlSplit[i].startsWith("{")) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private String getMatch(String url) {
+    StringBuilder matcher = new StringBuilder(128);
+    for (char c : url.toCharArray()) {
+      if (c == '{') {
+        break;
+      }
+      matcher.append(c);
+    }
+    return matcher.toString();
   }
 
   private LogicExecutionWrapper assignmentParameters(RequestHandler requestHandler, Request request) {
@@ -151,7 +194,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     for (int i = 0; i < paramValues.length; i++) {
       RequestHandlerParam handlerParam = requestHandler.getParams().get(i);
       paramTypes[i]  = handlerParam.getDataType();
-      paramValues[i] = request.assignment(handlerParam);
+      paramValues[i] = ParameterDispenser.dispen(handlerParam, request, requestHandler.getUrl());
     }
     return new LogicExecutionWrapper(requestHandler, paramValues, paramTypes);
   }

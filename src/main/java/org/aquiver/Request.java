@@ -32,7 +32,6 @@ import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http.multipart.MemoryAttribute;
-import org.aquiver.mvc.RequestHandlerParam;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -214,13 +213,5 @@ public class Request {
 
   public FullHttpRequest getRequest() {
     return request;
-  }
-
-  public Object assignment(RequestHandlerParam handlerParam) {
-    switch (handlerParam.getType()) {
-      case REQUEST_PARAM:
-        return handlerParam.getDataType().cast(queryString.get(handlerParam.getName()));
-    }
-    return null;
   }
 }
