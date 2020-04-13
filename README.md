@@ -14,7 +14,7 @@
 
 > The aquifer is a java web framework based on jdk11 and netty
 
-#### Status: Unfinished.
+## Status: Unfinished.
  ```java
 public class Application {
   public static void main(String[] args) {
@@ -22,8 +22,7 @@ public class Application {
   }
 }
 ```
-License
-***
+## License
 [MIT](https://opensource.org/licenses/MIT "MIT")
 
 Copyright (c) 2018-present, Yi (Ever) Wang
