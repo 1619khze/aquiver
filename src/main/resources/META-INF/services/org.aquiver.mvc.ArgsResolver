@@ -1,1 +1,4 @@
 org.aquiver.mvc.resolver.RequestParamArgsResolver
+org.aquiver.mvc.resolver.RequestCookiesArgsResolver
+org.aquiver.mvc.resolver.RequestHeadersArgsResolver
+org.aquiver.mvc.resolver.PathVariableArgsResolver
