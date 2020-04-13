@@ -26,7 +26,6 @@ package org.aquiver;
 import org.aquiver.annotation.Controller;
 import org.aquiver.annotation.RequestMapping;
 import org.aquiver.annotation.RestController;
-import org.aquiver.mvc.ArgsConverter;
 import org.aquiver.mvc.ArgsResolver;
 import org.aquiver.mvc.RequestMappingRegistry;
 import org.aquiver.toolkit.Reflections;
@@ -78,7 +77,6 @@ public class BeanManager {
       String url = "/";
 
       this.findArgsResolver(cls);
-      this.findArgsConverter(cls);
 
       if (Objects.isNull(cls.getAnnotation(RestController.class)) &&
               Objects.isNull(cls.getAnnotation(Controller.class))) {
@@ -112,12 +110,6 @@ public class BeanManager {
       ArgsResolver argsResolver = ser.getClass().getDeclaredConstructor().newInstance();
       mappingRegistry.getArgsResolvers().add(argsResolver);
     }
-
-    ServiceLoader<ArgsConverter> argsConverterLoad = ServiceLoader.load(ArgsConverter.class);
-    for (ArgsConverter<?> ser : argsConverterLoad) {
-      ArgsConverter<?> argsConverter = ser.getClass().getDeclaredConstructor().newInstance();
-      mappingRegistry.getArgsConverters().add(argsConverter);
-    }
   }
 
   private void findArgsResolver(Class<?> cls) throws ReflectiveOperationException {
@@ -131,20 +123,6 @@ public class BeanManager {
       }
       ArgsResolver argsResolver = (ArgsResolver) cls.getDeclaredConstructor().newInstance();
       mappingRegistry.getArgsResolvers().add(argsResolver);
-    }
-  }
-
-  private void findArgsConverter(Class<?> cls) throws ReflectiveOperationException {
-    Class<?>[] interfaces = cls.getInterfaces();
-    if (interfaces.length == 0) {
-      return;
-    }
-    for (Class<?> interfaceCls : interfaces) {
-      if (!interfaceCls.equals(ArgsConverter.class)) {
-        continue;
-      }
-      ArgsConverter<?> argsResolver = (ArgsConverter<?>) cls.getDeclaredConstructor().newInstance();
-      mappingRegistry.getArgsConverters().add(argsResolver);
     }
   }
 
