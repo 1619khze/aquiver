@@ -72,7 +72,7 @@ public class BeanManager {
       }
     }
 
-    this.serviceLoad();
+    this.findSpiService();
 
     for (Class<?> cls : discover) {
       String url = "/";
@@ -106,7 +106,7 @@ public class BeanManager {
     }
   }
 
-  private void serviceLoad() throws InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException, NoSuchMethodException {
+  private void findSpiService() throws InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException, NoSuchMethodException {
     ServiceLoader<ArgsResolver> argsResolverLoad = ServiceLoader.load(ArgsResolver.class);
     for (ArgsResolver ser : argsResolverLoad) {
       ArgsResolver argsResolver = ser.getClass().getDeclaredConstructor().newInstance();
@@ -115,7 +115,7 @@ public class BeanManager {
 
     ServiceLoader<ArgsConverter> argsConverterLoad = ServiceLoader.load(ArgsConverter.class);
     for (ArgsConverter<?> ser : argsConverterLoad) {
-      ArgsConverter argsConverter = ser.getClass().getDeclaredConstructor().newInstance();
+      ArgsConverter<?> argsConverter = ser.getClass().getDeclaredConstructor().newInstance();
       mappingRegistry.getArgsConverters().add(argsConverter);
     }
   }
