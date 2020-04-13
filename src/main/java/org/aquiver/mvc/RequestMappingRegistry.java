@@ -81,6 +81,9 @@ public class RequestMappingRegistry extends AbstractRegistry {
       String[] paramNames = this.getMethodParameterNamesByAsm(clazz, method);
       for (int i = 0; i < ps.length; i++) {
         List<ArgsResolver> argsResolvers = getArgsResolvers();
+        if(argsResolvers.isEmpty()){
+          break;
+        }
         for (ArgsResolver argsResolver : argsResolvers) {
           RequestHandlerParam param = argsResolver.resolve(ps[i], paramNames[i]);
           if (param != null) {
