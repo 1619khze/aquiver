@@ -52,11 +52,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
 
   private Map<String, RequestHandler> requestHandlers;
-  private List<ArgsConverter<?>>      argsConverters;
 
   public NettyServerHandler(BeanManager beanManager) {
     this.requestHandlers = beanManager.getMappingRegistry().getRequestHandlers();
-    this.argsConverters  = beanManager.getMappingRegistry().getArgsConverters();
   }
 
   /**

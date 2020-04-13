@@ -44,7 +44,6 @@ public class RequestMappingRegistry extends AbstractRegistry {
   private static final Logger log = LoggerFactory.getLogger(RequestMappingRegistry.class);
 
   private List<ArgsResolver>     argsResolvers  = new ArrayList<>();
-  private List<ArgsConverter<?>> argsConverters = new ArrayList<>();
 
   public List<ArgsResolver> getArgsResolvers() {
     return argsResolvers;
@@ -52,14 +51,6 @@ public class RequestMappingRegistry extends AbstractRegistry {
 
   public void setArgsResolvers(List<ArgsResolver> argsResolvers) {
     this.argsResolvers = argsResolvers;
-  }
-
-  public List<ArgsConverter<?>> getArgsConverters() {
-    return argsConverters;
-  }
-
-  public void setArgsConverters(List<ArgsConverter<?>> argsConverters) {
-    this.argsConverters = argsConverters;
   }
 
   @Override
