@@ -104,7 +104,7 @@ public class BeanManager {
     }
   }
 
-  private void findSpiService() throws InstantiationException, IllegalAccessException, java.lang.reflect.InvocationTargetException, NoSuchMethodException {
+  private void findSpiService() throws ReflectiveOperationException {
     ServiceLoader<ArgsResolver> argsResolverLoad = ServiceLoader.load(ArgsResolver.class);
     for (ArgsResolver ser : argsResolverLoad) {
       ArgsResolver argsResolver = ser.getClass().getDeclaredConstructor().newInstance();
