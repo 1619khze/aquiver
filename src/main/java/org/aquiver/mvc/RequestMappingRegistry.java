@@ -43,7 +43,7 @@ public class RequestMappingRegistry extends AbstractRegistry {
 
   private static final Logger log = LoggerFactory.getLogger(RequestMappingRegistry.class);
 
-  private List<ArgsResolver>     argsResolvers  = new ArrayList<>();
+  private List<ArgsResolver> argsResolvers = new ArrayList<>();
 
   public List<ArgsResolver> getArgsResolvers() {
     return argsResolvers;
@@ -72,7 +72,7 @@ public class RequestMappingRegistry extends AbstractRegistry {
       String[] paramNames = this.getMethodParameterNamesByAsm(clazz, method);
       for (int i = 0; i < ps.length; i++) {
         List<ArgsResolver> argsResolvers = getArgsResolvers();
-        if(argsResolvers.isEmpty()){
+        if (argsResolvers.isEmpty()) {
           break;
         }
         for (ArgsResolver argsResolver : argsResolvers) {

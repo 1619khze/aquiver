@@ -30,8 +30,11 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.aquiver.BeanManager;
-import org.aquiver.Request;
-import org.aquiver.mvc.*;
+import org.aquiver.RequestContext;
+import org.aquiver.mvc.LogicExecutionWrapper;
+import org.aquiver.mvc.ParameterDispenser;
+import org.aquiver.mvc.RequestHandler;
+import org.aquiver.mvc.RequestHandlerParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +54,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
 
-  private Map<String, RequestHandler> requestHandlers;
+  private final Map<String, RequestHandler> requestHandlers;
 
   public NettyServerHandler(BeanManager beanManager) {
     this.requestHandlers = beanManager.getMappingRegistry().getRequestHandlers();
@@ -91,23 +94,23 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     future.thenApply(this::thenApplyHttpEntity)
             .thenApply(this::thenExecutionLogic)
             .thenApply(result -> this.writeResponse(result, fullHttpRequest, ctx))
-            .whenComplete((refresh, throwable) -> refreshResponse(ctx, refresh));
+            .whenComplete((refresh, throwable) -> refreshResponse(ctx, refresh, throwable));
   }
 
-  private void refreshResponse(ChannelHandlerContext ctx, Boolean refresh) {
+  private void refreshResponse(ChannelHandlerContext ctx, Boolean refresh, Throwable throwable) {
     if (!refresh) {
       ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
     }
   }
 
-  private Request thenApplyHttpEntity(FullHttpRequest request) {
-    return new Request(request);
+  private RequestContext thenApplyHttpEntity(FullHttpRequest request) {
+    return new RequestContext(request);
   }
 
-  private Object thenExecutionLogic(Request request) {
-    CompletableFuture<Request> lookUpaFuture = CompletableFuture.completedFuture(request);
+  private Object thenExecutionLogic(RequestContext requestContext) {
+    CompletableFuture<RequestContext> lookUpaFuture = CompletableFuture.completedFuture(requestContext);
     CompletableFuture<Object> resultFuture = lookUpaFuture.thenApplyAsync(this::lookupRequestHandler)
-            .thenApply(requestHandler -> this.assignmentParameters(requestHandler, request))
+            .thenApply(requestHandler -> this.assignmentParameters(requestHandler, requestContext))
             .thenApply(this::executionLogic);
     return getIfReady(resultFuture);
   }
@@ -126,10 +129,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     return null;
   }
 
-  private RequestHandler lookupRequestHandler(Request request) {
-    String lookupPath = request.getUri().endsWith("/")
-            ? request.getUri().substring(0, request.getUri().length() - 1)
-            : request.getUri();
+  private RequestHandler lookupRequestHandler(RequestContext requestContext) {
+    String lookupPath = requestContext.getUri().endsWith("/")
+            ? requestContext.getUri().substring(0, requestContext.getUri().length() - 1)
+            : requestContext.getUri();
     int paramStartIndex = lookupPath.indexOf("?");
     if (paramStartIndex > 0) {
       lookupPath = lookupPath.substring(0, paramStartIndex);
@@ -183,7 +186,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     return matcher.toString();
   }
 
-  private LogicExecutionWrapper assignmentParameters(RequestHandler requestHandler, Request request) {
+  private LogicExecutionWrapper assignmentParameters(RequestHandler requestHandler, RequestContext requestContext) {
     List<RequestHandlerParam> params = requestHandler.getParams();
 
     Object[]   paramValues = new Object[params.size()];
@@ -192,7 +195,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     for (int i = 0; i < paramValues.length; i++) {
       RequestHandlerParam handlerParam = requestHandler.getParams().get(i);
       paramTypes[i]  = handlerParam.getDataType();
-      paramValues[i] = ParameterDispenser.dispen(handlerParam, request, requestHandler.getUrl());
+      paramValues[i] = ParameterDispenser.dispen(handlerParam, requestContext, requestHandler.getUrl());
     }
     return new LogicExecutionWrapper(requestHandler, paramValues, paramTypes);
   }
@@ -201,7 +204,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     boolean keepAlive = HttpUtil.isKeepAlive(request);
     FullHttpResponse response = new DefaultFullHttpResponse(
             HTTP_1_1, request.decoderResult().isSuccess() ? OK : BAD_REQUEST,
-            Unpooled.copiedBuffer(Objects.isNull(result) ? "".getBytes(CharsetUtil.UTF_8) : result.toString().getBytes(CharsetUtil.UTF_8)));
+            Unpooled.copiedBuffer(Objects.isNull(result) ? "".getBytes(CharsetUtil.UTF_8) :
+                    result.toString().getBytes(CharsetUtil.UTF_8)));
     response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
     if (keepAlive) {
       response.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());

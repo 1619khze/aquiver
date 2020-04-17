@@ -23,45 +23,66 @@
  */
 package org.aquiver.mvc;
 
-import org.aquiver.Request;
+import org.aquiver.RequestContext;
+
+import java.util.Collection;
+import java.util.Map;
 
 public final class ParameterDispenser {
 
-  public static Object dispen(RequestHandlerParam handlerParam, Request request, String url) {
+  public static Object dispen(RequestHandlerParam handlerParam, RequestContext requestContext, String url) {
     switch (handlerParam.getType()) {
       case REQUEST_PARAM:
-        return getQueryString(handlerParam, request);
+        return getQueryString(handlerParam, requestContext);
       case REQUEST_COOKIES:
-        return getRequestCookies(handlerParam, request);
+        return getRequestCookies(handlerParam, requestContext);
       case REQUEST_HEADER:
-        return getRequestHeaders(handlerParam, request);
+        return getRequestHeaders(handlerParam, requestContext);
       case PATH_VARIABLE:
-        return getPathVariable(handlerParam, request,url);
+        return getPathVariable(handlerParam, requestContext, url);
       case REQUEST_BODY:
-        return getRequestBody(handlerParam, request);
-      case HTTP_RESPONSE:
+        return getRequestBody(handlerParam, requestContext);
+      default:
+        break;
     }
     return null;
   }
 
-  private static Object getQueryString(RequestHandlerParam handlerParam, Request request) {
-    return handlerParam.getDataType().cast(request.getQueryString().get(handlerParam.getName()));
+  private static Object getQueryString(RequestHandlerParam handlerParam, RequestContext requestContext) {
+    if (isMap(handlerParam.getDataType())) {
+      return requestContext.getQueryString();
+    }
+    return handlerParam.getDataType().cast(requestContext.getQueryString().get(handlerParam.getName()));
   }
 
-  private static Object getRequestCookies(RequestHandlerParam handlerParam, Request request) {
-    return handlerParam.getDataType().cast(request.getCookies().get(handlerParam.getName()));
+  private static Object getRequestCookies(RequestHandlerParam handlerParam, RequestContext requestContext) {
+    if (isMap(handlerParam.getDataType())) {
+      return requestContext.getCookies();
+    }
+    return handlerParam.getDataType().cast(requestContext.getCookies().get(handlerParam.getName()));
   }
 
-  private static Object getRequestHeaders(RequestHandlerParam handlerParam, Request request) {
-    return handlerParam.getDataType().cast(request.getHeaders().get(handlerParam.getName()));
+  private static Object getRequestHeaders(RequestHandlerParam handlerParam, RequestContext requestContext) {
+    if (isMap(handlerParam.getDataType())) {
+      return requestContext.getHeaders();
+    }
+    return handlerParam.getDataType().cast(requestContext.getHeaders().get(handlerParam.getName()));
   }
 
-  private static Object getPathVariable(RequestHandlerParam handlerParam, Request request, String url) {
-    return handlerParam.getDataType().cast(getPathVariable(request.getUri(), url, handlerParam.getName()));
+  private static Object getPathVariable(RequestHandlerParam handlerParam, RequestContext requestContext, String url) {
+    return handlerParam.getDataType().cast(getPathVariable(requestContext.getUri(), url, handlerParam.getName()));
   }
 
-  private static Object getRequestBody(RequestHandlerParam handlerParam, Request request) {
+  private static Object getRequestBody(RequestHandlerParam handlerParam, RequestContext requestContext) {
     return null;
+  }
+
+  public static boolean isCollection(Class<?> cls) {
+    return Collection.class.isAssignableFrom(cls);
+  }
+
+  public static boolean isMap(Class<?> cls) {
+    return Map.class.isAssignableFrom(cls);
   }
 
   private static String getPathVariable(String url, String mappingUrl, String name) {
