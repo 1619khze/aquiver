@@ -64,7 +64,7 @@ public class RequestMappingRegistry extends AbstractRegistry {
     }
 
     RequestHandler requestHandler = new RequestHandler(url, clazz, method.getName(),
-            Objects.isNull(method.getAnnotation(ResponseBody.class)), requestMethod);
+            !Objects.isNull(method.getAnnotation(ResponseBody.class)), requestMethod);
 
     Parameter[] ps = method.getParameters();
 

@@ -23,6 +23,7 @@
  */
 package org.aquiver.server;
 
+import com.alibaba.fastjson.JSONObject;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -31,16 +32,15 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.aquiver.BeanManager;
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.LogicExecutionWrapper;
-import org.aquiver.mvc.ParameterDispenser;
-import org.aquiver.mvc.RequestHandler;
-import org.aquiver.mvc.RequestHandlerParam;
+import org.aquiver.Response;
+import org.aquiver.mvc.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -107,22 +107,25 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     return new RequestContext(request);
   }
 
-  private Object thenExecutionLogic(RequestContext requestContext) {
+  private Response thenExecutionLogic(RequestContext requestContext) {
     CompletableFuture<RequestContext> lookUpaFuture = CompletableFuture.completedFuture(requestContext);
-    CompletableFuture<Object> resultFuture = lookUpaFuture.thenApplyAsync(this::lookupRequestHandler)
+    CompletableFuture<Response> resultFuture = lookUpaFuture
+            .thenApplyAsync(this::lookupRequestHandler)
             .thenApply(requestHandler -> this.assignmentParameters(requestHandler, requestContext))
             .thenApply(this::executionLogic);
     return getIfReady(resultFuture);
   }
 
-  private Object executionLogic(LogicExecutionWrapper logicExecutionWrapper) {
+  private Response executionLogic(LogicExecutionWrapper logicExecutionWrapper) {
     MethodHandles.Lookup lookup = MethodHandles.lookup();
     try {
       RequestHandler requestHandler = logicExecutionWrapper.getRequestHandler();
       Method method = requestHandler.getClazz()
               .getMethod(requestHandler.getMethod(), logicExecutionWrapper.getParamTypes());
       MethodHandle methodHandle = lookup.unreflect(method);
-      return methodHandle.bindTo(requestHandler.getBean()).invokeWithArguments(logicExecutionWrapper.getParamValues());
+      Object result = methodHandle.bindTo(requestHandler.getBean())
+              .invokeWithArguments(logicExecutionWrapper.getParamValues());
+      return new Response(result, requestHandler.isJsonResponse());
     } catch (Throwable throwable) {
       log.error("An exception occurred when calling the mapping method", throwable);
     }
@@ -186,7 +189,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     return matcher.toString();
   }
 
-  private LogicExecutionWrapper assignmentParameters(RequestHandler requestHandler, RequestContext requestContext) {
+  private LogicExecutionWrapper assignmentParameters(RequestHandler requestHandler,
+                                                     RequestContext requestContext) {
     List<RequestHandlerParam> params = requestHandler.getParams();
 
     Object[]   paramValues = new Object[params.size()];
@@ -197,21 +201,24 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
       paramTypes[i]  = handlerParam.getDataType();
       paramValues[i] = ParameterDispenser.dispen(handlerParam, requestContext, requestHandler.getUrl());
     }
-    return new LogicExecutionWrapper(requestHandler, paramValues, paramTypes);
+    return LogicExecutionWrapper.of(requestHandler, paramValues, paramTypes);
   }
 
-  private boolean writeResponse(Object result, FullHttpRequest request, ChannelHandlerContext ctx) {
+  private boolean writeResponse(Response response, FullHttpRequest request, ChannelHandlerContext ctx) {
     boolean keepAlive = HttpUtil.isKeepAlive(request);
-    FullHttpResponse response = new DefaultFullHttpResponse(
+    Object  result    = response.getResult();
+    FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(
             HTTP_1_1, request.decoderResult().isSuccess() ? OK : BAD_REQUEST,
-            Unpooled.copiedBuffer(Objects.isNull(result) ? "".getBytes(CharsetUtil.UTF_8) :
-                    result.toString().getBytes(CharsetUtil.UTF_8)));
-    response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
+            Unpooled.copiedBuffer(Objects.isNull(response.getResult()) ? "".getBytes(CharsetUtil.UTF_8) :
+                    response.isJsonResponse() ? JSONObject.toJSONString(result).getBytes(StandardCharsets.UTF_8) :
+                            result.toString().getBytes(StandardCharsets.UTF_8)));
+    fullHttpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, response.isJsonResponse() ?
+            ContentType.APPLICATION_JSON : ContentType.TEXT_PLAN);
     if (keepAlive) {
-      response.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
-      response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+      fullHttpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, fullHttpResponse.content().readableBytes());
+      fullHttpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
     }
-    ctx.write(response);
+    ctx.write(fullHttpResponse);
     return keepAlive;
   }
 }

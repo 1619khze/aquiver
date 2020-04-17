@@ -28,13 +28,17 @@ import java.util.Objects;
 
 public class LogicExecutionWrapper {
   private RequestHandler requestHandler;
-  private Object[] paramValues;
-  private Class<?>[] paramTypes;
+  private Object[]       paramValues;
+  private Class<?>[]     paramTypes;
 
-  public LogicExecutionWrapper(RequestHandler requestHandler, Object[] paramValues, Class<?>[] paramTypes) {
+  private LogicExecutionWrapper(RequestHandler requestHandler, Object[] paramValues, Class<?>[] paramTypes) {
     this.requestHandler = requestHandler;
     this.paramValues    = paramValues;
     this.paramTypes     = paramTypes;
+  }
+
+  public static LogicExecutionWrapper of(RequestHandler requestHandler, Object[] paramValues, Class<?>[] paramTypes) {
+    return new LogicExecutionWrapper(requestHandler, paramValues, paramTypes);
   }
 
   public RequestHandler getRequestHandler() {
