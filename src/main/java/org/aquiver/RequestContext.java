@@ -36,7 +36,7 @@ import io.netty.handler.codec.http.multipart.MemoryAttribute;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class Request {
+public class RequestContext {
   private final FullHttpRequest  request;
   private       FullHttpResponse response;
 
@@ -50,7 +50,7 @@ public class Request {
   private String httpMethod;
   private String version;
 
-  public Request(FullHttpRequest request) {
+  public RequestContext(FullHttpRequest request) {
     this.request     = request;
     this.cookies     = new HashMap<>();
     this.headers     = new HashMap<>();
