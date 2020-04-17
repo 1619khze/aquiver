@@ -35,6 +35,7 @@ import java.net.BindException;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
+import static java.util.Objects.requireNonNull;
 import static org.aquiver.Const.*;
 
 /**
@@ -45,22 +46,49 @@ public final class Aquiver {
 
   private static final Logger log = LoggerFactory.getLogger(Aquiver.class);
 
-  private Environment    environment     = new Environment();
-  private Server         nettyServer     = new NettyServer();
-  private Set<String>    packages        = new LinkedHashSet<>();
-  private List<Class<?>> eventPool       = new LinkedList<>();
-  private CountDownLatch countDownLatch  = new CountDownLatch(1);
-  private String         bootConfName    = PATH_CONFIG_PROPERTIES;
-  private String         envName         = "default";
-  private boolean        envConfig       = false;
-  private boolean        masterConfig    = false;
-  private boolean        started         = false;
-  private boolean        verbose         = false;
-  private boolean        realtimeLogging = false;
-  private int            port;
-  private Class<?>       bootCls;
-  private String         bannerText;
-  private String         bannerFont;
+  private       Environment    environment     = new Environment();
+  private final Server         nettyServer     = new NettyServer();
+  private final Set<String>    packages        = new LinkedHashSet<>();
+  private final List<Class<?>> eventPool       = new LinkedList<>();
+  private final CountDownLatch countDownLatch  = new CountDownLatch(1);
+  private       String         bootConfName    = PATH_CONFIG_PROPERTIES;
+  private       String         envName         = "default";
+  private       boolean        envConfig       = false;
+  private       boolean        masterConfig    = false;
+  private       boolean        started         = false;
+  private       boolean        verbose         = false;
+  private       boolean        realtimeLogging = false;
+  private       int            port;
+  private       Class<?>       bootCls;
+  private       String         bannerText;
+  private       String         bannerFont;
+
+  /**
+   * Ensures that the argument expression is true.
+   */
+  static void requireArgument(boolean expression) {
+    if (!expression) {
+      throw new IllegalArgumentException();
+    }
+  }
+
+  /**
+   * Ensures that the state expression is true.
+   */
+  static void requireState(boolean expression) {
+    if (!expression) {
+      throw new IllegalStateException();
+    }
+  }
+
+  /**
+   * Ensures that the state expression is true.
+   */
+  static void requireState(boolean expression, String template, Object... args) {
+    if (!expression) {
+      throw new IllegalStateException(String.format(template, args));
+    }
+  }
 
   private Aquiver() {
   }
@@ -78,7 +106,7 @@ public final class Aquiver {
   }
 
   public Class<?> getBootCls() {
-    return bootCls;
+    return requireNonNull(bootCls);
   }
 
   public String bootClsName() {
@@ -86,12 +114,14 @@ public final class Aquiver {
   }
 
   public Aquiver bind(int port) {
+    requireArgument(port > 0);
     this.port = port;
     this.environment.add(PATH_SERVER_PORT, port);
     return this;
   }
 
   public int port() {
+    requireArgument(this.port > 0);
     return port;
   }
 
@@ -103,19 +133,21 @@ public final class Aquiver {
   }
 
   public void bannerText(String bannerText) {
-    this.bannerText = bannerText;
+    requireState(this.bannerText == null, "bannerText was already set to %s", this.bannerText);
+    this.bannerText = requireNonNull(bannerText);
     this.environment.add(PATH_APP_BANNER_TEXT, bannerText);
   }
 
   public String bannerFont() {
-    if (bannerFont == null) {
+    if (Objects.isNull(this.bannerFont)) {
       return this.environment.getString(PATH_APP_BANNER_FONT, BannerFont.FONT_DEFAULT);
     }
     return bannerFont;
   }
 
   public void bannerFont(String bannerFont) {
-    this.bannerFont = bannerFont;
+    requireState(this.bannerFont == null, "bannerFont was already set to %s", this.bannerFont);
+    this.bannerFont = requireNonNull(bannerFont);
     this.environment.add(PATH_APP_BANNER_FONT, bannerFont);
   }
 
@@ -128,37 +160,45 @@ public final class Aquiver {
   }
 
   public String bootConfName() {
-    return bootConfName;
+    return requireNonNull(bootConfName);
+  }
+
+  public Aquiver bootConfName(String bootConfName) {
+    requireState(this.bootConfName == null, "bootConfName was already set to %s", this.bootConfName);
+    this.bootConfName = requireNonNull(bootConfName);
+    return this;
   }
 
   public String envName() {
-    return envName;
+    return requireNonNull(envName);
   }
 
   public Set<String> packages() {
-    return packages;
+    return requireNonNull(packages);
   }
 
   public List<Class<?>> eventPool() {
-    return eventPool;
+    return requireNonNull(this.eventPool);
   }
 
   public Aquiver verbose(boolean verbose) {
+    this.verbose = verbose;
     this.environment.add(PATH_SCANNER_VERBOSE, verbose);
     return this;
   }
 
   public boolean verbose() {
-    return this.environment.getBoolean(PATH_SCANNER_VERBOSE, verbose);
+    return requireNonNull(this.environment.getBoolean(PATH_SCANNER_VERBOSE, verbose));
   }
 
   public Aquiver realtimeLogging(boolean realtimeLogging) {
+    this.realtimeLogging = realtimeLogging;
     this.environment.add(PATH_SCANNER_LOGGING, realtimeLogging);
     return this;
   }
 
   public boolean realtimeLogging() {
-    return this.environment.getBoolean(PATH_SCANNER_LOGGING, realtimeLogging);
+    return requireNonNull(this.environment.getBoolean(PATH_SCANNER_LOGGING, realtimeLogging));
   }
 
   public void start(Class<?> bootClass, String[] args) {
@@ -204,7 +244,7 @@ public final class Aquiver {
     this.loadPropsOrYaml(bootConfEnv, constField);
 
     //Support loading configuration from args array of main function
-    if (!Objects.requireNonNull(bootConfEnv).isEmpty()) {
+    if (!requireNonNull(bootConfEnv).isEmpty()) {
       Map<String, String>            bootEnvMap = bootConfEnv.toStringMap();
       Set<Map.Entry<String, String>> entrySet   = bootEnvMap.entrySet();
       entrySet.forEach(entry -> this.environment.add(entry.getKey(), entry.getValue()));
@@ -236,13 +276,16 @@ public final class Aquiver {
    */
   private void loadPropsOrYaml(Environment bootConfEnv, Map<String, String> constField) {
     //Properties are configured by default, and the properties loaded by default are application.properties
-    constField.keySet().forEach(key -> Optional.ofNullable(System.getProperty(constField.get(key)))
-            .ifPresent(property -> bootConfEnv.add(key, property)));
+    constField.keySet().forEach(key ->
+            Optional.ofNullable(System.getProperty(constField.get(key)))
+                    .ifPresent(property -> bootConfEnv.add(key, property)));
 
     //If there is no properties configuration, the yaml format is used, and the default yaml loaded is application.yml
     if (bootConfEnv.isEmpty()) {
-      Optional.ofNullable(Propertys.yaml(PATH_CONFIG_YAML)).ifPresent(yamlConfigTreeMap ->
-              bootConfEnv.load(new StringReader(Propertys.toProperties(yamlConfigTreeMap))));
+      Optional.ofNullable(Propertys.yaml(PATH_CONFIG_YAML))
+              .ifPresent(yamlConfigTreeMap ->
+                      bootConfEnv.load(new StringReader(
+                              Propertys.toProperties(yamlConfigTreeMap))));
     }
   }
 
