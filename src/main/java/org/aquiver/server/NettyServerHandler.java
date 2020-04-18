@@ -49,6 +49,8 @@ import java.util.concurrent.CompletableFuture;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+import static org.aquiver.mvc.MediaType.APPLICATION_JSON_VALUE;
+import static org.aquiver.mvc.MediaType.TEXT_PLAIN_VALUE;
 
 public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
@@ -110,7 +112,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   private Response thenExecutionLogic(RequestContext requestContext) {
     CompletableFuture<RequestContext> lookUpaFuture = CompletableFuture.completedFuture(requestContext);
     CompletableFuture<Response> resultFuture = lookUpaFuture
-            .thenApplyAsync(this::lookupRequestHandler)
+            .thenApply(this::lookupRequestHandler)
             .thenApply(requestHandler -> this.assignmentParameters(requestHandler, requestContext))
             .thenApply(this::executionLogic);
     return getIfReady(resultFuture);
@@ -213,7 +215,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
                     response.isJsonResponse() ? JSONObject.toJSONString(result).getBytes(StandardCharsets.UTF_8) :
                             result.toString().getBytes(StandardCharsets.UTF_8)));
     fullHttpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, response.isJsonResponse() ?
-            ContentType.APPLICATION_JSON : ContentType.TEXT_PLAN);
+            APPLICATION_JSON_VALUE : TEXT_PLAIN_VALUE);
     if (keepAlive) {
       fullHttpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, fullHttpResponse.content().readableBytes());
       fullHttpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
