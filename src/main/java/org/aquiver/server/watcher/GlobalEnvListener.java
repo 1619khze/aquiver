@@ -30,7 +30,7 @@ import java.nio.file.Path;
 
 public class GlobalEnvListener implements WatcherListener {
 
-  private static final Logger log = LoggerFactory.getLogger(GlobalEnvObserver.class);
+  private static final Logger log = LoggerFactory.getLogger(GlobalEnvTask.class);
 
   @Override
   public void onCreate(Path file) {

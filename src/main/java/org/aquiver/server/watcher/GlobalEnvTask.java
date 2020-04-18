@@ -28,27 +28,29 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.stream.Stream;
 
-public class GlobalEnvObserver implements Runnable {
+import static java.nio.file.WatchEvent.Kind;
+
+public class GlobalEnvTask implements Runnable {
 
   private Path            watchDirectory;
   private FilenameFilter  filenameFilter;
   private WatcherListener watcherListener;
 
-  public static GlobalEnvObserver config() {
-    return new GlobalEnvObserver();
+  public static GlobalEnvTask config() {
+    return new GlobalEnvTask();
   }
 
-  public GlobalEnvObserver watchPath(Path watchDirectory) {
+  public GlobalEnvTask watchPath(Path watchDirectory) {
     this.watchDirectory = watchDirectory;
     return this;
   }
 
-  public GlobalEnvObserver filter(FilenameFilter filenameFilter) {
+  public GlobalEnvTask filter(FilenameFilter filenameFilter) {
     this.filenameFilter = filenameFilter;
     return this;
   }
 
-  public GlobalEnvObserver listener(WatcherListener watcherListener) {
+  public GlobalEnvTask listener(WatcherListener watcherListener) {
     this.watcherListener = watcherListener;
     return this;
   }
@@ -82,14 +84,15 @@ public class GlobalEnvObserver implements Runnable {
               StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
       while (true) {
         WatchKey watchKey = watchService.take();
-        for (WatchEvent event : watchKey.pollEvents()) {
-          WatchEvent.Kind eventKind = event.kind();
+        watchKey.pollEvents().forEach(event -> {
+          Kind<?> eventKind = event.kind();
           if (eventKind == StandardWatchEventKinds.OVERFLOW) {
-            continue;
+            return;
           }
           String fileName = event.context().toString();
-          if (this.filenameFilter != null && !this.filenameFilter.accept(this.watchDirectory.toFile(), fileName)) {
-            continue;
+          if (this.filenameFilter != null && !this.filenameFilter
+                  .accept(this.watchDirectory.toFile(), fileName)) {
+            return;
           }
           Path file = Paths.get(this.watchDirectory.toString(), fileName);
           if (eventKind == StandardWatchEventKinds.ENTRY_CREATE) {
@@ -99,7 +102,7 @@ public class GlobalEnvObserver implements Runnable {
           } else if (eventKind == StandardWatchEventKinds.ENTRY_DELETE) {
             this.watcherListener.onDelete(file);
           }
-        }
+        });
         boolean isKeyValid = watchKey.reset();
         if (!isKeyValid) {
           break;

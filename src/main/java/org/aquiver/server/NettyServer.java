@@ -33,7 +33,7 @@ import io.netty.util.ResourceLeakDetector;
 import org.aquiver.*;
 import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
-import org.aquiver.server.watcher.GlobalEnvObserver;
+import org.aquiver.server.watcher.GlobalEnvTask;
 import org.aquiver.server.websocket.WebSocketServerInitializer;
 import org.aquiver.toolkit.Systems;
 import org.slf4j.Logger;
@@ -277,7 +277,7 @@ public class NettyServer implements Server {
     if (watch) {
       log.info("start application watcher");
       final GlobalEnvListener fileListener = new GlobalEnvListener();
-      GlobalEnvObserver.config().watchPath(SERVER_WATCHER_PATH).listener(fileListener).start();
+      GlobalEnvTask.config().watchPath(SERVER_WATCHER_PATH).listener(fileListener).start();
     }
   }
 

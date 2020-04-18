@@ -46,8 +46,10 @@ public final class EventLoopKit {
 
   public static boolean epollIsAvailable() {
     try {
-      Object obj = Class.forName("io.netty.channel.epoll.Epoll").getMethod("isAvailable").invoke(null);
-      return null != obj && Boolean.parseBoolean(obj.toString()) && System.getProperty("os.name").toLowerCase().contains("linux");
+      Object obj = Class.forName("io.netty.channel.epoll.Epoll")
+              .getMethod("isAvailable").invoke(null);
+      return null != obj && Boolean.parseBoolean(obj.toString())
+              && System.getProperty("os.name").toLowerCase().contains("linux");
     } catch (Exception e) {
       return false;
     }
@@ -83,10 +85,13 @@ public final class EventLoopKit {
    * @return
    */
   public static String judgeMode(String channelName) {
-    String mode = "Nio";
-    if (channelName.startsWith("Epoll")) {
-      mode = "Epoll";
+    String NIO   = "nio";
+    String EPOLL = "epoll";
+    if (channelName.toLowerCase().startsWith(NIO)) {
+      return NIO;
+    } else if (channelName.toLowerCase().startsWith(EPOLL)) {
+      return EPOLL;
     }
-    return mode;
+    return NIO;
   }
 }
