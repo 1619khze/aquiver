@@ -33,17 +33,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class BeanManager {
 
   private static final Logger log = LoggerFactory.getLogger(BeanManager.class);
-
-  private final Map<Class<?>, Object> beanPool = new ConcurrentHashMap<>(64);
 
   private final Discoverer discoverer;
   private final String     scanPath;
@@ -58,58 +54,60 @@ public class BeanManager {
 
   public void start() throws ReflectiveOperationException {
     final Set<Class<?>> discover = discoverer.discover(scanPath);
-
     for (Class<?> next : discover) {
       boolean normal = Reflections.isNormal(next);
       if (!normal) {
         discover.remove(next);
-      } else {
-        this.beanPool.put(next, next.getDeclaredConstructor().newInstance());
       }
       if (log.isDebugEnabled()) {
-        log.trace("Is this class normal: {}", normal);
+        log.debug("Is this class normal: {}", normal);
       }
     }
-
-    this.findSpiService();
-
-    for (Class<?> cls : discover) {
-      String url = "/";
-
-      this.findArgsResolver(cls);
-
-      if (Objects.isNull(cls.getAnnotation(RestController.class)) &&
-              Objects.isNull(cls.getAnnotation(Controller.class))) {
-        continue;
-      }
-
-      RequestMapping classRequestMapping = cls.getAnnotation(RequestMapping.class);
-      if (classRequestMapping != null) {
-        String className = cls.getName();
-        String value     = classRequestMapping.value();
-        if (!"".equals(value)) {
-          url = value;
-        }
-        log.info("Registered rest controller:[{}:{}]", url, className);
-      }
-
-      Method[] methods = cls.getMethods();
-      for (Method method : methods) {
-        RequestMapping methodRequestMapping = method.getAnnotation(RequestMapping.class);
-        if (Objects.isNull(methodRequestMapping)) {
-          continue;
-        }
-        this.mappingRegistry.register(cls, url, method, methodRequestMapping);
-      }
-    }
+    this.registerHandler(discover);
   }
 
-  private void findSpiService() throws ReflectiveOperationException {
+  private void registerHandler(Set<Class<?>> discover) throws ReflectiveOperationException {
     ServiceLoader<ArgsResolver> argsResolverLoad = ServiceLoader.load(ArgsResolver.class);
     for (ArgsResolver ser : argsResolverLoad) {
       ArgsResolver argsResolver = ser.getClass().getDeclaredConstructor().newInstance();
       mappingRegistry.getArgsResolvers().add(argsResolver);
     }
+    for (Class<?> cls : discover) {
+      String url = "/";
+      this.findArgsResolver(cls);
+      if (Objects.isNull(cls.getAnnotation(RestController.class)) &&
+              Objects.isNull(cls.getAnnotation(Controller.class))) {
+        continue;
+      }
+      url = getRequestMappingPath(cls, url);
+      this.registerHandlerMethod(cls, url);
+    }
+  }
+
+  private void registerHandlerMethod(Class<?> cls, String url) {
+    Method[] methods = cls.getMethods();
+    for (Method method : methods) {
+      RequestMapping methodRequestMapping = method.getAnnotation(RequestMapping.class);
+      if (Objects.isNull(methodRequestMapping)) {
+        continue;
+      }
+      this.mappingRegistry.register(cls, url, method, methodRequestMapping);
+    }
+  }
+
+  private String getRequestMappingPath(Class<?> cls, String url) {
+    RequestMapping classRequestMapping = cls.getAnnotation(RequestMapping.class);
+    if (classRequestMapping != null) {
+      String className = cls.getName();
+      String value     = classRequestMapping.value();
+      if (!"".equals(value)) {
+        url = value;
+      }
+      if (log.isDebugEnabled()) {
+        log.debug("Registered rest controller:[{}:{}]", url, className);
+      }
+    }
+    return url;
   }
 
   private void findArgsResolver(Class<?> cls) throws ReflectiveOperationException {
