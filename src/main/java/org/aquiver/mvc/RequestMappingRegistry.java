@@ -76,7 +76,11 @@ public class RequestMappingRegistry extends AbstractRegistry {
           break;
         }
         for (ArgsResolver argsResolver : argsResolvers) {
-          RequestHandlerParam param = argsResolver.resolve(ps[i], paramNames[i]);
+          Parameter parameter = ps[i];
+          if (!argsResolver.support(parameter)) {
+            continue;
+          }
+          RequestHandlerParam param = argsResolver.resolve(parameter, paramNames[i]);
           if (param != null) {
             requestHandler.getParams().add(param);
           }

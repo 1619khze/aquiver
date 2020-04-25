@@ -25,7 +25,7 @@ package org.aquiver.mvc;
 
 import java.lang.reflect.Parameter;
 
-@FunctionalInterface
 public interface ArgsResolver {
+  boolean support(Parameter parameter);
   RequestHandlerParam resolve(Parameter parameter, String paramName);
 }

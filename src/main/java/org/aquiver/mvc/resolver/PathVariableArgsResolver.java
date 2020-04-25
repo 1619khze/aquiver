@@ -29,21 +29,24 @@ import org.aquiver.mvc.RequestHandlerParam;
 import org.aquiver.mvc.RequestParamType;
 
 import java.lang.reflect.Parameter;
+import java.util.Objects;
 
 public class PathVariableArgsResolver implements ArgsResolver {
 
   @Override
+  public boolean support(Parameter parameter) {
+    return !Objects.isNull(parameter.getAnnotation(PathVariable.class));
+  }
+
+  @Override
   public RequestHandlerParam resolve(Parameter parameter, String paramName) {
-    if (parameter.getAnnotation(PathVariable.class) != null) {
-      RequestHandlerParam handlerParam = new RequestHandlerParam();
-      PathVariable        pathVariable = parameter.getAnnotation(PathVariable.class);
-      handlerParam.setDataType(parameter.getType());
-      handlerParam.setName((!"".equals(pathVariable.value())&& !pathVariable.value().trim().isEmpty()) ?
-              pathVariable.value().trim() : paramName);
-      handlerParam.setRequired(true);
-      handlerParam.setType(RequestParamType.PATH_VARIABLE);
-      return handlerParam;
-    }
-    return null;
+    RequestHandlerParam handlerParam = new RequestHandlerParam();
+    PathVariable        pathVariable = parameter.getAnnotation(PathVariable.class);
+    handlerParam.setDataType(parameter.getType());
+    handlerParam.setName((!"".equals(pathVariable.value()) && !pathVariable.value().trim().isEmpty()) ?
+            pathVariable.value().trim() : paramName);
+    handlerParam.setRequired(true);
+    handlerParam.setType(RequestParamType.PATH_VARIABLE);
+    return handlerParam;
   }
 }

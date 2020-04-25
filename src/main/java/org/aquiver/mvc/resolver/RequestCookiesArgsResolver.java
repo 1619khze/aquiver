@@ -29,20 +29,23 @@ import org.aquiver.mvc.RequestHandlerParam;
 import org.aquiver.mvc.RequestParamType;
 
 import java.lang.reflect.Parameter;
+import java.util.Objects;
 
 public class RequestCookiesArgsResolver implements ArgsResolver {
 
   @Override
+  public boolean support(Parameter parameter) {
+    return !Objects.isNull(parameter.getAnnotation(RequestCookies.class));
+  }
+
+  @Override
   public RequestHandlerParam resolve(Parameter parameter, String paramName) {
-    if (parameter.getAnnotation(RequestCookies.class) != null) {
-      RequestHandlerParam handlerParam   = new RequestHandlerParam();
-      RequestCookies      requestCookies = parameter.getAnnotation(RequestCookies.class);
-      handlerParam.setDataType(parameter.getType());
-      handlerParam.setName("".equals(requestCookies.value()) ? paramName : requestCookies.value());
-      handlerParam.setRequired(true);
-      handlerParam.setType(RequestParamType.REQUEST_COOKIES);
-      return handlerParam;
-    }
-    return null;
+    RequestHandlerParam handlerParam   = new RequestHandlerParam();
+    RequestCookies      requestCookies = parameter.getAnnotation(RequestCookies.class);
+    handlerParam.setDataType(parameter.getType());
+    handlerParam.setName("".equals(requestCookies.value()) ? paramName : requestCookies.value());
+    handlerParam.setRequired(true);
+    handlerParam.setType(RequestParamType.REQUEST_COOKIES);
+    return handlerParam;
   }
 }

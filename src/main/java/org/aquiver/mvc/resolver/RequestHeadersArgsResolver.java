@@ -29,20 +29,23 @@ import org.aquiver.mvc.RequestHandlerParam;
 import org.aquiver.mvc.RequestParamType;
 
 import java.lang.reflect.Parameter;
+import java.util.Objects;
 
 public class RequestHeadersArgsResolver implements ArgsResolver {
 
   @Override
+  public boolean support(Parameter parameter) {
+    return !Objects.isNull(parameter.getAnnotation(RequestHeader.class));
+  }
+
+  @Override
   public RequestHandlerParam resolve(Parameter parameter, String paramName) {
-    if (parameter.getAnnotation(RequestHeader.class) != null) {
-      RequestHandlerParam handlerParam  = new RequestHandlerParam();
-      RequestHeader       requestHeader = parameter.getAnnotation(RequestHeader.class);
-      handlerParam.setDataType(parameter.getType());
-      handlerParam.setName("".equals(requestHeader.value()) ? paramName : requestHeader.value());
-      handlerParam.setRequired(true);
-      handlerParam.setType(RequestParamType.REQUEST_HEADER);
-      return handlerParam;
-    }
-    return null;
+    RequestHandlerParam handlerParam  = new RequestHandlerParam();
+    RequestHeader       requestHeader = parameter.getAnnotation(RequestHeader.class);
+    handlerParam.setDataType(parameter.getType());
+    handlerParam.setName("".equals(requestHeader.value()) ? paramName : requestHeader.value());
+    handlerParam.setRequired(true);
+    handlerParam.setType(RequestParamType.REQUEST_HEADER);
+    return handlerParam;
   }
 }
