@@ -27,6 +27,7 @@ import org.aquiver.Aquiver;
 
 public class Application {
   public static void main(String[] args) {
-    Aquiver.of().start(Application.class, args);
+//    Aquiver.of().start(Application.class, args);
+    Aquiver.run(Application.class, args);
   }
 }

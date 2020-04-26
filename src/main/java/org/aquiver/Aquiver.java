@@ -97,6 +97,12 @@ public final class Aquiver {
     return new Aquiver();
   }
 
+  public static Aquiver run(Class<?> bootClass, String... args) {
+    final Aquiver aquiver = of();
+    aquiver.start(bootClass, args);
+    return aquiver;
+  }
+
   public Environment environment() {
     return environment;
   }
