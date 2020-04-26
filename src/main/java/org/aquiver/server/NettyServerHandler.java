@@ -62,6 +62,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     this.requestHandlers = routeResolver.getMappingRegistry().getRequestHandlers();
   }
 
+  @Override
+  public boolean acceptInboundMessage(final Object msg) throws Exception {
+    return msg instanceof FullHttpRequest;
+  }
+
   /**
    * Returns if the future has successfully completed.
    */
@@ -211,11 +216,15 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     Object  result    = response.getResult();
     FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(
             HTTP_1_1, request.decoderResult().isSuccess() ? OK : BAD_REQUEST,
-            Unpooled.copiedBuffer(Objects.isNull(response.getResult()) ? "".getBytes(CharsetUtil.UTF_8) :
-                    response.isJsonResponse() ? JSONObject.toJSONString(result).getBytes(StandardCharsets.UTF_8) :
-                            result.toString().getBytes(StandardCharsets.UTF_8)));
-    fullHttpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, response.isJsonResponse() ?
-            APPLICATION_JSON_VALUE : TEXT_PLAIN_VALUE);
+            Unpooled.copiedBuffer(Objects.isNull(result)
+                    ? "".getBytes(CharsetUtil.UTF_8)
+                    : response.isJsonResponse()
+                    ? JSONObject.toJSONString(result).getBytes(StandardCharsets.UTF_8)
+                    : result.toString().getBytes(StandardCharsets.UTF_8)
+            )
+    );
+
+    fullHttpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, response.isJsonResponse() ? APPLICATION_JSON_VALUE : TEXT_PLAIN_VALUE);
     if (keepAlive) {
       fullHttpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, fullHttpResponse.content().readableBytes());
       fullHttpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);

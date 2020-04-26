@@ -241,7 +241,7 @@ public final class Aquiver {
    * 4. Support loading configuration from System.Property
    */
   private void loadConfig(String[] args) throws IllegalAccessException {
-    String bootConf = environment().get(PATH_SERVER_BOOT_CONFIG, PATH_CONFIG_PROPERTIES);
+    String      bootConf    = environment().get(PATH_SERVER_BOOT_CONFIG, PATH_CONFIG_PROPERTIES);
     Environment bootConfEnv = Environment.of(bootConf);
 
     Map<String, String> argsMap    = this.loadMainArgs(args);
