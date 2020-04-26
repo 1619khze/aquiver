@@ -30,7 +30,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
-import org.aquiver.BeanManager;
+import org.aquiver.RouteResolver;
 import org.aquiver.RequestContext;
 import org.aquiver.Response;
 import org.aquiver.mvc.*;
@@ -58,8 +58,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
   private final Map<String, RequestHandler> requestHandlers;
 
-  public NettyServerHandler(BeanManager beanManager) {
-    this.requestHandlers = beanManager.getMappingRegistry().getRequestHandlers();
+  public NettyServerHandler(RouteResolver routeResolver) {
+    this.requestHandlers = routeResolver.getMappingRegistry().getRequestHandlers();
   }
 
   /**

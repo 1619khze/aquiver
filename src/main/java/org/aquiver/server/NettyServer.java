@@ -67,8 +67,8 @@ public class NettyServer implements Server {
   private          Environment     environment;
   private          Aquiver         aquiver;
   private          Channel         channel;
-  private          SslContext      sslContext;
-  private          BeanManager     beanManager;
+  private SslContext    sslContext;
+  private RouteResolver routeResolver;
 
   /**
    * start server and init setting
@@ -133,9 +133,9 @@ public class NettyServer implements Server {
             .scanPackages(aquiver.packages()).build();
 
     final Discoverer discoverer = new ClassgraphDiscoverer(classgraphOptions);
-    this.beanManager = new BeanManager(discoverer, scanPath);
+    this.routeResolver = new RouteResolver(discoverer, scanPath);
     try {
-      this.beanManager.start();
+      this.routeResolver.start();
     } catch (ReflectiveOperationException e) {
       log.error("An exception occurred while initializing the ioc container", e);
     }
@@ -201,7 +201,7 @@ public class NettyServer implements Server {
 
     ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
 
-    this.serverBootstrap.childHandler(new NettyServerInitializer(sslContext, environment, beanManager));
+    this.serverBootstrap.childHandler(new NettyServerInitializer(sslContext, environment, routeResolver));
 
     int acceptThreadCount = environment.getInteger(PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT, DEFAULT_ACCEPT_THREAD_COUNT);
     int ioThreadCount     = environment.getInteger(PATH_SERVER_NETTY_IO_THREAD_COUNT, DEFAULT_IO_THREAD_COUNT);
