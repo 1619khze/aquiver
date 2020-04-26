@@ -24,7 +24,9 @@
 package org.aquiver.server;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -46,11 +48,11 @@ import java.security.cert.CertificateException;
 import static org.aquiver.Const.*;
 
 /**
- * 1, open ssl {@code initSSL}
- * 2, open webSocket {@code initWebSocket}
- * 3, open the Http com.aquiver.service {@code startServer}
- * 4, observe the environment {@code watchEnv}
- * 5, configure the shutdown thread to stop the com.aquiver.service hook {@code shutdownHook}
+ * 1. open ssl {@code initSSL}
+ * 2. open webSocket {@code initWebSocket}
+ * 3. open the Http com.aquiver.service {@code startServer}
+ * 4. observe the environment {@code watchEnv}
+ * 5. configure the shutdown thread to stop the com.aquiver.service hook {@code shutdownHook}
  *
  * @author WangYi
  * @since 2019/6/5
@@ -67,8 +69,8 @@ public class NettyServer implements Server {
   private          Environment     environment;
   private          Aquiver         aquiver;
   private          Channel         channel;
-  private SslContext    sslContext;
-  private RouteResolver routeResolver;
+  private          SslContext      sslContext;
+  private          RouteResolver   routeResolver;
 
   /**
    * start server and init setting
@@ -192,7 +194,17 @@ public class NettyServer implements Server {
    * Judgment method in {@link EventLoopKit}, {@code nioGroup} is the judgment method under windows
    * {@code epollGroup} is the judgment method for Mac system or Linux system.
    * <p>
+   * <p>
+   * IO threads, in order to make full use of the CPU, while considering reducing the overhead of line context
+   * switching, usually set to twice the number of CPU coresFor scenes with high response time requirements,
+   * disable the nagle algorithm and send immediately without waiting.
    * After these are done, they will get the port and ip address to start. These are all user-configurable.
+   * </p>
+   * <p>
+   * Bootstrap configuration parameter, specify a pooled Allocator, PooledByteBufAllocator pooled multiplexingIn
+   * IO operation, direct memory is allocated instead of JVM heap space, to avoid copying from JVM to direct memory
+   * when sending data
+   * </p>
    *
    * @param startTime
    * @throws Exception
@@ -216,7 +228,8 @@ public class NettyServer implements Server {
       this.workerGroup = nettyServerGroup.getWorkGroup();
     }
 
-    this.serverBootstrap.group(bossGroup, workerGroup).channel(nettyServerGroup.getChannelClass());
+    this.serverBootstrap.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+            .channel(nettyServerGroup.getChannelClass());
 
     log.info("The IO mode of the application startup is: {}",
             EventLoopKit.judgeMode(nettyServerGroup.getChannelClass().getSimpleName()));

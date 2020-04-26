@@ -213,7 +213,8 @@ public final class Aquiver {
     } catch (IllegalAccessException e) {
       log.error("An exception occurred while loading the configuration", e);
     }
-    Thread bootThread = new Thread(() -> {
+    final String threadName = this.environment.get(PATH_APP_THREAD_NAME, SERVER_THREAD_NAME);
+    final Thread bootThread = new Thread(() -> {
       try {
         this.bootCls = bootClass;
         this.nettyServer.start(this);
@@ -224,11 +225,7 @@ public final class Aquiver {
       } catch (Exception e) {
         log.error("An exception occurred while the service started", e);
       }
-    });
-
-    String threadName = this.environment.get(PATH_APP_THREAD_NAME, SERVER_THREAD_NAME);
-
-    bootThread.setName(threadName);
+    }, threadName);
     bootThread.start();
     this.started = true;
   }
