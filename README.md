@@ -18,7 +18,7 @@
  ```java
 public class Application {
   public static void main(String[] args) {
-    Aquiver.of().start(Main.class, args);
+    Aquiver.run(Main.class, args);
   }
 }
 ```
