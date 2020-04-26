@@ -231,7 +231,7 @@ public class NettyServer implements Server {
     long startUpTime  = (endTime - startTime);
     long jvmStartTime = (endTime - Systems.getJvmStartUpTime());
 
-    log.info("aquiver isStop on port(s): {} (com.aquiver.http) with context path ''", port);
+    log.info("Aquiver started on port(s): {} (com.aquiver.http) with context path ''", port);
     log.info("Started {} in {} ms (JVM running for {} ms)", aquiver.bootClsName(), startUpTime, jvmStartTime);
   }
 
