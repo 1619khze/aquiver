@@ -35,7 +35,7 @@ public class RequestHeadersArgsResolver implements ArgsResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return !Objects.isNull(parameter.getAnnotation(RequestHeader.class));
+    return parameter.isAnnotationPresent(RequestHeader.class);
   }
 
   @Override

@@ -35,7 +35,7 @@ public class RequestParamArgsResolver implements ArgsResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return !Objects.isNull(parameter.getAnnotation(RequestParam.class));
+    return parameter.isAnnotationPresent(RequestParam.class);
   }
 
   @Override

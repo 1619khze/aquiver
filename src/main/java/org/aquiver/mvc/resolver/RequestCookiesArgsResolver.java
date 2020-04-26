@@ -35,7 +35,7 @@ public class RequestCookiesArgsResolver implements ArgsResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return !Objects.isNull(parameter.getAnnotation(RequestCookies.class));
+    return parameter.isAnnotationPresent(RequestCookies.class);
   }
 
   @Override

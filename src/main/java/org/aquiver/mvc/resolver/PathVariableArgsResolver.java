@@ -35,7 +35,7 @@ public class PathVariableArgsResolver implements ArgsResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return !Objects.isNull(parameter.getAnnotation(PathVariable.class));
+    return parameter.isAnnotationPresent(PathVariable.class);
   }
 
   @Override
