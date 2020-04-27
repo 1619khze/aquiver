@@ -29,6 +29,11 @@ import org.aquiver.RequestContext;
 public class DefaultExceptionHandler implements ExceptionHandler {
 
   @Override
+  public boolean support(Throwable cause) {
+    return true;
+  }
+
+  @Override
   public void handle(RequestContext requestContext, Throwable throwable, Object handler) {
 
   }

@@ -23,8 +23,9 @@
  */
 package org.aquiver;
 
-@FunctionalInterface
 public interface ExceptionHandler {
+
+  boolean support(Throwable cause);
 
   /**
    * @param requestContext   Current request
