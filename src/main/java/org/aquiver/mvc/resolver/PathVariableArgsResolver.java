@@ -29,7 +29,6 @@ import org.aquiver.mvc.RequestHandlerParam;
 import org.aquiver.mvc.RequestParamType;
 
 import java.lang.reflect.Parameter;
-import java.util.Objects;
 
 public class PathVariableArgsResolver implements ArgsResolver {
 

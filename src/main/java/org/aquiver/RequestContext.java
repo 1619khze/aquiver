@@ -25,6 +25,7 @@ package org.aquiver;
 
 import com.alibaba.fastjson.JSONObject;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
@@ -32,26 +33,30 @@ import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http.multipart.MemoryAttribute;
+import org.aquiver.mvc.RequestHandler;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class RequestContext {
-  private final FullHttpRequest  request;
-  private       FullHttpResponse response;
+  private final FullHttpRequest       httpRequest;
+  private final ChannelHandlerContext context;
+  private       FullHttpResponse      httpResponse;
 
+  private RequestHandler      requestHandler;
+  private Response            response;
   private Map<String, Object> cookies;
   private Map<String, Object> headers;
   private Map<String, String> queryString;
   private Map<String, Object> formData;
   private Map<String, Object> jsonData;
+  private String              uri;
+  private String              httpMethod;
+  private String              version;
 
-  private String uri;
-  private String httpMethod;
-  private String version;
-
-  public RequestContext(FullHttpRequest request) {
-    this.request     = request;
+  public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
+    this.context     = context;
+    this.httpRequest = httpRequest;
     this.cookies     = new HashMap<>();
     this.headers     = new HashMap<>();
     this.queryString = new HashMap<>();
@@ -61,9 +66,9 @@ public class RequestContext {
   }
 
   public void init() {
-    this.uri        = request.uri();
-    this.httpMethod = request.method().name();
-    this.version    = request.protocolVersion().text();
+    this.uri        = httpRequest.uri();
+    this.httpMethod = httpRequest.method().name();
+    this.version    = httpRequest.protocolVersion().text();
     this.headers();
     this.cookies();
     this.queryString();
@@ -72,7 +77,7 @@ public class RequestContext {
   }
 
   private void jsonData() {
-    ByteBuf content    = request.content();
+    ByteBuf content    = httpRequest.content();
     byte[]  reqContent = new byte[content.readableBytes()];
     content.readBytes(reqContent);
     String     strContent = new String(reqContent, StandardCharsets.UTF_8);
@@ -87,7 +92,7 @@ public class RequestContext {
 
   private void formData() {
     HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(
-            new DefaultHttpDataFactory(false), request);
+            new DefaultHttpDataFactory(false), httpRequest);
     List<InterfaceHttpData> formDataList = decoder.getBodyHttpDatas();
     if (Objects.isNull(formDataList) || formDataList.isEmpty()) {
       return;
@@ -101,7 +106,7 @@ public class RequestContext {
   }
 
   private void queryString() {
-    QueryStringDecoder        queryStringDecoder = new QueryStringDecoder(request.uri());
+    QueryStringDecoder        queryStringDecoder = new QueryStringDecoder(httpRequest.uri());
     Map<String, List<String>> params             = queryStringDecoder.parameters();
     if (Objects.isNull(params) || params.isEmpty()) {
       return;
@@ -114,7 +119,7 @@ public class RequestContext {
   }
 
   private void cookies() {
-    String cookieString = request.headers().get(HttpHeaderNames.COOKIE);
+    String cookieString = httpRequest.headers().get(HttpHeaderNames.COOKIE);
     if (cookieString != null) {
       Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(cookieString);
       if (cookies.isEmpty()) {
@@ -127,7 +132,7 @@ public class RequestContext {
   }
 
   private void headers() {
-    HttpHeaders                     httpHeaders = request.headers();
+    HttpHeaders                     httpHeaders = httpRequest.headers();
     List<Map.Entry<String, String>> entries     = httpHeaders.entries();
     if (entries.isEmpty()) {
       return;
@@ -143,75 +148,95 @@ public class RequestContext {
     return cookies;
   }
 
-  public Map<String, Object> getHeaders() {
-    return headers;
-  }
-
-  public Map<String, String> getQueryString() {
-    return queryString;
-  }
-
-  public Map<String, Object> getFormData() {
-    return formData;
-  }
-
-  public Map<String, Object> getJsonData() {
-    return jsonData;
-  }
-
-  public String getUri() {
-    return uri;
-  }
-
-  public String getHttpMethod() {
-    return httpMethod;
-  }
-
-  public String getVersion() {
-    return version;
-  }
-
   public void setCookies(Map<String, Object> cookies) {
     this.cookies = cookies;
+  }
+
+  public Map<String, Object> getHeaders() {
+    return headers;
   }
 
   public void setHeaders(Map<String, Object> headers) {
     this.headers = headers;
   }
 
+  public Map<String, String> getQueryString() {
+    return queryString;
+  }
+
   public void setQueryString(Map<String, String> queryString) {
     this.queryString = queryString;
+  }
+
+  public Map<String, Object> getFormData() {
+    return formData;
   }
 
   public void setFormData(Map<String, Object> formData) {
     this.formData = formData;
   }
 
+  public Map<String, Object> getJsonData() {
+    return jsonData;
+  }
+
   public void setJsonData(Map<String, Object> jsonData) {
     this.jsonData = jsonData;
+  }
+
+  public String getUri() {
+    return uri;
   }
 
   public void setUri(String uri) {
     this.uri = uri;
   }
 
+  public String getHttpMethod() {
+    return httpMethod;
+  }
+
   public void setHttpMethod(String httpMethod) {
     this.httpMethod = httpMethod;
+  }
+
+  public String getVersion() {
+    return version;
   }
 
   public void setVersion(String version) {
     this.version = version;
   }
 
-  public FullHttpResponse getResponse() {
+  public FullHttpResponse getHttpResponse() {
+    return httpResponse;
+  }
+
+  public void setHttpResponse(FullHttpResponse httpResponse) {
+    this.httpResponse = httpResponse;
+  }
+
+  public FullHttpRequest getHttpRequest() {
+    return httpRequest;
+  }
+
+  public RequestHandler getRequestHandler() {
+    return requestHandler;
+  }
+
+  public void setRequestHandler(RequestHandler requestHandler) {
+    this.requestHandler = requestHandler;
+  }
+
+  public Response getResponse() {
     return response;
   }
 
-  public void setResponse(FullHttpResponse response) {
+  public void setResponse(Response response) {
     this.response = response;
   }
 
-  public FullHttpRequest getRequest() {
-    return request;
+  public ChannelHandlerContext getContext() {
+    return context;
   }
 }

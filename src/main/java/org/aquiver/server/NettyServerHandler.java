@@ -25,15 +25,19 @@ package org.aquiver.server;
 
 import com.alibaba.fastjson.JSONObject;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
-import org.aquiver.RouteResolver;
 import org.aquiver.RequestContext;
 import org.aquiver.Response;
-import org.aquiver.mvc.*;
+import org.aquiver.RouteResolver;
+import org.aquiver.mvc.LogicExecutionWrapper;
+import org.aquiver.mvc.ParameterDispenser;
+import org.aquiver.mvc.RequestHandler;
+import org.aquiver.mvc.RequestHandlerParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +49,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ForkJoinPool;
 
-import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
+import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import static org.aquiver.mvc.MediaType.APPLICATION_JSON_VALUE;
 import static org.aquiver.mvc.MediaType.TEXT_PLAIN_VALUE;
@@ -55,7 +59,8 @@ import static org.aquiver.mvc.MediaType.TEXT_PLAIN_VALUE;
 public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
-
+  private final static String FAVICON_PATH = "/favicon.ico";
+  private final static String EMPTY_STRING = "";
   private final Map<String, RequestHandler> requestHandlers;
 
   public NettyServerHandler(RouteResolver routeResolver) {
@@ -63,7 +68,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   }
 
   @Override
-  public boolean acceptInboundMessage(final Object msg) throws Exception {
+  public boolean acceptInboundMessage(final Object msg) {
     return msg instanceof FullHttpRequest;
   }
 
@@ -97,30 +102,34 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest fullHttpRequest) {
-    CompletableFuture<FullHttpRequest> future = CompletableFuture.completedFuture(fullHttpRequest);
-    future.thenApply(this::thenApplyHttpEntity)
-            .thenApply(this::thenExecutionLogic)
-            .thenApply(result -> this.writeResponse(result, fullHttpRequest, ctx))
-            .whenComplete((refresh, throwable) -> refreshResponse(ctx, refresh, throwable));
-  }
-
-  private void refreshResponse(ChannelHandlerContext ctx, Boolean refresh, Throwable throwable) {
-    if (!refresh) {
-      ctx.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+    if (FAVICON_PATH.equals(fullHttpRequest.uri())) {
+      return;
     }
+
+    CompletableFuture<FullHttpRequest> future = CompletableFuture.completedFuture(fullHttpRequest);
+
+    ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
+
+    future.thenApply(request -> this.thenApplyHttpEntity(request, ctx))
+            .thenApplyAsync(this::thenExecutionLogic, forkJoinPool)
+            .thenAcceptAsync(this::writeResponse, forkJoinPool);
+    future.complete(fullHttpRequest);
   }
 
-  private RequestContext thenApplyHttpEntity(FullHttpRequest request) {
-    return new RequestContext(request);
+  private RequestContext thenApplyHttpEntity(FullHttpRequest request, ChannelHandlerContext channelHandlerContext) {
+    return new RequestContext(request, channelHandlerContext);
   }
 
-  private Response thenExecutionLogic(RequestContext requestContext) {
+  private RequestContext thenExecutionLogic(RequestContext requestContext) {
     CompletableFuture<RequestContext> lookUpaFuture = CompletableFuture.completedFuture(requestContext);
     CompletableFuture<Response> resultFuture = lookUpaFuture
             .thenApply(this::lookupRequestHandler)
-            .thenApply(requestHandler -> this.assignmentParameters(requestHandler, requestContext))
+            .thenApply(this::invokeParam)
             .thenApply(this::executionLogic);
-    return getIfReady(resultFuture);
+    Response ifReady = getIfReady(resultFuture);
+    requestContext.setResponse(ifReady);
+    resultFuture.complete(ifReady);
+    return requestContext;
   }
 
   private Response executionLogic(LogicExecutionWrapper logicExecutionWrapper) {
@@ -128,7 +137,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     try {
       RequestHandler requestHandler = logicExecutionWrapper.getRequestHandler();
       Method method = requestHandler.getClazz()
-              .getMethod(requestHandler.getMethod(), logicExecutionWrapper.getParamTypes());
+              .getMethod(requestHandler.getMethod(),
+                      logicExecutionWrapper.getParamTypes());
       MethodHandle methodHandle = lookup.unreflect(method);
       Object result = methodHandle.bindTo(requestHandler.getBean())
               .invokeWithArguments(logicExecutionWrapper.getParamValues());
@@ -139,7 +149,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     return null;
   }
 
-  private RequestHandler lookupRequestHandler(RequestContext requestContext) {
+  private RequestContext lookupRequestHandler(RequestContext requestContext) {
     String lookupPath = requestContext.getUri().endsWith("/")
             ? requestContext.getUri().substring(0, requestContext.getUri().length() - 1)
             : requestContext.getUri();
@@ -147,30 +157,45 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     if (paramStartIndex > 0) {
       lookupPath = lookupPath.substring(0, paramStartIndex);
     }
+    if (preLookUp(requestContext, lookupPath)) {
+      return requestContext;
+    }
+    if (loopLookUp(requestContext, lookupPath)) {
+      return requestContext;
+    }
+    this.handleException(new RuntimeException("There is no corresponding request mapping program:" + lookupPath), requestContext);
+    return requestContext;
+  }
 
+  private boolean loopLookUp(RequestContext requestContext, String lookupPath) {
+    for (Map.Entry<String, RequestHandler> entry : requestHandlers.entrySet()) {
+      String[] lookupPathSplit = lookupPath.split("/");
+      String[] mappingUrlSplit = entry.getKey().split("/");
+      String   matcher         = this.getMatch(entry.getKey());
+      if (!lookupPath.startsWith(matcher) || lookupPathSplit.length != mappingUrlSplit.length) {
+        continue;
+      }
+
+      if (checkMatch(lookupPathSplit, mappingUrlSplit)) {
+        RequestHandler value = entry.getValue();
+        requestContext.setRequestHandler(value);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean preLookUp(RequestContext requestContext, String lookupPath) {
     if (requestHandlers == null || requestHandlers.isEmpty()) {
-      return null;
+      throw new RuntimeException("There is no corresponding request mapping program:" + lookupPath);
     }
 
     if (requestHandlers.containsKey(lookupPath)) {
-      return this.requestHandlers.get(lookupPath);
+      RequestHandler handler = this.requestHandlers.get(lookupPath);
+      requestContext.setRequestHandler(handler);
+      return true;
     }
-
-    for (Map.Entry<String, RequestHandler> entry : requestHandlers.entrySet()) {
-      String matcher = this.getMatch(entry.getKey());
-      if (!lookupPath.startsWith(matcher)) {
-        return null;
-      }
-      String[] lookupPathSplit = lookupPath.split("/");
-      String[] mappingUrlSplit = entry.getKey().split("/");
-      if (lookupPathSplit.length != mappingUrlSplit.length) {
-        continue;
-      }
-      if (checkMatch(lookupPathSplit, mappingUrlSplit)) {
-        return entry.getValue();
-      }
-    }
-    return null;
+    return false;
   }
 
   private boolean checkMatch(String[] lookupPathSplit, String... mappingUrlSplit) {
@@ -196,9 +221,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     return matcher.toString();
   }
 
-  private LogicExecutionWrapper assignmentParameters(RequestHandler requestHandler,
-                                                     RequestContext requestContext) {
-    List<RequestHandlerParam> params = requestHandler.getParams();
+  private LogicExecutionWrapper invokeParam(RequestContext requestContext) {
+    RequestHandler            requestHandler = requestContext.getRequestHandler();
+    List<RequestHandlerParam> params         = requestHandler.getParams();
 
     Object[]   paramValues = new Object[params.size()];
     Class<?>[] paramTypes  = new Class[params.size()];
@@ -211,13 +236,15 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     return LogicExecutionWrapper.of(requestHandler, paramValues, paramTypes);
   }
 
-  private boolean writeResponse(Response response, FullHttpRequest request, ChannelHandlerContext ctx) {
-    boolean keepAlive = HttpUtil.isKeepAlive(request);
-    Object  result    = response.getResult();
+  private void writeResponse(RequestContext requestContext) {
+    FullHttpRequest httpRequest = requestContext.getHttpRequest();
+    Response        response    = requestContext.getResponse();
+    boolean         keepAlive   = HttpUtil.isKeepAlive(httpRequest);
+    Object          result      = response.getResult();
     FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(
-            HTTP_1_1, request.decoderResult().isSuccess() ? OK : BAD_REQUEST,
+            HTTP_1_1, httpRequest.decoderResult().isSuccess() ? OK : BAD_REQUEST,
             Unpooled.copiedBuffer(Objects.isNull(result)
-                    ? "".getBytes(CharsetUtil.UTF_8)
+                    ? EMPTY_STRING.getBytes(CharsetUtil.UTF_8)
                     : response.isJsonResponse()
                     ? JSONObject.toJSONString(result).getBytes(StandardCharsets.UTF_8)
                     : result.toString().getBytes(StandardCharsets.UTF_8)
@@ -229,7 +256,16 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
       fullHttpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, fullHttpResponse.content().readableBytes());
       fullHttpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
     }
-    ctx.write(fullHttpResponse);
-    return keepAlive;
+    requestContext.getContext().writeAndFlush(fullHttpResponse);
+  }
+
+  protected void handleException(Exception e, RequestContext requestContext) {
+    log.warn("There is no corresponding request mapping program: {}", requestContext.getUri());
+    FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(
+            HTTP_1_1, INTERNAL_SERVER_ERROR,
+            Unpooled.copiedBuffer(e.getMessage().getBytes(StandardCharsets.UTF_8))
+    );
+    ChannelFuture channelFuture = requestContext.getContext().writeAndFlush(fullHttpResponse);
+    channelFuture.addListener(ChannelFutureListener.CLOSE);
   }
 }
