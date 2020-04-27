@@ -43,7 +43,7 @@ public interface Const {
   String  BANNER_TEXT                    = "aquiver";
   String  CRISPY_FRAMEWORK               = " :: Aquiver Framework :: ";
   String  SPACE                          = " ";
-  String  SERVER_THREAD_NAME             = "（'-'*) run ✧";
+  String  SERVER_THREAD_NAME             = "（'-'*)";
   String  PATH_SERVER_PORT               = "server.port";
   String  PATH_SERVER_SSL                = "server.ssl";
   String  PATH_SERVER_ADDRESS            = "server.address";

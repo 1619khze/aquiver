@@ -34,6 +34,8 @@ import java.io.StringReader;
 import java.net.BindException;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import static java.util.Objects.requireNonNull;
 import static org.aquiver.Const.*;
@@ -45,12 +47,11 @@ import static org.aquiver.Const.*;
 public final class Aquiver {
 
   private static final Logger log = LoggerFactory.getLogger(Aquiver.class);
-
-  private       Environment    environment     = new Environment();
   private final Server         nettyServer     = new NettyServer();
   private final Set<String>    packages        = new LinkedHashSet<>();
   private final List<Class<?>> eventPool       = new LinkedList<>();
   private final CountDownLatch countDownLatch  = new CountDownLatch(1);
+  private       Environment    environment     = new Environment();
   private       String         bootConfName    = PATH_CONFIG_PROPERTIES;
   private       String         envName         = "default";
   private       boolean        envConfig       = false;
@@ -62,6 +63,10 @@ public final class Aquiver {
   private       Class<?>       bootCls;
   private       String         bannerText;
   private       String         bannerFont;
+  private       Executor       singleExecutor;
+
+  private Aquiver() {
+  }
 
   /**
    * Ensures that the argument expression is true.
@@ -88,9 +93,6 @@ public final class Aquiver {
     if (!expression) {
       throw new IllegalStateException(String.format(template, args));
     }
-  }
-
-  private Aquiver() {
   }
 
   public static Aquiver of() {
@@ -210,6 +212,7 @@ public final class Aquiver {
   public void start(Class<?> bootClass, String[] args) {
     try {
       this.loadConfig(args);
+      this.initSingleExecutor();
     } catch (IllegalAccessException e) {
       log.error("An exception occurred while loading the configuration", e);
     }
@@ -226,8 +229,13 @@ public final class Aquiver {
         log.error("An exception occurred while the service started", e);
       }
     }, threadName);
-    bootThread.start();
+    this.singleExecutor.execute(bootThread);
     this.started = true;
+  }
+
+  private void initSingleExecutor() {
+    AquiverThreadFactory aquiverThreadFactory = new AquiverThreadFactory(SERVER_THREAD_NAME);
+    this.singleExecutor = Executors.newSingleThreadExecutor(aquiverThreadFactory);
   }
 
   /**
