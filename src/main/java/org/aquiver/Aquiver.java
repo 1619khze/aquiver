@@ -235,7 +235,7 @@ public final class Aquiver {
 
   private void initSingleExecutor() {
     AquiverThreadFactory aquiverThreadFactory = new AquiverThreadFactory(SERVER_THREAD_NAME);
-    this.singleExecutor = Executors.newSingleThreadExecutor(aquiverThreadFactory);
+    this.singleExecutor = Executors.newCachedThreadPool(aquiverThreadFactory);
   }
 
   /**
