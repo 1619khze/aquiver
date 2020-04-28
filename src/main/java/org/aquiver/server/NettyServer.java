@@ -100,9 +100,9 @@ public class NettyServer implements Server {
 
     this.configLoadLog(aquiver, envName);
 
-    this.initIoc();
     this.initSSL();
     this.initWebSocket();
+    this.initRouteResolve();
     this.startServer(startMs);
     this.watchEnv();
     this.shutdownHook();
@@ -127,7 +127,7 @@ public class NettyServer implements Server {
   /**
    * init ioc container
    */
-  private void initIoc() {
+  private void initRouteResolve() {
     final String scanPath = aquiver.getBootCls().getPackage().getName();
 
     final ClassgraphOptions classgraphOptions = ClassgraphOptions.builder()
