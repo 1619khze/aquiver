@@ -59,8 +59,10 @@ import static org.aquiver.mvc.MediaType.TEXT_PLAIN_VALUE;
 public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
+
   private final static String FAVICON_PATH = "/favicon.ico";
   private final static String EMPTY_STRING = "";
+
   private final Map<String, RequestHandler> requestHandlers;
 
   public NettyServerHandler(RouteResolver routeResolver) {
@@ -163,7 +165,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     if (loopLookUp(requestContext, lookupPath)) {
       return requestContext;
     }
-    this.handleException(new RuntimeException("There is no corresponding request mapping program:" + lookupPath), requestContext);
+    this.handleException(new RuntimeException("There is no corresponding " +
+            "request mapping program:" + lookupPath), requestContext);
     return requestContext;
   }
 
@@ -251,10 +254,14 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
             )
     );
 
-    fullHttpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, response.isJsonResponse() ? APPLICATION_JSON_VALUE : TEXT_PLAIN_VALUE);
+    fullHttpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE,
+            response.isJsonResponse() ? APPLICATION_JSON_VALUE : TEXT_PLAIN_VALUE);
     if (keepAlive) {
-      fullHttpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, fullHttpResponse.content().readableBytes());
-      fullHttpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+      fullHttpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH,
+              fullHttpResponse.content().readableBytes());
+
+      fullHttpResponse.headers().set(HttpHeaderNames.CONNECTION,
+              HttpHeaderValues.KEEP_ALIVE);
     }
     requestContext.getContext().writeAndFlush(fullHttpResponse);
   }
