@@ -31,11 +31,14 @@ import io.netty.channel.ServerChannel;
  * @since 2019/5/9
  */
 public class NettyServerGroup {
-  private EventLoopGroup                 bossGroup;
-  private EventLoopGroup                 workGroup;
-  private Class<? extends ServerChannel> channelClass;
 
-  NettyServerGroup(EventLoopGroup bossGroup, EventLoopGroup workGroup, Class<? extends ServerChannel> channelClass) {
+  private final EventLoopGroup bossGroup;
+  private final EventLoopGroup workGroup;
+
+  private final Class<? extends ServerChannel> channelClass;
+
+  NettyServerGroup(EventLoopGroup bossGroup, EventLoopGroup workGroup,
+                   Class<? extends ServerChannel> channelClass) {
     this.bossGroup    = bossGroup;
     this.workGroup    = workGroup;
     this.channelClass = channelClass;
