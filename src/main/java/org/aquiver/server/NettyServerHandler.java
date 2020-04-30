@@ -242,7 +242,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   private void writeResponse(RequestContext requestContext) {
     FullHttpRequest httpRequest = requestContext.getHttpRequest();
     Response        response    = requestContext.getResponse();
-    boolean         keepAlive   = HttpUtil.isKeepAlive(httpRequest);
     Object          result      = response.getResult();
     FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(
             HTTP_1_1, httpRequest.decoderResult().isSuccess() ? OK : BAD_REQUEST,
@@ -253,15 +252,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
                     : result.toString().getBytes(StandardCharsets.UTF_8)
             )
     );
-
-    fullHttpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE,
-            response.isJsonResponse() ? APPLICATION_JSON_VALUE : TEXT_PLAIN_VALUE);
-    if (keepAlive) {
-      fullHttpResponse.headers().setInt(HttpHeaderNames.CONTENT_LENGTH,
-              fullHttpResponse.content().readableBytes());
-
-      fullHttpResponse.headers().set(HttpHeaderNames.CONNECTION,
-              HttpHeaderValues.KEEP_ALIVE);
+    HttpHeaders     headers     = fullHttpResponse.headers();
+    headers.set(HttpHeaderNames.CONTENT_TYPE, response.isJsonResponse() ? APPLICATION_JSON_VALUE : TEXT_PLAIN_VALUE);
+    if (HttpUtil.isKeepAlive(httpRequest)) {
+      headers.set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+      headers.setInt(HttpHeaderNames.CONTENT_LENGTH, fullHttpResponse.content().readableBytes());
     }
     requestContext.getContext().writeAndFlush(fullHttpResponse);
   }
