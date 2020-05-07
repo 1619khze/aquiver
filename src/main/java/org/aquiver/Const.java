@@ -78,7 +78,7 @@ public interface Const {
   String PATH_CONFIG_YAML       = "application.yml";
 
   // setting prefix
-  String PATH_PREFIX_ROOT = "PATH_PREFIX";
+  String PATH_PREFIX_ROOT = "PATH_";
 
   // watch env
   Path SERVER_WATCHER_PATH = Paths.get(Objects.requireNonNull(Propertys.getCurrentClassPath()));
