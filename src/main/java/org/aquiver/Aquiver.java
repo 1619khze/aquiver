@@ -45,8 +45,8 @@ import static org.aquiver.Const.*;
  * @since 2019/6/5
  */
 public final class Aquiver {
-
   private static final Logger log = LoggerFactory.getLogger(Aquiver.class);
+
   private final Server         nettyServer     = new NettyServer();
   private final Set<String>    packages        = new LinkedHashSet<>();
   private final List<Class<?>> eventPool       = new LinkedList<>();
