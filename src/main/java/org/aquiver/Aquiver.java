@@ -239,11 +239,16 @@ public final class Aquiver {
   }
 
   /**
-   * Load configuration from multiple places between startup services. Support items are:
-   * 1. Properties are configured by default, and the properties loaded by default are application.properties
-   * 2. If there is no properties configuration, the yaml format is used, and the default yaml loaded is application.yml
-   * 3. Support loading configuration from args array of main function
-   * 4. Support loading configuration from System.Property
+   * Load configuration from multiple places between startup services.
+   * Support items are: Properties are configured by default, and the
+   * properties loaded by default are application.properties If there
+   * is no properties configuration, the yaml format is used, and the
+   * default yaml loaded is application.yml Support loading
+   * configuration from args array of main function Support loading
+   * configuration from System.Property
+   *
+   * @param args main method args
+   * @throws IllegalAccessException IllegalAccessException
    */
   private void loadConfig(String[] args) throws IllegalAccessException {
     String      bootConf    = environment().get(PATH_SERVER_BOOT_CONFIG, PATH_CONFIG_PROPERTIES);
@@ -289,12 +294,14 @@ public final class Aquiver {
    * @param constField
    */
   private void loadPropsOrYaml(Environment bootConfEnv, Map<String, String> constField) {
-    //Properties are configured by default, and the properties loaded by default are application.properties
+    /** Properties are configured by default, and the properties loaded
+     * by default are application.properties */
     constField.keySet().forEach(key ->
             Optional.ofNullable(System.getProperty(constField.get(key)))
                     .ifPresent(property -> bootConfEnv.add(key, property)));
 
-    //If there is no properties configuration, the yaml format is used, and the default yaml loaded is application.yml
+    /** If there is no properties configuration, the yaml format is
+     * used, and the default yaml loaded is application.yml */
     if (bootConfEnv.isEmpty()) {
       Optional.ofNullable(Propertys.yaml(PATH_CONFIG_YAML))
               .ifPresent(yamlConfigTreeMap ->
