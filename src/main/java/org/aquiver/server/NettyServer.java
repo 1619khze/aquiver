@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
 import java.io.File;
+import java.nio.file.Paths;
 import java.security.cert.CertificateException;
 
 import static org.aquiver.Const.*;
@@ -319,6 +320,6 @@ public class NettyServer implements Server {
    * @return
    */
   private File setKeyCertFileAndPriKey(String keyPath, File defaultFilePath) {
-    return keyPath != null ? new File(keyPath) : defaultFilePath;
+    return keyPath != null ? Paths.get(keyPath).toFile() : defaultFilePath;
   }
 }
