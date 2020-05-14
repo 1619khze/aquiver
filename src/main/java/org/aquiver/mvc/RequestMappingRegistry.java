@@ -55,48 +55,53 @@ public class RequestMappingRegistry extends AbstractRegistry {
 
   @Override
   public void register(Class<?> clazz, String baseUrl, Method method, RequestMapping methodRequestMapping) {
-    String methodUrl = methodRequestMapping.value();
-    String url       = super.getMethodUrl(baseUrl, methodUrl);
+    String methodUrl   = methodRequestMapping.value();
+    String completeUrl = super.getMethodUrl(baseUrl, methodUrl);
 
     RequestMethod requestMethod = methodRequestMapping.method();
-    if (url.trim().isEmpty()) {
+    if (completeUrl.trim().isEmpty()) {
       return;
     }
 
-    RequestHandler requestHandler = new RequestHandler(url, clazz, method.getName(),
-            !Objects.isNull(method.getAnnotation(ResponseBody.class)), requestMethod);
-
-    Parameter[] ps = method.getParameters();
-
+    boolean isJsonResponse = !Objects.isNull(method.getAnnotation(ResponseBody.class));
+    RequestHandler requestHandler = new RequestHandler(completeUrl,
+            clazz, method.getName(), isJsonResponse, requestMethod);
     try {
-      String[] paramNames = this.getMethodParameterNamesByAsm(clazz, method);
-      for (int i = 0; i < ps.length; i++) {
-        List<ArgsResolver> argsResolvers = getArgsResolvers();
-        if (argsResolvers.isEmpty()) {
-          break;
-        }
-        for (ArgsResolver argsResolver : argsResolvers) {
-          Parameter parameter = ps[i];
-          if (!argsResolver.support(parameter)) {
-            continue;
-          }
-          RequestHandlerParam param = argsResolver.resolve(parameter, paramNames[i]);
-          if (param != null) {
-            requestHandler.getParams().add(param);
-          }
-        }
-      }
+      Parameter[] parameters = method.getParameters();
+      String[]    paramNames = this.getMethodParameterNamesByAsm(clazz, method);
+      this.execuArgsResolver(requestHandler, parameters, paramNames);
     } catch (IOException e) {
       log.error("An exception occurred while parsing the method parameter name", e);
     }
 
-    if (this.repeat(url)) {
+    if (this.repeat(completeUrl)) {
       if (log.isDebugEnabled()) {
-        log.debug("Registered request processor URL is duplicated :{}", url);
+        log.debug("Registered request processor URL is duplicated :{}", completeUrl);
       }
-      throw new HandlerRepeatException("Registered request processor URL is duplicated : " + url);
+      throw new HandlerRepeatException("Registered request processor URL is duplicated : " + completeUrl);
     }
-    this.register(url, requestHandler);
+    this.register(completeUrl, requestHandler);
+  }
+
+  private void execuArgsResolver(RequestHandler requestHandler, Parameter[] ps, String[] paramNames) {
+    for (int i = 0; i < ps.length; i++) {
+      List<ArgsResolver> argsResolvers = getArgsResolvers();
+      if (argsResolvers.isEmpty()) {
+        break;
+      }
+      this.execuArgsResolver(requestHandler, ps[i], paramNames[i], argsResolvers);
+    }
+  }
+
+  private void execuArgsResolver(RequestHandler requestHandler, Parameter parameter,
+                                 String paramName, List<ArgsResolver> argsResolvers) {
+    for (ArgsResolver argsResolver : argsResolvers) {
+      if (!argsResolver.support(parameter)) continue;
+      RequestHandlerParam param = argsResolver.resolve(parameter, paramName);
+      if (param != null) {
+        requestHandler.getParams().add(param);
+      }
+    }
   }
 
   @Override
