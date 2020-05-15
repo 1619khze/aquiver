@@ -28,9 +28,9 @@ public interface ExceptionHandler {
   boolean support(Throwable cause);
 
   /**
-   * @param requestContext   Current request
-   * @param throwable The Throwable caused in handler
-   * @param handler   Target handler that handles current request
+   * @param requestContext Current request
+   * @param throwable      The Throwable caused in handler
+   * @param handler        Target handler that handles current request
    */
   void handle(RequestContext requestContext, Throwable throwable, Object handler);
 }

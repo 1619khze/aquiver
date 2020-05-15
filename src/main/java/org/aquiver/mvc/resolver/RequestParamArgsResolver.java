@@ -29,7 +29,6 @@ import org.aquiver.mvc.RequestHandlerParam;
 import org.aquiver.mvc.RequestParamType;
 
 import java.lang.reflect.Parameter;
-import java.util.Objects;
 
 public class RequestParamArgsResolver implements ArgsResolver {
 
@@ -41,7 +40,7 @@ public class RequestParamArgsResolver implements ArgsResolver {
   @Override
   public RequestHandlerParam resolve(Parameter parameter, String paramName) {
     RequestHandlerParam handlerParam = new RequestHandlerParam();
-    RequestParam        requestParam = parameter.getAnnotation(RequestParam.class);
+    RequestParam requestParam = parameter.getAnnotation(RequestParam.class);
     handlerParam.setDataType(parameter.getType());
     handlerParam.setName("".equals(requestParam.value()) ? paramName : requestParam.value());
     handlerParam.setRequired(requestParam.required());

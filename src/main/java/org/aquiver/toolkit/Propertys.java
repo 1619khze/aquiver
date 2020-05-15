@@ -51,7 +51,7 @@ public abstract class Propertys {
 
   public static Map<String, String> confFieldMap() throws IllegalAccessException {
     final Map<String, String> constArgsMap = new HashMap<>();
-    List<Field>               fields       = Arrays.asList(Const.class.getFields());
+    List<Field> fields = Arrays.asList(Const.class.getFields());
     for (Field field : new ArrayList<>(fields)) {
       if (field.getName().contains(Const.PATH_PREFIX_ROOT)) {
         continue;
@@ -104,7 +104,7 @@ public abstract class Propertys {
   }
 
   public static String getCurrentClassPath() {
-    URL    url = Propertys.class.getResource("/");
+    URL url = Propertys.class.getResource("/");
     String path;
     if (null == url) {
       File f = new File(Propertys.class.getProtectionDomain().getCodeSource().getLocation().getPath());

@@ -31,8 +31,8 @@ import java.lang.annotation.*;
 @Documented
 public @interface RequestHeader {
 
-    String value() default "";
-    
-    boolean required() default true;
-    
+  String value() default "";
+
+  boolean required() default true;
+
 }

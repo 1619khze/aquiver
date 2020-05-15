@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.LongAdder;
  */
 public class NettyThreadFactory implements ThreadFactory {
 
-  private final String    prefix;
+  private final String prefix;
   private final LongAdder threadNumber = new LongAdder();
 
   public NettyThreadFactory(String prefix) {

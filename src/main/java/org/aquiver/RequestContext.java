@@ -39,36 +39,36 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class RequestContext {
-  private final FullHttpRequest       httpRequest;
+  private final FullHttpRequest httpRequest;
   private final ChannelHandlerContext context;
-  private       FullHttpResponse      httpResponse;
+  private FullHttpResponse httpResponse;
 
-  private RequestHandler      requestHandler;
-  private Response            response;
+  private RequestHandler requestHandler;
+  private Response response;
   private Map<String, Object> cookies;
   private Map<String, Object> headers;
   private Map<String, String> queryString;
   private Map<String, Object> formData;
   private Map<String, Object> jsonData;
-  private String              uri;
-  private String              httpMethod;
-  private String              version;
+  private String uri;
+  private String httpMethod;
+  private String version;
 
   public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
-    this.context     = context;
+    this.context = context;
     this.httpRequest = httpRequest;
-    this.cookies     = new HashMap<>();
-    this.headers     = new HashMap<>();
+    this.cookies = new HashMap<>();
+    this.headers = new HashMap<>();
     this.queryString = new HashMap<>();
-    this.formData    = new HashMap<>();
-    this.jsonData    = new HashMap<>();
+    this.formData = new HashMap<>();
+    this.jsonData = new HashMap<>();
     this.init();
   }
 
   public void init() {
-    this.uri        = httpRequest.uri();
+    this.uri = httpRequest.uri();
     this.httpMethod = httpRequest.method().name();
-    this.version    = httpRequest.protocolVersion().text();
+    this.version = httpRequest.protocolVersion().text();
     this.headers();
     this.cookies();
     this.queryString();
@@ -77,10 +77,10 @@ public class RequestContext {
   }
 
   private void jsonData() {
-    ByteBuf content    = httpRequest.content();
-    byte[]  reqContent = new byte[content.readableBytes()];
+    ByteBuf content = httpRequest.content();
+    byte[] reqContent = new byte[content.readableBytes()];
     content.readBytes(reqContent);
-    String     strContent = new String(reqContent, StandardCharsets.UTF_8);
+    String strContent = new String(reqContent, StandardCharsets.UTF_8);
     JSONObject jsonParams = JSONObject.parseObject(strContent);
     if (Objects.isNull(jsonParams) || jsonParams.keySet().isEmpty()) {
       return;
@@ -106,13 +106,13 @@ public class RequestContext {
   }
 
   private void queryString() {
-    QueryStringDecoder        queryStringDecoder = new QueryStringDecoder(httpRequest.uri());
-    Map<String, List<String>> params             = queryStringDecoder.parameters();
+    QueryStringDecoder queryStringDecoder = new QueryStringDecoder(httpRequest.uri());
+    Map<String, List<String>> params = queryStringDecoder.parameters();
     if (Objects.isNull(params) || params.isEmpty()) {
       return;
     }
     for (Map.Entry<String, List<String>> p : params.entrySet()) {
-      String       key   = p.getKey();
+      String key = p.getKey();
       List<String> value = p.getValue();
       this.queryString.put(key, value.get(0));
     }
@@ -132,13 +132,13 @@ public class RequestContext {
   }
 
   private void headers() {
-    HttpHeaders                     httpHeaders = httpRequest.headers();
-    List<Map.Entry<String, String>> entries     = httpHeaders.entries();
+    HttpHeaders httpHeaders = httpRequest.headers();
+    List<Map.Entry<String, String>> entries = httpHeaders.entries();
     if (entries.isEmpty()) {
       return;
     }
     for (Map.Entry<String, String> h : entries) {
-      CharSequence key   = h.getKey();
+      CharSequence key = h.getKey();
       CharSequence value = h.getValue();
       headers.put(key.toString(), value);
     }

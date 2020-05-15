@@ -34,9 +34,9 @@ import io.netty.handler.codec.http.cors.CorsConfig;
 import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.cors.CorsHandler;
 import io.netty.handler.ssl.SslContext;
-import org.aquiver.RouteResolver;
 import org.aquiver.Const;
 import org.aquiver.Environment;
+import org.aquiver.RouteResolver;
 
 /**
  * @author WangYi
@@ -44,10 +44,10 @@ import org.aquiver.Environment;
  */
 public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
   private final RouteResolver routeResolver;
-  private final SslContext    sslCtx;
-  private       boolean     cors;
-  private       boolean     compressor;
-  private       CorsConfig  corsConfig;
+  private final SslContext sslCtx;
+  private boolean cors;
+  private boolean compressor;
+  private CorsConfig corsConfig;
 
   NettyServerInitializer(SslContext sslCtx, Environment environment, RouteResolver routeResolver) {
     this.sslCtx = sslCtx;
@@ -58,7 +58,7 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
   }
 
   private NettyServerInitializer cors(boolean cors) {
-    this.cors       = cors;
+    this.cors = cors;
     this.corsConfig = CorsConfigBuilder.forAnyOrigin().allowNullOrigin().allowCredentials().build();
     return this;
   }

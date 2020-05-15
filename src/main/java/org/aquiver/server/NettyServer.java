@@ -59,19 +59,19 @@ import static org.aquiver.Const.*;
  * @since 2019/6/5
  */
 public class NettyServer implements Server {
-
   private static final Logger log = LoggerFactory.getLogger(NettyServer.class);
 
-  private final    Banner          defaultBanner   = new NettyServerBanner();
-  private final    ServerBootstrap serverBootstrap = new ServerBootstrap();
-  private volatile boolean         stop            = false;
-  private          EventLoopGroup  bossGroup;
-  private          EventLoopGroup  workerGroup;
-  private          Environment     environment;
-  private          Aquiver         aquiver;
-  private          Channel         channel;
-  private          SslContext      sslContext;
-  private          RouteResolver   routeResolver;
+  private final Banner defaultBanner = new NettyServerBanner();
+  private final ServerBootstrap serverBootstrap = new ServerBootstrap();
+  private volatile boolean stop = false;
+
+  private EventLoopGroup bossGroup;
+  private EventLoopGroup workerGroup;
+  private Environment environment;
+  private Aquiver aquiver;
+  private Channel channel;
+  private SslContext sslContext;
+  private RouteResolver routeResolver;
 
   /**
    * start server and init setting
@@ -83,16 +83,16 @@ public class NettyServer implements Server {
   public void start(Aquiver aquiver) throws Exception {
     long startMs = System.currentTimeMillis();
 
-    this.aquiver     = aquiver;
+    this.aquiver = aquiver;
     this.environment = aquiver.environment();
     this.printBanner();
 
-    final String bootClsName     = aquiver.bootClsName();
-    final String bootConfName    = aquiver.bootConfName();
-    final String envName         = aquiver.envName();
-    final String deviceName      = Systems.getDeviceName();
+    final String bootClsName = aquiver.bootClsName();
+    final String bootConfName = aquiver.bootConfName();
+    final String envName = aquiver.envName();
+    final String deviceName = Systems.getDeviceName();
     final String currentUserName = System.getProperty("user.name");
-    final String pidCode         = Systems.getPid();
+    final String pidCode = Systems.getPid();
 
     log.info("Starting {} on {} with PID {} ", bootClsName, deviceName + "/" + currentUserName, pidCode);
     log.info("Starting service [Netty]");
@@ -147,14 +147,14 @@ public class NettyServer implements Server {
   private void initSSL() throws CertificateException, SSLException {
     log.info("Check if the ssl configuration is enabled.");
 
-    final Boolean               ssl = environment.getBoolean(PATH_SERVER_SSL, SERVER_SSL);
+    final Boolean ssl = environment.getBoolean(PATH_SERVER_SSL, SERVER_SSL);
     final SelfSignedCertificate ssc = new SelfSignedCertificate();
 
     if (ssl) {
       log.info("Ssl configuration takes effect :{}", true);
 
-      final String sslCert           = this.environment.get(PATH_SERVER_SSL_CERT, null);
-      final String sslPrivateKey     = this.environment.get(PATH_SERVER_SSL_PRIVATE_KEY, null);
+      final String sslCert = this.environment.get(PATH_SERVER_SSL_CERT, null);
+      final String sslPrivateKey = this.environment.get(PATH_SERVER_SSL_PRIVATE_KEY, null);
       final String sslPrivateKeyPass = this.environment.get(PATH_SERVER_SSL_PRIVATE_KEY_PASS, null);
 
       log.info("SSL CertChainFile  Path: {}", sslCert);
@@ -217,15 +217,15 @@ public class NettyServer implements Server {
     this.serverBootstrap.childHandler(new NettyServerInitializer(sslContext, environment, routeResolver));
 
     int acceptThreadCount = environment.getInteger(PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT, DEFAULT_ACCEPT_THREAD_COUNT);
-    int ioThreadCount     = environment.getInteger(PATH_SERVER_NETTY_IO_THREAD_COUNT, DEFAULT_IO_THREAD_COUNT);
+    int ioThreadCount = environment.getInteger(PATH_SERVER_NETTY_IO_THREAD_COUNT, DEFAULT_IO_THREAD_COUNT);
 
     NettyServerGroup nettyServerGroup = EventLoopKit.nioGroup(acceptThreadCount, ioThreadCount);
-    this.bossGroup   = nettyServerGroup.getBossGroup();
+    this.bossGroup = nettyServerGroup.getBossGroup();
     this.workerGroup = nettyServerGroup.getWorkGroup();
 
     if (EventLoopKit.epollIsAvailable()) {
       nettyServerGroup = EventLoopKit.epollGroup(acceptThreadCount, ioThreadCount);
-      this.bossGroup   = nettyServerGroup.getBossGroup();
+      this.bossGroup = nettyServerGroup.getBossGroup();
       this.workerGroup = nettyServerGroup.getWorkGroup();
     }
 
@@ -237,12 +237,12 @@ public class NettyServer implements Server {
 
     this.stop = false;
 
-    final Integer port    = this.environment.getInteger(PATH_SERVER_PORT, SERVER_PORT);
-    final String  address = this.environment.get(PATH_SERVER_ADDRESS, SERVER_ADDRESS);
+    final Integer port = this.environment.getInteger(PATH_SERVER_PORT, SERVER_PORT);
+    final String address = this.environment.get(PATH_SERVER_ADDRESS, SERVER_ADDRESS);
     this.channel = serverBootstrap.bind(address, port).sync().channel();
 
-    long endTime      = System.currentTimeMillis();
-    long startUpTime  = (endTime - startTime);
+    long endTime = System.currentTimeMillis();
+    long startUpTime = (endTime - startTime);
     long jvmStartTime = (endTime - Systems.getJvmStartUpTime());
 
     log.info("Aquiver started on port(s): {} (com.aquiver.http) with context path ''", port);

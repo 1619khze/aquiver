@@ -42,13 +42,13 @@ public class RouteResolver {
   private static final Logger log = LoggerFactory.getLogger(RouteResolver.class);
 
   private final Discoverer discoverer;
-  private final String     scanPath;
+  private final String scanPath;
 
   private final RequestMappingRegistry mappingRegistry;
 
   public RouteResolver(Discoverer discoverer, String scanPath) {
-    this.discoverer      = discoverer;
-    this.scanPath        = scanPath;
+    this.discoverer = discoverer;
+    this.scanPath = scanPath;
     this.mappingRegistry = new RequestMappingRegistry();
   }
 
@@ -99,7 +99,7 @@ public class RouteResolver {
     RequestMapping classRequestMapping = cls.getAnnotation(RequestMapping.class);
     if (classRequestMapping != null) {
       String className = cls.getName();
-      String value     = classRequestMapping.value();
+      String value = classRequestMapping.value();
       if (!"".equals(value)) {
         url = value;
       }

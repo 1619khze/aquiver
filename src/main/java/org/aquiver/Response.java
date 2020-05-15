@@ -28,12 +28,12 @@ import org.aquiver.mvc.MediaType;
 import java.util.Objects;
 
 public class Response {
-  private Object    result;
-  private boolean   jsonResponse;
+  private Object result;
+  private boolean jsonResponse;
   private MediaType mediaType;
 
   public Response(Object result, boolean jsonResponse) {
-    this.result       = result;
+    this.result = result;
     this.jsonResponse = jsonResponse;
   }
 

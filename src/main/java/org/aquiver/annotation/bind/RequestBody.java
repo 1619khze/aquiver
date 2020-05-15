@@ -30,7 +30,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface RequestBody {
-    
-    String value() default "";
+
+  String value() default "";
 
 }

@@ -28,8 +28,8 @@ package org.aquiver.server.banner;
  * @since 2019/5/24
  */
 public interface BannerFont {
-  String FONT_3_D         = "3-D";
-  String FONT_3D_ASCII    = "3D-ASCII";
+  String FONT_3_D = "3-D";
+  String FONT_3D_ASCII = "3D-ASCII";
   String FONT_3D_DIAGONAL = "3D_Diagonal";
-  String FONT_DEFAULT     = "Standard";
+  String FONT_DEFAULT = "Standard";
 }

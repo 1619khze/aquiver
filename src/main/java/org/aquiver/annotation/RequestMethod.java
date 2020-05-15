@@ -31,5 +31,5 @@ public enum RequestMethod {
   PATCH,
   DELETE,
   OPTIONS,
-  TRACE;
+  TRACE
 }

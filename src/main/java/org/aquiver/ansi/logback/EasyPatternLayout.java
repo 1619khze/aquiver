@@ -37,7 +37,7 @@ import java.util.Map;
 public class EasyPatternLayout extends PatternLayoutBase<ILoggingEvent> {
 
   private static final Map<String, String> defaultConverterMap = new HashMap<>();
-  private static final String              HEADER_PREFIX       = "#logback.classic pattern: ";
+  private static final String HEADER_PREFIX = "#logback.classic pattern: ";
 
   static {
     defaultConverterMap.putAll(Parser.DEFAULT_COMPOSITE_CONVERTER_MAP);

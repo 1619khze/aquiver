@@ -56,13 +56,13 @@ public final class EventLoopKit {
   }
 
   public static NettyServerGroup epollGroup(int threadCount, int workers) {
-    bossEventLoopGroup   = new EpollEventLoopGroup(threadCount, named("epoll-boss@"));
+    bossEventLoopGroup = new EpollEventLoopGroup(threadCount, named("epoll-boss@"));
     workerEventLoopGroup = new EpollEventLoopGroup(workers, named("epoll-worker@"));
     return eventLoopGroupBuilder(bossEventLoopGroup, workerEventLoopGroup, EpollServerSocketChannel.class);
   }
 
   public static NettyServerGroup nioGroup(int threadCount, int workers) {
-    bossEventLoopGroup   = new NioEventLoopGroup(threadCount, named("nio-boss@"));
+    bossEventLoopGroup = new NioEventLoopGroup(threadCount, named("nio-boss@"));
     workerEventLoopGroup = new NioEventLoopGroup(workers, named("nio-worker@"));
     return eventLoopGroupBuilder(bossEventLoopGroup, workerEventLoopGroup, NioServerSocketChannel.class);
   }
@@ -85,7 +85,7 @@ public final class EventLoopKit {
    * @return
    */
   public static String judgeMode(String channelName) {
-    String NIO   = "nio";
+    String NIO = "nio";
     String EPOLL = "epoll";
     if (channelName.toLowerCase().startsWith(NIO)) {
       return NIO;

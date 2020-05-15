@@ -47,23 +47,23 @@ import static org.aquiver.Const.*;
 public final class Aquiver {
   private static final Logger log = LoggerFactory.getLogger(Aquiver.class);
 
-  private final Server         nettyServer     = new NettyServer();
-  private final Set<String>    packages        = new LinkedHashSet<>();
-  private final List<Class<?>> eventPool       = new LinkedList<>();
-  private final CountDownLatch countDownLatch  = new CountDownLatch(1);
-  private       Environment    environment     = new Environment();
-  private       String         bootConfName    = PATH_CONFIG_PROPERTIES;
-  private       String         envName         = "default";
-  private       boolean        envConfig       = false;
-  private       boolean        masterConfig    = false;
-  private       boolean        started         = false;
-  private       boolean        verbose         = false;
-  private       boolean        realtimeLogging = false;
-  private       int            port;
-  private       Class<?>       bootCls;
-  private       String         bannerText;
-  private       String         bannerFont;
-  private       Executor       singleExecutor;
+  private final Server nettyServer = new NettyServer();
+  private final Set<String> packages = new LinkedHashSet<>();
+  private final List<Class<?>> eventPool = new LinkedList<>();
+  private final CountDownLatch countDownLatch = new CountDownLatch(1);
+  private Environment environment = new Environment();
+  private String bootConfName = PATH_CONFIG_PROPERTIES;
+  private String envName = "default";
+  private boolean envConfig = false;
+  private boolean masterConfig = false;
+  private boolean started = false;
+  private boolean verbose = false;
+  private boolean realtimeLogging = false;
+  private int port;
+  private Class<?> bootCls;
+  private String bannerText;
+  private String bannerFont;
+  private Executor singleExecutor;
 
   private Aquiver() {
   }
@@ -251,18 +251,18 @@ public final class Aquiver {
    * @throws IllegalAccessException IllegalAccessException
    */
   private void loadConfig(String[] args) throws IllegalAccessException {
-    String      bootConf    = environment().get(PATH_SERVER_BOOT_CONFIG, PATH_CONFIG_PROPERTIES);
+    String bootConf = environment().get(PATH_SERVER_BOOT_CONFIG, PATH_CONFIG_PROPERTIES);
     Environment bootConfEnv = Environment.of(bootConf);
 
-    Map<String, String> argsMap    = this.loadMainArgs(args);
+    Map<String, String> argsMap = this.loadMainArgs(args);
     Map<String, String> constField = Propertys.confFieldMap();
 
     this.loadPropsOrYaml(bootConfEnv, constField);
 
     //Support loading configuration from args array of main function
     if (!requireNonNull(bootConfEnv).isEmpty()) {
-      Map<String, String>            bootEnvMap = bootConfEnv.toStringMap();
-      Set<Map.Entry<String, String>> entrySet   = bootEnvMap.entrySet();
+      Map<String, String> bootEnvMap = bootConfEnv.toStringMap();
+      Set<Map.Entry<String, String>> entrySet = bootEnvMap.entrySet();
 
       entrySet.forEach(entry -> this.environment
               .add(entry.getKey(), entry.getValue()));
@@ -336,14 +336,15 @@ public final class Aquiver {
    * @param envName
    */
   private void envConfig(String envName) {
-    String      envFileName = "application" + "-" + envName + ".properties";
+    String envFileName = "application" + "-" + envName + ".properties";
     Environment customerEnv = Environment.of(envFileName);
     if (customerEnv.isEmpty()) {
       String envYmlFileName = "application" + "-" + envName + ".yml";
       customerEnv = Environment.of(envYmlFileName);
     }
     if (!customerEnv.isEmpty()) {
-      customerEnv.props().forEach((key, value) -> this.environment.add(key.toString(), value));
+      customerEnv.props().forEach((key, value) ->
+              this.environment.add(key.toString(), value));
     }
     this.environment.add(PATH_SERVER_PROFILE, envName);
   }

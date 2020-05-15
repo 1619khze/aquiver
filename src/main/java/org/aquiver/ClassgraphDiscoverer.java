@@ -33,11 +33,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class ClassgraphDiscoverer implements Discoverer {
 
   private final ClassgraphOptions classgraphOptions;
-  private final ClassGraph        classGraph;
+  private final ClassGraph classGraph;
 
   public ClassgraphDiscoverer(ClassgraphOptions classgraphOptions) {
     this.classgraphOptions = classgraphOptions;
-    this.classGraph        = new ClassGraph();
+    this.classGraph = new ClassGraph();
   }
 
   @Override

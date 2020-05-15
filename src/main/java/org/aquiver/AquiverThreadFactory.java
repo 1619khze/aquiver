@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.LongAdder;
 
 public class AquiverThreadFactory implements ThreadFactory {
 
-  private final String    prefix;
+  private final String prefix;
   private final LongAdder threadNumber = new LongAdder();
 
   public AquiverThreadFactory(String prefix) {

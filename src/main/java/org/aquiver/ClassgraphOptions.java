@@ -27,12 +27,12 @@ import java.util.Set;
 
 public class ClassgraphOptions {
   private final Set<String> scanPackages;
-  private       boolean     verbose;
-  private       boolean     enableRealtimeLogging;
+  private final boolean verbose;
+  private final boolean enableRealtimeLogging;
 
   public ClassgraphOptions(Set<String> scanPackages, boolean verbose, boolean enableRealtimeLogging) {
-    this.scanPackages          = scanPackages;
-    this.verbose               = verbose;
+    this.scanPackages = scanPackages;
+    this.verbose = verbose;
     this.enableRealtimeLogging = enableRealtimeLogging;
   }
 
@@ -54,8 +54,8 @@ public class ClassgraphOptions {
 
   public static class FastClassgraphScannerConfigBuilder {
     private Set<String> scanPackages;
-    private boolean     verbose;
-    private boolean     enableRealtimeLogging;
+    private boolean verbose;
+    private boolean enableRealtimeLogging;
 
     public ClassgraphOptions.FastClassgraphScannerConfigBuilder scanPackages(Set<String> scanPackages) {
       this.scanPackages = scanPackages;

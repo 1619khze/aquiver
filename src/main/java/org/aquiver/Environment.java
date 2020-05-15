@@ -39,11 +39,11 @@ public final class Environment {
 
   private static final Logger log = LoggerFactory.getLogger(Environment.class);
 
-  private Properties properties = new Properties();
+  private final Properties properties = new Properties();
 
   public Environment() {
-    Properties  sysProps = System.getProperties();
-    Set<String> keySet   = sysProps.stringPropertyNames();
+    Properties sysProps = System.getProperties();
+    Set<String> keySet = sysProps.stringPropertyNames();
     keySet.forEach(key -> properties.put(key, sysProps.getProperty(key)));
   }
 
@@ -148,8 +148,8 @@ public final class Environment {
   }
 
   public Map<String, Object> toMap(Properties properties) {
-    Map<String, Object> argsMap     = new HashMap<>();
-    Set                 propertySet = properties.entrySet();
+    Map<String, Object> argsMap = new HashMap<>();
+    Set propertySet = properties.entrySet();
     for (Object o : propertySet) {
       Map.Entry entry = (Map.Entry) o;
       argsMap.put(String.valueOf(entry.getKey()), entry.getValue());
@@ -162,7 +162,7 @@ public final class Environment {
   }
 
   public Map<String, String> toStringMap() {
-    Map<String, String>            argsMap     = new HashMap<>();
+    Map<String, String> argsMap = new HashMap<>();
     Set<Map.Entry<Object, Object>> propertySet = properties.entrySet();
     for (Map.Entry<Object, Object> o : propertySet) {
       argsMap.put(String.valueOf(o.getKey()), String.valueOf(o.getValue()));

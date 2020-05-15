@@ -107,8 +107,8 @@ public abstract class AbstractRegistry implements RegisterStrategy {
     }
     final String[] parameterNames = new String[parameterTypes.length];
 
-    String className    = clazz.getName();
-    int    lastDotIndex = className.lastIndexOf(".");
+    String className = clazz.getName();
+    int lastDotIndex = className.lastIndexOf(".");
     className = className.substring(lastDotIndex + 1) + ".class";
 
     InputStream inputStream = clazz.getResourceAsStream(className);

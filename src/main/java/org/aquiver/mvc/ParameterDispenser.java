@@ -86,7 +86,7 @@ public final class ParameterDispenser {
   }
 
   private static String getPathVariable(String url, String mappingUrl, String name) {
-    String[] urlSplit        = url.split("/");
+    String[] urlSplit = url.split("/");
     String[] mappingUrlSplit = mappingUrl.split("/");
     for (int i = 0; i < mappingUrlSplit.length; i++) {
       if (mappingUrlSplit[i].equals("{" + name + "}")) {

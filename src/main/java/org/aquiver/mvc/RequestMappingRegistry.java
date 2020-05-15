@@ -55,7 +55,7 @@ public class RequestMappingRegistry extends AbstractRegistry {
 
   @Override
   public void register(Class<?> clazz, String baseUrl, Method method, RequestMapping methodRequestMapping) {
-    String methodUrl   = methodRequestMapping.value();
+    String methodUrl = methodRequestMapping.value();
     String completeUrl = super.getMethodUrl(baseUrl, methodUrl);
 
     RequestMethod requestMethod = methodRequestMapping.method();
@@ -68,7 +68,7 @@ public class RequestMappingRegistry extends AbstractRegistry {
             clazz, method.getName(), isJsonResponse, requestMethod);
     try {
       Parameter[] parameters = method.getParameters();
-      String[]    paramNames = this.getMethodParameterNamesByAsm(clazz, method);
+      String[] paramNames = this.getMethodParameterNamesByAsm(clazz, method);
       this.execuArgsResolver(requestHandler, parameters, paramNames);
     } catch (IOException e) {
       log.error("An exception occurred while parsing the method parameter name", e);

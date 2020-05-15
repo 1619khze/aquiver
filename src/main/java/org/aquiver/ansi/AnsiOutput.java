@@ -31,15 +31,15 @@ import java.util.Locale;
  * @since 2019/1/16
  */
 public abstract class AnsiOutput {
-  private static final String  ENCODE_JOIN           = ";";
-  private static final String  OPERATING_SYSTEM_NAME = System.getProperty("os.name")
+  private static final String ENCODE_JOIN = ";";
+  private static final String OPERATING_SYSTEM_NAME = System.getProperty("os.name")
           .toLowerCase(Locale.ENGLISH);
-  private static final String  ENCODE_START          = "\033[";
-  private static final String  ENCODE_END            = "m";
-  private static final String  RESET                 = AnsiColor.RESET.toString();
-  private static       Enabled enabled               = Enabled.ALWAYS;
-  private static       Boolean consoleAvailable;
-  private static       Boolean ansiCapable;
+  private static final String ENCODE_START = "\033[";
+  private static final String ENCODE_END = "m";
+  private static final String RESET = AnsiColor.RESET.toString();
+  private static Enabled enabled = Enabled.ALWAYS;
+  private static Boolean consoleAvailable;
+  private static Boolean ansiCapable;
 
   private static void notNull(Object object, String message) {
     if (object == null) {
@@ -92,7 +92,7 @@ public abstract class AnsiOutput {
   }
 
   private static void buildEnabled(StringBuilder sb, Object[] elements) {
-    boolean writingAnsi      = false;
+    boolean writingAnsi = false;
     boolean containsEncoding = false;
     for (Object element : elements) {
       if (element instanceof AnsiElement) {

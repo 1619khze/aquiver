@@ -109,7 +109,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     }
 
     CompletableFuture<FullHttpRequest> future = CompletableFuture.completedFuture(fullHttpRequest);
-
     ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
 
     future.thenApply(request -> this.thenApplyHttpEntity(request, ctx))
@@ -174,7 +173,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     for (Map.Entry<String, RequestHandler> entry : requestHandlers.entrySet()) {
       String[] lookupPathSplit = lookupPath.split("/");
       String[] mappingUrlSplit = entry.getKey().split("/");
-      String   matcher         = this.getMatch(entry.getKey());
+      String matcher = this.getMatch(entry.getKey());
       if (!lookupPath.startsWith(matcher) || lookupPathSplit.length != mappingUrlSplit.length) {
         continue;
       }
@@ -225,15 +224,15 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   }
 
   private LogicExecutionWrapper invokeParam(RequestContext requestContext) {
-    RequestHandler            requestHandler = requestContext.getRequestHandler();
-    List<RequestHandlerParam> params         = requestHandler.getParams();
+    RequestHandler requestHandler = requestContext.getRequestHandler();
+    List<RequestHandlerParam> params = requestHandler.getParams();
 
-    Object[]   paramValues = new Object[params.size()];
-    Class<?>[] paramTypes  = new Class[params.size()];
+    Object[] paramValues = new Object[params.size()];
+    Class<?>[] paramTypes = new Class[params.size()];
 
     for (int i = 0; i < paramValues.length; i++) {
       RequestHandlerParam handlerParam = requestHandler.getParams().get(i);
-      paramTypes[i]  = handlerParam.getDataType();
+      paramTypes[i] = handlerParam.getDataType();
       paramValues[i] = ParameterDispenser.dispen(handlerParam, requestContext, requestHandler.getUrl());
     }
     return LogicExecutionWrapper.of(requestHandler, paramValues, paramTypes);
@@ -241,8 +240,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
   private void writeResponse(RequestContext requestContext) {
     FullHttpRequest httpRequest = requestContext.getHttpRequest();
-    Response        response    = requestContext.getResponse();
-    Object          result      = response.getResult();
+    Response response = requestContext.getResponse();
+    Object result = response.getResult();
     FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(
             HTTP_1_1, httpRequest.decoderResult().isSuccess() ? OK : BAD_REQUEST,
             Unpooled.copiedBuffer(Objects.isNull(result)
@@ -252,7 +251,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
                     : result.toString().getBytes(StandardCharsets.UTF_8)
             )
     );
-    HttpHeaders     headers     = fullHttpResponse.headers();
+    HttpHeaders headers = fullHttpResponse.headers();
     headers.set(HttpHeaderNames.CONTENT_TYPE, response.isJsonResponse() ? APPLICATION_JSON_VALUE : TEXT_PLAIN_VALUE);
     if (HttpUtil.isKeepAlive(httpRequest)) {
       headers.set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);

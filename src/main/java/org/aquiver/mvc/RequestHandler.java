@@ -30,20 +30,20 @@ import java.util.List;
 import java.util.Objects;
 
 public class RequestHandler {
-  private String        url;
-  private Class<?>      clazz;
-  private String        method;
-  private Object        bean;
-  private boolean       jsonResponse;
+  private String url;
+  private Class<?> clazz;
+  private String method;
+  private Object bean;
+  private boolean jsonResponse;
   private RequestMethod requestMethod;
 
   private List<RequestHandlerParam> params = new ArrayList<>();
 
   public RequestHandler(String url, Class<?> clazz, String method, boolean jsonResponse, RequestMethod requestMethod) {
-    this.url           = url;
-    this.clazz         = clazz;
-    this.method        = method;
-    this.jsonResponse  = jsonResponse;
+    this.url = url;
+    this.clazz = clazz;
+    this.method = method;
+    this.jsonResponse = jsonResponse;
     this.requestMethod = requestMethod;
     try {
       this.bean = clazz.getDeclaredConstructor().newInstance();

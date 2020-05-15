@@ -32,8 +32,8 @@ import static java.nio.file.WatchEvent.Kind;
 
 public class GlobalEnvTask implements Runnable {
 
-  private Path            watchDirectory;
-  private FilenameFilter  filenameFilter;
+  private Path watchDirectory;
+  private FilenameFilter filenameFilter;
   private WatcherListener watcherListener;
 
   public static GlobalEnvTask config() {

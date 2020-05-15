@@ -31,42 +31,42 @@ import java.util.Objects;
 
 public interface Const {
 
-  Integer SERVER_PORT                    = 8080;
-  Boolean SERVER_SSL                     = false;
-  Boolean SERVER_CORS                    = false;
-  Boolean SERVER_WEBSOCKET               = false;
-  Boolean SERVER_CONTENT_COMPRESSOR      = false;
-  Integer STRAP_LINE_SIZE                = 42;
-  String  SERVER_WEBSOCKET_PATH          = "/websocket";
-  String  SERVER_ADDRESS                 = "localhost";
-  String  CRISPY_VERSION                 = "(v1.0.0 RELEASE)";
-  String  BANNER_TEXT                    = "aquiver";
-  String  CRISPY_FRAMEWORK               = " :: Aquiver Framework :: ";
-  String  SPACE                          = " ";
-  String  SERVER_THREAD_NAME             = "（'-'*)";
-  String  PATH_SERVER_PORT               = "server.port";
-  String  PATH_SERVER_SSL                = "server.ssl";
-  String  PATH_SERVER_ADDRESS            = "server.address";
-  String  PATH_SERVER_CORS               = "server.cors";
-  String  PATH_SERVER_WEBSOCKET          = "server.websocket";
-  String  PATH_SERVER_WEBSOCKET_PATH     = "server.websocketPath";
-  String  PATH_SERVER_CONTENT_COMPRESSOR = "server.autoCompression";
-  String  PATH_SERVER_PROFILE            = "server.profile";
-  String  PATH_SERVER_BOOT_CONFIG        = "server.boot.conf";
-  String  PATH_ENV_WATCHER               = "server.env.watcher";
-  String  PATH_SCANNER_VERBOSE           = "server.scanner.verbose";
-  String  PATH_SCANNER_LOGGING           = "server.scanner.logging";
+  Integer SERVER_PORT = 8080;
+  Boolean SERVER_SSL = false;
+  Boolean SERVER_CORS = false;
+  Boolean SERVER_WEBSOCKET = false;
+  Boolean SERVER_CONTENT_COMPRESSOR = false;
+  Integer STRAP_LINE_SIZE = 42;
+  String SERVER_WEBSOCKET_PATH = "/websocket";
+  String SERVER_ADDRESS = "localhost";
+  String CRISPY_VERSION = "(v1.0.0 RELEASE)";
+  String BANNER_TEXT = "aquiver";
+  String CRISPY_FRAMEWORK = " :: Aquiver Framework :: ";
+  String SPACE = " ";
+  String SERVER_THREAD_NAME = "（'-'*)";
+  String PATH_SERVER_PORT = "server.port";
+  String PATH_SERVER_SSL = "server.ssl";
+  String PATH_SERVER_ADDRESS = "server.address";
+  String PATH_SERVER_CORS = "server.cors";
+  String PATH_SERVER_WEBSOCKET = "server.websocket";
+  String PATH_SERVER_WEBSOCKET_PATH = "server.websocketPath";
+  String PATH_SERVER_CONTENT_COMPRESSOR = "server.autoCompression";
+  String PATH_SERVER_PROFILE = "server.profile";
+  String PATH_SERVER_BOOT_CONFIG = "server.boot.conf";
+  String PATH_ENV_WATCHER = "server.env.watcher";
+  String PATH_SCANNER_VERBOSE = "server.scanner.verbose";
+  String PATH_SCANNER_LOGGING = "server.scanner.logging";
 
   // netty setting
-  String PATH_SERVER_SSL_CERT                  = "server.ssl.cert-path";
-  String PATH_SERVER_SSL_PRIVATE_KEY           = "server.ssl.private-key-path";
-  String PATH_SERVER_SSL_PRIVATE_KEY_PASS      = "server.ssl.private-key-pass";
+  String PATH_SERVER_SSL_CERT = "server.ssl.cert-path";
+  String PATH_SERVER_SSL_PRIVATE_KEY = "server.ssl.private-key-path";
+  String PATH_SERVER_SSL_PRIVATE_KEY_PASS = "server.ssl.private-key-pass";
   String PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT = "server.netty.accept-thread-count";
-  String PATH_SERVER_NETTY_IO_THREAD_COUNT     = "server.netty.io-thread-count";
+  String PATH_SERVER_NETTY_IO_THREAD_COUNT = "server.netty.io-thread-count";
 
   // netty default property
   Integer DEFAULT_ACCEPT_THREAD_COUNT = 1;
-  Integer DEFAULT_IO_THREAD_COUNT     = 0;
+  Integer DEFAULT_IO_THREAD_COUNT = 0;
 
   // app setting
   String PATH_APP_BANNER_TEXT = "app.banner.text";
@@ -75,7 +75,7 @@ public interface Const {
 
   // full property file name
   String PATH_CONFIG_PROPERTIES = "application.properties";
-  String PATH_CONFIG_YAML       = "application.yml";
+  String PATH_CONFIG_YAML = "application.yml";
 
   // setting prefix
   String PATH_PREFIX_ROOT = "PATH_";

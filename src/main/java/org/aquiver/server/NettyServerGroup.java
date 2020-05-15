@@ -39,8 +39,8 @@ public class NettyServerGroup {
 
   NettyServerGroup(EventLoopGroup bossGroup, EventLoopGroup workGroup,
                    Class<? extends ServerChannel> channelClass) {
-    this.bossGroup    = bossGroup;
-    this.workGroup    = workGroup;
+    this.bossGroup = bossGroup;
+    this.workGroup = workGroup;
     this.channelClass = channelClass;
   }
 
@@ -61,8 +61,8 @@ public class NettyServerGroup {
   }
 
   public static class NettyServerGroupBuilder {
-    private EventLoopGroup                 bossGroup;
-    private EventLoopGroup                 workGroup;
+    private EventLoopGroup bossGroup;
+    private EventLoopGroup workGroup;
     private Class<? extends ServerChannel> channelClass;
 
     NettyServerGroupBuilder() {

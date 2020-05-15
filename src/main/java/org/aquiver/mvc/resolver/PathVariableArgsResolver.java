@@ -40,7 +40,7 @@ public class PathVariableArgsResolver implements ArgsResolver {
   @Override
   public RequestHandlerParam resolve(Parameter parameter, String paramName) {
     RequestHandlerParam handlerParam = new RequestHandlerParam();
-    PathVariable        pathVariable = parameter.getAnnotation(PathVariable.class);
+    PathVariable pathVariable = parameter.getAnnotation(PathVariable.class);
     handlerParam.setDataType(parameter.getType());
     handlerParam.setName((!"".equals(pathVariable.value()) && !pathVariable.value().trim().isEmpty()) ?
             pathVariable.value().trim() : paramName);

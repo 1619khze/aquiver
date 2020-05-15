@@ -26,10 +26,10 @@ package org.aquiver.mvc;
 import java.util.Objects;
 
 public class RequestHandlerParam {
-  private String    name;
-  private Class<?>  dataType;
+  private String name;
+  private Class<?> dataType;
   private RequestParamType type;
-  private boolean   required = true;
+  private boolean required = true;
 
   public String getName() {
     return name;

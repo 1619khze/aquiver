@@ -27,5 +27,6 @@ import java.lang.reflect.Parameter;
 
 public interface ArgsResolver {
   boolean support(Parameter parameter);
+
   RequestHandlerParam resolve(Parameter parameter, String paramName);
 }
