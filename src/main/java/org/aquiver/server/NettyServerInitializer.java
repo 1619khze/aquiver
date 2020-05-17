@@ -36,25 +36,25 @@ import io.netty.handler.codec.http.cors.CorsHandler;
 import io.netty.handler.ssl.SslContext;
 import org.aquiver.Const;
 import org.aquiver.Environment;
-import org.aquiver.RouteResolver;
+import org.aquiver.RequestMappingResolver;
 
 /**
  * @author WangYi
  * @since 2019/6/5
  */
 public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
-  private final RouteResolver routeResolver;
-  private final SslContext sslCtx;
+  private final RequestMappingResolver requestMappingResolver;
+  private final SslContext             sslCtx;
   private boolean cors;
   private boolean compressor;
   private CorsConfig corsConfig;
 
-  NettyServerInitializer(SslContext sslCtx, Environment environment, RouteResolver routeResolver) {
+  NettyServerInitializer(SslContext sslCtx, Environment environment, RequestMappingResolver requestMappingResolver) {
     this.sslCtx = sslCtx;
     final Boolean cors = environment.getBoolean(Const.PATH_SERVER_CORS, Const.SERVER_CORS);
     final Boolean gzip = environment.getBoolean(Const.PATH_SERVER_CONTENT_COMPRESSOR, Const.SERVER_CONTENT_COMPRESSOR);
     this.cors(cors).gzip(gzip);
-    this.routeResolver = routeResolver;
+    this.requestMappingResolver = requestMappingResolver;
   }
 
   private NettyServerInitializer cors(boolean cors) {
@@ -77,6 +77,6 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
     channelPipeline.addLast(new HttpRequestDecoder());
     channelPipeline.addLast(new HttpResponseEncoder());
     channelPipeline.addLast(new HttpObjectAggregator(65536));
-    channelPipeline.addLast(new NettyServerHandler(routeResolver));
+    channelPipeline.addLast(new NettyServerHandler(requestMappingResolver));
   }
 }

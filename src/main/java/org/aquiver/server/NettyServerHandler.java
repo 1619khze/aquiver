@@ -33,8 +33,8 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.aquiver.RequestContext;
 import org.aquiver.Response;
-import org.aquiver.RouteResolver;
-import org.aquiver.mvc.LogicExecutionWrapper;
+import org.aquiver.RequestMappingResolver;
+import org.aquiver.mvc.LogicExecutionResponse;
 import org.aquiver.mvc.ParameterDispenser;
 import org.aquiver.mvc.RequestHandler;
 import org.aquiver.mvc.RequestHandlerParam;
@@ -65,8 +65,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
   private final Map<String, RequestHandler> requestHandlers;
 
-  public NettyServerHandler(RouteResolver routeResolver) {
-    this.requestHandlers = routeResolver.getMappingRegistry().getRequestHandlers();
+  public NettyServerHandler(RequestMappingResolver requestMappingResolver) {
+    this.requestHandlers = requestMappingResolver.getMappingRegistry().getRequestHandlers();
   }
 
   @Override
@@ -111,13 +111,13 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     CompletableFuture<FullHttpRequest> future = CompletableFuture.completedFuture(fullHttpRequest);
     ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
 
-    future.thenApply(request -> this.thenApplyHttpEntity(request, ctx))
+    future.thenApply(request -> this.thenApplyRequestContext(request, ctx))
             .thenApplyAsync(this::thenExecutionLogic, forkJoinPool)
             .thenAcceptAsync(this::writeResponse, forkJoinPool);
     future.complete(fullHttpRequest);
   }
 
-  private RequestContext thenApplyHttpEntity(FullHttpRequest request, ChannelHandlerContext channelHandlerContext) {
+  private RequestContext thenApplyRequestContext(FullHttpRequest request, ChannelHandlerContext channelHandlerContext) {
     return new RequestContext(request, channelHandlerContext);
   }
 
@@ -133,16 +133,16 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     return requestContext;
   }
 
-  private Response executionLogic(LogicExecutionWrapper logicExecutionWrapper) {
+  private Response executionLogic(LogicExecutionResponse logicExecutionResponse) {
     MethodHandles.Lookup lookup = MethodHandles.lookup();
     try {
-      RequestHandler requestHandler = logicExecutionWrapper.getRequestHandler();
+      RequestHandler requestHandler = logicExecutionResponse.getRequestHandler();
       Method method = requestHandler.getClazz()
               .getMethod(requestHandler.getMethod(),
-                      logicExecutionWrapper.getParamTypes());
+                      logicExecutionResponse.getParamTypes());
       MethodHandle methodHandle = lookup.unreflect(method);
       Object result = methodHandle.bindTo(requestHandler.getBean())
-              .invokeWithArguments(logicExecutionWrapper.getParamValues());
+              .invokeWithArguments(logicExecutionResponse.getParamValues());
       return new Response(result, requestHandler.isJsonResponse());
     } catch (Throwable throwable) {
       log.error("An exception occurred when calling the mapping method", throwable);
@@ -223,7 +223,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     return matcher.toString();
   }
 
-  private LogicExecutionWrapper invokeParam(RequestContext requestContext) {
+  private LogicExecutionResponse invokeParam(RequestContext requestContext) {
     RequestHandler requestHandler = requestContext.getRequestHandler();
     List<RequestHandlerParam> params = requestHandler.getParams();
 
@@ -235,7 +235,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
       paramTypes[i] = handlerParam.getDataType();
       paramValues[i] = ParameterDispenser.dispen(handlerParam, requestContext, requestHandler.getUrl());
     }
-    return LogicExecutionWrapper.of(requestHandler, paramValues, paramTypes);
+    return LogicExecutionResponse.of(requestHandler, paramValues, paramTypes);
   }
 
   private void writeResponse(RequestContext requestContext) {

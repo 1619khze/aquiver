@@ -37,16 +37,16 @@ import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.Set;
 
-public class RouteResolver {
+public class RequestMappingResolver {
 
-  private static final Logger log = LoggerFactory.getLogger(RouteResolver.class);
+  private static final Logger log = LoggerFactory.getLogger(RequestMappingResolver.class);
 
   private final Discoverer discoverer;
   private final String scanPath;
 
   private final RequestMappingRegistry mappingRegistry;
 
-  public RouteResolver(Discoverer discoverer, String scanPath) {
+  public RequestMappingResolver(Discoverer discoverer, String scanPath) {
     this.discoverer = discoverer;
     this.scanPath = scanPath;
     this.mappingRegistry = new RequestMappingRegistry();

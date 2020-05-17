@@ -26,19 +26,19 @@ package org.aquiver.mvc;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class LogicExecutionWrapper {
+public class LogicExecutionResponse {
   private RequestHandler requestHandler;
   private Object[] paramValues;
   private Class<?>[] paramTypes;
 
-  private LogicExecutionWrapper(RequestHandler requestHandler, Object[] paramValues, Class<?>[] paramTypes) {
+  private LogicExecutionResponse(RequestHandler requestHandler, Object[] paramValues, Class<?>[] paramTypes) {
     this.requestHandler = requestHandler;
     this.paramValues = paramValues;
     this.paramTypes = paramTypes;
   }
 
-  public static LogicExecutionWrapper of(RequestHandler requestHandler, Object[] paramValues, Class<?>[] paramTypes) {
-    return new LogicExecutionWrapper(requestHandler, paramValues, paramTypes);
+  public static LogicExecutionResponse of(RequestHandler requestHandler, Object[] paramValues, Class<?>[] paramTypes) {
+    return new LogicExecutionResponse(requestHandler, paramValues, paramTypes);
   }
 
   public RequestHandler getRequestHandler() {
@@ -69,7 +69,7 @@ public class LogicExecutionWrapper {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    LogicExecutionWrapper that = (LogicExecutionWrapper) o;
+    LogicExecutionResponse that = (LogicExecutionResponse) o;
     return Objects.equals(requestHandler, that.requestHandler) &&
             Arrays.equals(paramValues, that.paramValues) &&
             Arrays.equals(paramTypes, that.paramTypes);
