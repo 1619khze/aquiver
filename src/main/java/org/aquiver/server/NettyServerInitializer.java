@@ -44,7 +44,7 @@ import org.aquiver.RequestMappingResolver;
  */
 public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
   private final RequestMappingResolver requestMappingResolver;
-  private final SslContext             sslCtx;
+  private final SslContext sslCtx;
   private boolean cors;
   private boolean compressor;
   private CorsConfig corsConfig;

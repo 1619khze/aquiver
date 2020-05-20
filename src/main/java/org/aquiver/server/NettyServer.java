@@ -70,7 +70,7 @@ public class NettyServer implements Server {
   private Environment environment;
   private Aquiver aquiver;
   private Channel channel;
-  private SslContext             sslContext;
+  private SslContext sslContext;
   private RequestMappingResolver requestMappingResolver;
 
   /**
