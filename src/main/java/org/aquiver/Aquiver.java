@@ -41,6 +41,26 @@ import static java.util.Objects.requireNonNull;
 import static org.aquiver.Const.*;
 
 /**
+ * Aquiver is apex context, can use method configure
+ * <p>
+ * A simple startup example，Bind port after instantiated by {@linkplain #of()}
+ * <pre>{@code
+ *  public class Application {
+ *    public static void main(String[] args) {
+ *      Aquiver.of().bind(8081).start(Application.class, args);
+ *    }
+ *  }
+ * }</pre>
+ * <p>
+ * Or you can use {@linkplain #run(Class, String...)} to start directly, Usage example:
+ * <pre>{@code
+ *  public class Application {
+ *    public static void main(String[] args) {
+ *      Aquiver.run(Application.class, args);
+ *    }
+ *  }
+ * }
+ * </pre>
  * @author WangYi
  * @since 2019/6/5
  */
@@ -65,8 +85,7 @@ public final class Aquiver {
   private String bannerFont;
   private Executor singleExecutor;
 
-  private Aquiver() {
-  }
+  private Aquiver() {}
 
   /**
    * Ensures that the argument expression is true.
