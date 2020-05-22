@@ -129,11 +129,11 @@ public class NettyServer implements Server {
    * init ioc container
    */
   private void initRouteResolve() {
-    final String scanPath = aquiver.getBootCls().getPackage().getName();
+    final String scanPath = aquiver.bootCls().getPackage().getName();
 
     final ClassgraphOptions classgraphOptions = ClassgraphOptions.builder()
             .verbose(aquiver.verbose()).enableRealtimeLogging(aquiver.realtimeLogging())
-            .scanPackages(aquiver.packages()).build();
+            .scanPackages(aquiver.scanPaths()).build();
 
     final Discoverer discoverer = new ClassgraphDiscoverer(classgraphOptions);
     this.requestMappingResolver = new RequestMappingResolver(discoverer, scanPath);
