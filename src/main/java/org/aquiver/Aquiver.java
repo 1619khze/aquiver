@@ -61,12 +61,14 @@ import static org.aquiver.Const.*;
  *  }
  * }
  * </pre>
+ *
  * @author WangYi
  * @since 2019/6/5
  */
 public final class Aquiver {
   private static final Logger log = LoggerFactory.getLogger(Aquiver.class);
 
+  /** Components needed to start the service. */
   private final Server nettyServer = new NettyServer();
   private final Set<String> packages = new LinkedHashSet<>();
   private final List<Class<?>> eventPool = new LinkedList<>();
@@ -74,84 +76,157 @@ public final class Aquiver {
   private Environment environment = new Environment();
   private String bootConfName = PATH_CONFIG_PROPERTIES;
   private String envName = "default";
+
+  /** Parameters needed to read the configuration file. */
   private boolean envConfig = false;
   private boolean masterConfig = false;
   private boolean started = false;
+
+  /** Classgraph related configuration. */
   private boolean verbose = false;
   private boolean realtimeLogging = false;
+
+  /** Some content that may be needed. */
   private int port;
   private Class<?> bootCls;
   private String bannerText;
   private String bannerFont;
   private Executor singleExecutor;
 
-  private Aquiver() {}
+  private Aquiver() {
+  }
 
-  /**
-   * Ensures that the argument expression is true.
-   */
+  /** Ensures that the argument expression is true. */
   static void requireArgument(boolean expression) {
     if (!expression) {
       throw new IllegalArgumentException();
     }
   }
 
-  /**
-   * Ensures that the state expression is true.
-   */
+  /** Ensures that the argument expression is true */
+  static void requireArgument(boolean expression, String template, Object... args) {
+    if (!expression) {
+      throw new IllegalArgumentException(String.format(template, args));
+    }
+  }
+
+  /** Ensures that the state expression is true. */
   static void requireState(boolean expression) {
     if (!expression) {
       throw new IllegalStateException();
     }
   }
 
-  /**
-   * Ensures that the state expression is true.
-   */
+  /** Ensures that the state expression is true. */
   static void requireState(boolean expression, String template, Object... args) {
     if (!expression) {
       throw new IllegalStateException(String.format(template, args));
     }
   }
 
+  /** Set the listening port number. */
+  public Aquiver bind(int port) {
+    requireArgument(this.port > 0 && port <= 65533, "Port number must be available");
+    requireState(this.bannerText == null, "port was already set to %s", this.port);
+    this.port = port;
+    this.environment.add(PATH_SERVER_PORT, port);
+    return this;
+  }
+
+  /** Set the print banner text */
+  public void bannerText(String bannerText) {
+    requireState(this.bannerText == null, "bannerText was already set to %s", this.bannerText);
+    this.bannerText = requireNonNull(bannerText);
+    this.environment.add(PATH_APP_BANNER_TEXT, bannerText);
+  }
+
+  /** Set the print banner font */
+  public void bannerFont(String bannerFont) {
+    requireState(this.bannerFont == null, "bannerFont was already set to %s", this.bannerFont);
+    this.bannerFont = requireNonNull(bannerFont);
+    this.environment.add(PATH_APP_BANNER_FONT, bannerFont);
+  }
+
+  /** Set the print banner name */
+  public Aquiver bootConfName(String bootConfName) {
+    requireState(this.bootConfName == null, "bootConfName was already set to %s", this.bootConfName);
+    this.bootConfName = requireNonNull(bootConfName);
+    return this;
+  }
+
+  /**
+   * Returns the listening port number
+   *
+   * @return port number
+   */
+  public int port() {
+    requireArgument(this.port > 0 && port <= 65533, "Port number must be available");
+    return port;
+  }
+
+  /**
+   * Return Aquiver instants
+   *
+   * @return Aquiver instants
+   */
   public static Aquiver of() {
     return new Aquiver();
   }
 
+  /**
+   * Start service with default configuration
+   *
+   * @param bootClass started main class
+   * @param args      main method param array
+   * @return Aquiver
+   */
   public static Aquiver run(Class<?> bootClass, String... args) {
     final Aquiver aquiver = of();
     aquiver.start(bootClass, args);
     return aquiver;
   }
 
+  /**
+   * Get a unified environment object
+   *
+   * @return environment object
+   */
   public Environment environment() {
     return environment;
   }
 
+  /**
+   * Set a environment object
+   *
+   * @param environment environment object
+   */
   public void environment(Environment environment) {
     this.environment = environment;
   }
 
-  public Class<?> getBootCls() {
+  /**
+   * Get the startup class that calls the start or run method
+   *
+   * @return started class
+   */
+  public Class<?> bootCls() {
     return requireNonNull(bootCls);
   }
 
+  /**
+   * Get started class name
+   *
+   * @return class name
+   */
   public String bootClsName() {
     return bootCls.getSimpleName();
   }
 
-  public Aquiver bind(int port) {
-    requireArgument(port > 0);
-    this.port = port;
-    this.environment.add(PATH_SERVER_PORT, port);
-    return this;
-  }
-
-  public int port() {
-    requireArgument(this.port > 0);
-    return port;
-  }
-
+  /**
+   * Get banner text
+   *
+   * @return banner text
+   */
   public String bannerText() {
     if (bannerText == null) {
       return this.environment.getString(PATH_APP_BANNER_TEXT, BANNER_TEXT);
@@ -159,12 +234,11 @@ public final class Aquiver {
     return bannerText;
   }
 
-  public void bannerText(String bannerText) {
-    requireState(this.bannerText == null, "bannerText was already set to %s", this.bannerText);
-    this.bannerText = requireNonNull(bannerText);
-    this.environment.add(PATH_APP_BANNER_TEXT, bannerText);
-  }
-
+  /**
+   * Get banner font
+   *
+   * @return banner font
+   */
   public String bannerFont() {
     if (Objects.isNull(this.bannerFont)) {
       return this.environment.getString(PATH_APP_BANNER_FONT, BannerFont.FONT_DEFAULT);
@@ -172,62 +246,108 @@ public final class Aquiver {
     return bannerFont;
   }
 
-  public void bannerFont(String bannerFont) {
-    requireState(this.bannerFont == null, "bannerFont was already set to %s", this.bannerFont);
-    this.bannerFont = requireNonNull(bannerFont);
-    this.environment.add(PATH_APP_BANNER_FONT, bannerFont);
-  }
-
+  /**
+   * Get environment config load status
+   *
+   * @return environment config load status
+   */
   public boolean envConfig() {
     return envConfig;
   }
 
+  /**
+   * Get master config properties or yaml load status
+   *
+   * @return master config properties or yaml load status
+   */
   public boolean masterConfig() {
     return masterConfig;
   }
 
+  /**
+   * Get start up server config properties name
+   *
+   * @return start up server config properties name
+   */
   public String bootConfName() {
     return requireNonNull(bootConfName);
   }
 
-  public Aquiver bootConfName(String bootConfName) {
-    requireState(this.bootConfName == null, "bootConfName was already set to %s", this.bootConfName);
-    this.bootConfName = requireNonNull(bootConfName);
-    return this;
-  }
-
+  /**
+   * Get environment name
+   *
+   * @return environment name
+   */
   public String envName() {
     return requireNonNull(envName);
   }
 
-  public Set<String> packages() {
+  /**
+   * Get scan path list
+   *
+   * @return scan path list
+   */
+  public Set<String> scanPaths() {
     return requireNonNull(packages);
   }
 
+  /**
+   * Get event list
+   *
+   * @return event list
+   */
   public List<Class<?>> eventPool() {
     return requireNonNull(this.eventPool);
   }
 
+  /**
+   * Set Whether to start the detailed scan log of classgraph
+   *
+   * @param verbose Whether to enable detailed scan log
+   * @return Aquiver
+   */
   public Aquiver verbose(boolean verbose) {
     this.verbose = verbose;
     this.environment.add(PATH_SCANNER_VERBOSE, verbose);
     return this;
   }
 
+  /**
+   * Get Whether to start the detailed scan log of classgraph
+   *
+   * @return Whether to enable detailed scan log
+   */
   public boolean verbose() {
     return requireNonNull(this.environment.getBoolean(PATH_SCANNER_VERBOSE, verbose));
   }
 
+  /**
+   * Set Whether to enable real-time recording of classgraph
+   *
+   * @param realtimeLogging Whether to enable real-time recording of classgraph
+   * @return Aquiver
+   */
   public Aquiver realtimeLogging(boolean realtimeLogging) {
     this.realtimeLogging = realtimeLogging;
     this.environment.add(PATH_SCANNER_LOGGING, realtimeLogging);
     return this;
   }
 
+  /**
+   * Get Whether to enable real-time recording of classgraph
+   *
+   * @return Whether to enable real-time recording of classgraph
+   */
   public boolean realtimeLogging() {
     return requireNonNull(this.environment.getBoolean(PATH_SCANNER_LOGGING, realtimeLogging));
   }
 
+  /**
+   * Open an http service, which is implemented by netty by default
+   *
+   * @param bootClass start up class
+   * @param args      main method param array
+   */
   public void start(Class<?> bootClass, String[] args) {
     try {
       this.loadConfig(args);
@@ -252,6 +372,9 @@ public final class Aquiver {
     this.started = true;
   }
 
+  /**
+   * init single executor
+   */
   private void initSingleExecutor() {
     AquiverThreadFactory aquiverThreadFactory = new AquiverThreadFactory(SERVER_THREAD_NAME);
     this.singleExecutor = Executors.newCachedThreadPool(aquiverThreadFactory);
@@ -278,7 +401,7 @@ public final class Aquiver {
 
     this.loadPropsOrYaml(bootConfEnv, constField);
 
-    //Support loading configuration from args array of main function
+    /** Support loading configuration from args array of main function. */
     if (!requireNonNull(bootConfEnv).isEmpty()) {
       Map<String, String> bootEnvMap = bootConfEnv.toStringMap();
       Set<Map.Entry<String, String>> entrySet = bootEnvMap.entrySet();
