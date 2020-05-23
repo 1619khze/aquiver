@@ -147,6 +147,7 @@ public final class Environment {
     }
   }
 
+  @SuppressWarnings("rawtypes")
   public Map<String, Object> toMap(Properties properties) {
     Map<String, Object> argsMap = new HashMap<>();
     Set propertySet = properties.entrySet();
