@@ -3,6 +3,10 @@ package org.aquiver;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.LongAdder;
 
+/**
+ * @author WangYi
+ * @since 2020/5/23
+ */
 public class AquiverThreadFactory implements ThreadFactory {
 
   private final String prefix;

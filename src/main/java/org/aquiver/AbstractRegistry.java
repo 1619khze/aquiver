@@ -35,6 +35,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * @author WangYi
+ * @since 2020/5/23
+ */
 public abstract class AbstractRegistry implements RegisterStrategy {
 
   private final Map<String, RequestHandler> requestHandlers = new ConcurrentHashMap<>(64);

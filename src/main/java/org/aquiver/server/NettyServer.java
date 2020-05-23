@@ -49,11 +49,11 @@ import java.security.cert.CertificateException;
 import static org.aquiver.Const.*;
 
 /**
- * 1. open ssl {@code initSSL}
- * 2. open webSocket {@code initWebSocket}
- * 3. open the Http com.aquiver.service {@code startServer}
- * 4. observe the environment {@code watchEnv}
- * 5. configure the shutdown thread to stop the com.aquiver.service hook {@code shutdownHook}
+ * open ssl {@code initSSL}
+ * open webSocket {@code initWebSocket}
+ * open the Http com.aquiver.service {@code startServer}
+ * observe the environment {@code watchEnv}
+ * configure the shutdown thread to stop the hook {@code shutdownHook}
  *
  * @author WangYi
  * @since 2019/6/5
@@ -61,23 +61,29 @@ import static org.aquiver.Const.*;
 public class NettyServer implements Server {
   private static final Logger log = LoggerFactory.getLogger(NettyServer.class);
 
+  /** Banner and bootstrap when service starts. */
   private final Banner defaultBanner = new NettyServerBanner();
   private final ServerBootstrap serverBootstrap = new ServerBootstrap();
-  private volatile boolean stop = false;
 
+  /** Netty builds long connection service. */
   private EventLoopGroup bossGroup;
   private EventLoopGroup workerGroup;
   private Environment environment;
   private Aquiver aquiver;
   private Channel channel;
   private SslContext sslContext;
+
+  /** request mapping resolver. */
   private RequestMappingResolver requestMappingResolver;
+
+  /** Service startup status, using volatile to ensure threads are visible. */
+  private volatile boolean stop = false;
 
   /**
    * start server and init setting
    *
-   * @param aquiver
-   * @throws Exception
+   * @param aquiver Aquiver
+   * @throws Exception Common Exception
    */
   @Override
   public void start(Aquiver aquiver) throws Exception {
@@ -101,7 +107,7 @@ public class NettyServer implements Server {
 
     this.configLoadLog(aquiver, envName);
 
-    this.initSSL();
+    this.initSsl();
     this.initWebSocket();
     this.initRouteResolve();
     this.startServer(startMs);
@@ -112,8 +118,8 @@ public class NettyServer implements Server {
   /**
    * record the log loaded by the configuration
    *
-   * @param aquiver
-   * @param envName
+   * @param aquiver Aquiver
+   * @param envName Enabled environment name
    */
   private void configLoadLog(Aquiver aquiver, String envName) {
     if (aquiver.masterConfig()) {
@@ -144,7 +150,15 @@ public class NettyServer implements Server {
     }
   }
 
-  private void initSSL() throws CertificateException, SSLException {
+  /**
+   * init ssl connection
+   *
+   * @throws CertificateException This exception indicates one of a variety of certificate problems.
+   * @throws SSLException         Indicates some kind of error detected by an SSL subsystem.
+   *                              This class is the general class of exceptions produced
+   *                              by failed SSL-related operations.
+   */
+  private void initSsl() throws CertificateException, SSLException {
     log.info("Check if the ssl configuration is enabled.");
 
     final Boolean ssl = environment.getBoolean(PATH_SERVER_SSL, SERVER_SSL);
@@ -207,8 +221,8 @@ public class NettyServer implements Server {
    * when sending data
    * </p>
    *
-   * @param startTime
-   * @throws Exception
+   * @param startTime Startup time for calculating start time
+   * @throws Exception Common exception
    */
   private void startServer(long startTime) throws Exception {
 
@@ -315,9 +329,9 @@ public class NettyServer implements Server {
    * Use the configured path if the certificate and private key are
    * configured, otherwise use the default configuration
    *
-   * @param keyPath
-   * @param defaultFilePath
-   * @return
+   * @param keyPath         private keystore path
+   * @param defaultFilePath default private keystore path
+   * @return keystore file
    */
   private File setKeyCertFileAndPriKey(String keyPath, File defaultFilePath) {
     return keyPath != null ? Paths.get(keyPath).toFile() : defaultFilePath;

@@ -30,6 +30,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+/**
+ * Class scanner based on classgraph package
+ *
+ * @author WangYi
+ * @since 2020/5/23
+ */
 public class ClassgraphDiscoverer implements Discoverer {
 
   private final ClassgraphOptions classgraphOptions;
@@ -45,7 +51,8 @@ public class ClassgraphDiscoverer implements Discoverer {
     this.classGraph.enableAllInfo();
     if (classgraphOptions != null) {
       this.scanPackageName(classgraphOptions.getScanPackages(), scanPackageName)
-              .verbose(classgraphOptions.isVerbose()).enableRealtimeLogging(classgraphOptions.isEnableRealtimeLogging());
+              .verbose(classgraphOptions.isVerbose())
+              .enableRealtimeLogging(classgraphOptions.isEnableRealtimeLogging());
     }
     List<Class<?>> classes = this.classGraph.scan().getAllClasses().loadClasses();
     return new CopyOnWriteArraySet<>(classes);
@@ -60,7 +67,8 @@ public class ClassgraphDiscoverer implements Discoverer {
    */
   private ClassgraphDiscoverer scanPackageName(Set<String> scanPackages, String scanPackageName) {
     if (scanPackageName == null || !scanPackageName.contains(".")) {
-      throw new IllegalArgumentException("scanPackageName cannot be empty and needs to conform to the specification");
+      throw new IllegalArgumentException("scanPackageName cannot be empty and " +
+              "needs to conform to the specification");
     }
     if (scanPackages == null) {
       scanPackages = new LinkedHashSet<>();

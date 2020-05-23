@@ -25,6 +25,10 @@ package org.aquiver;
 
 import java.util.Set;
 
+/**
+ * @author WangYi
+ * @since 2020/5/23
+ */
 public class ClassgraphOptions {
   private final Set<String> scanPackages;
   private final boolean verbose;
