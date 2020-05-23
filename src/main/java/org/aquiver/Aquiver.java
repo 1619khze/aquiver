@@ -33,9 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.io.StringReader;
 import java.net.BindException;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 import static java.util.Objects.requireNonNull;
 import static org.aquiver.Const.*;
@@ -91,7 +89,12 @@ public final class Aquiver {
   private Class<?> bootCls;
   private String bannerText;
   private String bannerFont;
-  private Executor singleExecutor;
+  private ExecutorService reusableExecutor;
+
+  /** Thread pool setting param */
+  private int corePoolSize = 5;
+  private int maximumPoolSize = 200;
+  private int keepAliveTime = 0;
 
   private Aquiver() {
   }
@@ -122,6 +125,28 @@ public final class Aquiver {
     if (!expression) {
       throw new IllegalStateException(String.format(template, args));
     }
+  }
+
+  /**
+   * Return Aquiver instants
+   *
+   * @return Aquiver instants
+   */
+  public static Aquiver of() {
+    return new Aquiver();
+  }
+
+  /**
+   * Start service with default configuration
+   *
+   * @param bootClass started main class
+   * @param args      main method param array
+   * @return Aquiver
+   */
+  public static Aquiver run(Class<?> bootClass, String... args) {
+    final Aquiver aquiver = of();
+    aquiver.start(bootClass, args);
+    return aquiver;
   }
 
   /** Set the listening port number. */
@@ -162,28 +187,6 @@ public final class Aquiver {
   public int port() {
     requireArgument(this.port > 0 && port <= 65533, "Port number must be available");
     return port;
-  }
-
-  /**
-   * Return Aquiver instants
-   *
-   * @return Aquiver instants
-   */
-  public static Aquiver of() {
-    return new Aquiver();
-  }
-
-  /**
-   * Start service with default configuration
-   *
-   * @param bootClass started main class
-   * @param args      main method param array
-   * @return Aquiver
-   */
-  public static Aquiver run(Class<?> bootClass, String... args) {
-    final Aquiver aquiver = of();
-    aquiver.start(bootClass, args);
-    return aquiver;
   }
 
   /**
@@ -343,6 +346,42 @@ public final class Aquiver {
   }
 
   /**
+   * the number of threads to keep in the pool, even
+   * if they are idle, unless {@code allowCoreThreadTimeOut} is set
+   *
+   * @param corePoolSize setting thread pool size
+   * @return Aquiver
+   */
+  public Aquiver corePoolSize(int corePoolSize) {
+    this.corePoolSize = corePoolSize;
+    return this;
+  }
+
+  /**
+   * the maximum number of threads to allow in the pool
+   *
+   * @param maximumPoolSize thread pool maximum pool size
+   * @return Aquiver
+   */
+  public Aquiver maximumPoolSize(int maximumPoolSize) {
+    this.maximumPoolSize = maximumPoolSize;
+    return this;
+  }
+
+  /**
+   * when the number of threads is greater than
+   * the core, this is the maximum time that excess idle threads
+   * will wait for new tasks before terminating.
+   *
+   * @param keepAliveTime keep live time
+   * @return Aquiver
+   */
+  public Aquiver keepAliveTime(int keepAliveTime) {
+    this.keepAliveTime = keepAliveTime;
+    return this;
+  }
+
+  /**
    * Open an http service, which is implemented by netty by default
    *
    * @param bootClass start up class
@@ -351,12 +390,11 @@ public final class Aquiver {
   public void start(Class<?> bootClass, String[] args) {
     try {
       this.loadConfig(args);
-      this.initSingleExecutor();
+      this.initReusableThreadPool();
     } catch (IllegalAccessException e) {
       log.error("An exception occurred while loading the configuration", e);
     }
-    final String threadName = this.environment.get(PATH_APP_THREAD_NAME, SERVER_THREAD_NAME);
-    final Thread bootThread = new Thread(() -> {
+    this.reusableExecutor.execute(() -> {
       try {
         this.bootCls = bootClass;
         this.nettyServer.start(this);
@@ -366,18 +404,37 @@ public final class Aquiver {
         log.error("Bind port is exception:", e);
       } catch (Exception e) {
         log.error("An exception occurred while the service started", e);
+      } finally {
+        log.info("SingleExecutor graceful shutdown");
+        this.reusableExecutor.shutdown();
       }
-    }, threadName);
-    this.singleExecutor.execute(bootThread);
+    });
     this.started = true;
   }
 
   /**
-   * init single executor
+   * init default param reusable executor
    */
-  private void initSingleExecutor() {
-    AquiverThreadFactory aquiverThreadFactory = new AquiverThreadFactory(SERVER_THREAD_NAME);
-    this.singleExecutor = Executors.newCachedThreadPool(aquiverThreadFactory);
+  private void initReusableThreadPool() {
+    this.initReusableThreadPool(corePoolSize, maximumPoolSize, keepAliveTime);
+  }
+
+  /**
+   * Instantiation reusable executor based on parameters
+   *
+   * @param corePoolSize    the number of threads to keep in the pool, even
+   *                        if they are idle, unless {@code allowCoreThreadTimeOut} is set
+   * @param maximumPoolSize the maximum number of threads to allow in the pool
+   * @param keepAliveTime   when the number of threads is greater than
+   *                        the core, this is the maximum time that excess idle threads
+   *                        will wait for new tasks before terminating.
+   */
+  private void initReusableThreadPool(int corePoolSize, int maximumPoolSize, int keepAliveTime) {
+    final AquiverThreadFactory aquiverThreadFactory = new AquiverThreadFactory(SERVER_THREAD_NAME);
+    final LinkedBlockingQueue<Runnable> runnableQueue = new LinkedBlockingQueue<>(16);
+    final ThreadPoolExecutor.AbortPolicy abortPolicy = new ThreadPoolExecutor.AbortPolicy();
+    this.reusableExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
+            TimeUnit.MILLISECONDS, runnableQueue, aquiverThreadFactory, abortPolicy);
   }
 
   /**
@@ -422,7 +479,7 @@ public final class Aquiver {
 
     if (!envConfig) {
       String profileName = this.environment.get(PATH_SERVER_PROFILE);
-      if (profileName != null && !profileName.equals("")) {
+      if (profileName != null && !"".equals(profileName)) {
         envConfig(profileName);
         this.envName = profileName;
       }
@@ -498,7 +555,8 @@ public final class Aquiver {
    */
   public Aquiver await() {
     if (!this.started) {
-      throw new IllegalStateException("Server hasn't been started. Call start() before calling this method.");
+      throw new IllegalStateException("Server hasn't been started. " +
+              "Call start() before calling this method.");
     }
     try {
       this.countDownLatch.await();
