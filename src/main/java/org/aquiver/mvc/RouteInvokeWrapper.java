@@ -26,19 +26,19 @@ package org.aquiver.mvc;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class LogicExecutionResponse {
+public class RouteInvokeWrapper {
   private Route route;
   private Object[] paramValues;
   private Class<?>[] paramTypes;
 
-  private LogicExecutionResponse(Route route, Object[] paramValues, Class<?>[] paramTypes) {
+  private RouteInvokeWrapper(Route route, Object[] paramValues, Class<?>[] paramTypes) {
     this.route = route;
     this.paramValues = paramValues;
     this.paramTypes = paramTypes;
   }
 
-  public static LogicExecutionResponse of(Route route, Object[] paramValues, Class<?>[] paramTypes) {
-    return new LogicExecutionResponse(route, paramValues, paramTypes);
+  public static RouteInvokeWrapper of(Route route, Object[] paramValues, Class<?>[] paramTypes) {
+    return new RouteInvokeWrapper(route, paramValues, paramTypes);
   }
 
   public Route getRoute() {
@@ -69,7 +69,7 @@ public class LogicExecutionResponse {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    LogicExecutionResponse that = (LogicExecutionResponse) o;
+    RouteInvokeWrapper that = (RouteInvokeWrapper) o;
     return Objects.equals(route, that.route) &&
             Arrays.equals(paramValues, that.paramValues) &&
             Arrays.equals(paramTypes, that.paramTypes);
