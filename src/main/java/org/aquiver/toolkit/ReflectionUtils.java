@@ -25,7 +25,8 @@ package org.aquiver.toolkit;
 
 import java.lang.reflect.Modifier;
 
-public abstract class Reflections {
+public final class ReflectionUtils {
+  private ReflectionUtils() {}
 
   public static <T> boolean isInterface(Class<T> clazz) {
     return clazz.isInterface();

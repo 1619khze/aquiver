@@ -37,7 +37,7 @@ import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvTask;
 import org.aquiver.server.websocket.WebSocketServerInitializer;
-import org.aquiver.toolkit.Systems;
+import org.aquiver.toolkit.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,9 +101,9 @@ public class NettyServer implements Server {
     final String bootClsName = aquiver.bootClsName();
     final String bootConfName = aquiver.bootConfName();
     final String envName = aquiver.envName();
-    final String deviceName = Systems.getDeviceName();
+    final String deviceName = SystemUtils.getDeviceName();
     final String currentUserName = System.getProperty("user.name");
-    final String pidCode = Systems.getPid();
+    final String pidCode = SystemUtils.getPid();
 
     log.info("Starting {} on {} with PID {} ", bootClsName, deviceName + "/" + currentUserName, pidCode);
     log.info("Starting service [Netty]");
@@ -266,7 +266,7 @@ public class NettyServer implements Server {
 
     long endTime = System.currentTimeMillis();
     long startUpTime = (endTime - startTime);
-    long jvmStartTime = (endTime - Systems.getJvmStartUpTime());
+    long jvmStartTime = (endTime - SystemUtils.getJvmStartUpTime());
 
     log.info("Aquiver started on port(s): {} (com.aquiver.http) with context path ''", port);
     log.info("Started {} in {} ms (JVM running for {} ms)", aquiver.bootClsName(), startUpTime, jvmStartTime);

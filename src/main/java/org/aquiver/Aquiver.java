@@ -26,7 +26,7 @@ package org.aquiver;
 import org.aquiver.server.NettyServer;
 import org.aquiver.server.Server;
 import org.aquiver.server.banner.BannerFont;
-import org.aquiver.toolkit.Propertys;
+import org.aquiver.toolkit.PropertyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -482,7 +482,7 @@ public final class Aquiver {
     Environment bootConfEnv = Environment.of(bootConf);
 
     Map<String, String> argsMap = this.loadMainArgs(args);
-    Map<String, String> constField = Propertys.confFieldMap();
+    Map<String, String> constField = PropertyUtils.confFieldMap();
 
     this.loadPropsOrYaml(bootConfEnv, constField);
 
@@ -530,10 +530,10 @@ public final class Aquiver {
     /** If there is no properties configuration, the yaml format is
      * used, and the default yaml loaded is application.yml */
     if (bootConfEnv.isEmpty()) {
-      Optional.ofNullable(Propertys.yaml(PATH_CONFIG_YAML))
+      Optional.ofNullable(PropertyUtils.yaml(PATH_CONFIG_YAML))
               .ifPresent(yamlConfigTreeMap ->
                       bootConfEnv.load(new StringReader(
-                              Propertys.toProperties(yamlConfigTreeMap))));
+                              PropertyUtils.toProperties(yamlConfigTreeMap))));
     }
   }
 
@@ -544,7 +544,7 @@ public final class Aquiver {
    * @return
    */
   private Map<String, String> loadMainArgs(String[] args) {
-    Map<String, String> argsMap = Propertys.parseArgs(args);
+    Map<String, String> argsMap = PropertyUtils.parseArgs(args);
     if (argsMap.size() > 0) {
       log.info("Entered command line:{}", argsMap.toString());
     }

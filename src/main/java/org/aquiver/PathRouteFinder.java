@@ -25,7 +25,7 @@ package org.aquiver;
 
 import org.aquiver.annotation.Path;
 import org.aquiver.annotation.RestPath;
-import org.aquiver.toolkit.Reflections;
+import org.aquiver.toolkit.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +52,7 @@ public class PathRouteFinder implements RouteFinder {
     Map<String, Class<?>> routeClsMap = new ConcurrentHashMap<>(16);
     for (Class<?> next : classSet) {
       String url = "/";
-      boolean normal = Reflections.isNormal(next);
+      boolean normal = ReflectionUtils.isNormal(next);
       if (!normal) {
         classSet.remove(next);
         continue;

@@ -25,12 +25,12 @@ package org.aquiver.ansi.logback;
 
 import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import org.aquiver.toolkit.Systems;
+import org.aquiver.toolkit.SystemUtils;
 
 public class ProcessIdClassicConverter extends ClassicConverter {
 
   @Override
   public String convert(ILoggingEvent iLoggingEvent) {
-    return Systems.getPid();
+    return SystemUtils.getPid();
   }
 }

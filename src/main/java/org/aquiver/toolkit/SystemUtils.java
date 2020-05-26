@@ -31,7 +31,8 @@ import java.net.UnknownHostException;
  * @author WangYi
  * @since 2019/6/5
  */
-public abstract class Systems {
+public final class SystemUtils {
+  private SystemUtils() {}
 
   public static String getPid() {
     return ManagementFactory.getRuntimeMXBean().getName().split("@")[0];

@@ -28,9 +28,9 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static io.netty.util.internal.PlatformDependent.isWindows;
@@ -39,7 +39,8 @@ import static io.netty.util.internal.PlatformDependent.isWindows;
  * @author WangYi
  * @since 2019/6/10
  */
-public abstract class Propertys {
+public final class PropertyUtils {
+  private PropertyUtils() {}
 
   public static String toProperties(TreeMap<String, Map<String, Object>> config) {
     StringBuilder sb = new StringBuilder();
@@ -61,6 +62,7 @@ public abstract class Propertys {
     return constArgsMap;
   }
 
+  @SuppressWarnings("unchecked")
   public static String toString(String key, Map<String, Object> map) {
     StringBuilder sb = new StringBuilder();
     for (String mapKey : map.keySet()) {
@@ -88,11 +90,12 @@ public abstract class Propertys {
     return argsMap;
   }
 
+  @SuppressWarnings("unchecked")
   public static TreeMap<String, Map<String, Object>> yaml(String location) {
     if (!location.startsWith("/")) {
       location = "/" + location;
     }
-    InputStream resourceAsStream = Propertys.class.getResourceAsStream(location);
+    InputStream resourceAsStream = PropertyUtils.class.getResourceAsStream(location);
     if (resourceAsStream == null) {
       return null;
     }
@@ -104,25 +107,21 @@ public abstract class Propertys {
   }
 
   public static String getCurrentClassPath() {
-    URL url = Propertys.class.getResource("/");
+    URL url = PropertyUtils.class.getResource("/");
     String path;
     if (null == url) {
-      File f = new File(Propertys.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+      File f = new File(PropertyUtils.class.getProtectionDomain().getCodeSource().getLocation().getPath());
       path = f.getPath();
     } else {
       path = url.getPath();
     }
-    try {
-      if (isWindows()) {
-        return decode(path.replaceFirst("^/(.:/)", "$1"));
-      }
-      return decode(path);
-    } catch (UnsupportedEncodingException e) {
-      return "/";
+    if (isWindows()) {
+      return decode(path.replaceFirst("^/(.:/)", "$1"));
     }
+    return decode(path);
   }
 
-  private static String decode(String path) throws UnsupportedEncodingException {
-    return java.net.URLDecoder.decode(path, "utf-8");
+  private static String decode(String path) {
+    return java.net.URLDecoder.decode(path, StandardCharsets.UTF_8);
   }
 }
