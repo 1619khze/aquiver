@@ -19,7 +19,6 @@
         <logback.version>1.2.3</logback.version>
         <netty.version>4.1.45.Final</netty.version>
         <logback.version>1.2.3</logback.version>
-        <asm.version>8.0.1</asm.version>
         <java.version>8</java.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-license-plugin.version>1.9.0</maven-license-plugin.version>
@@ -86,11 +85,6 @@
             <version>${logback.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm</artifactId>
-            <version>${asm.version}</version>
-        </dependency>
-        <dependency>
             <groupId>io.github.classgraph</groupId>
             <artifactId>classgraph</artifactId>
             <version>${classgraph.version}</version>
@@ -102,10 +96,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.8.1</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>11</source>
+                    <target>11</target>
                     <compilerArgs>
                         <arg>-parameters</arg>
                     </compilerArgs>
