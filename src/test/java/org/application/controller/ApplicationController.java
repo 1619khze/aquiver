@@ -24,56 +24,56 @@
 package org.application.controller;
 
 import org.application.bean.User;
-import org.aquiver.annotation.RequestMapping;
-import org.aquiver.annotation.RequestMethod;
-import org.aquiver.annotation.ResponseBody;
-import org.aquiver.annotation.RestController;
-import org.aquiver.annotation.bind.PathVariable;
-import org.aquiver.annotation.bind.RequestCookies;
-import org.aquiver.annotation.bind.RequestHeader;
-import org.aquiver.annotation.bind.RequestParam;
+import org.aquiver.annotation.Path;
+import org.aquiver.annotation.PathMethod;
+import org.aquiver.annotation.JSON;
+import org.aquiver.annotation.RestPath;
+import org.aquiver.annotation.bind.PathVar;
+import org.aquiver.annotation.bind.Cookies;
+import org.aquiver.annotation.bind.Header;
+import org.aquiver.annotation.bind.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RestController
-@RequestMapping(value = "/controller")
+@RestPath
+@Path(value = "/controller")
 public class ApplicationController {
 
   private static final Logger log = LoggerFactory.getLogger(ApplicationController.class);
 
-  @RequestMapping(value = "/requestParam", method = RequestMethod.GET)
-  public String requestParam(@RequestParam String name) {
+  @Path(value = "/requestParam", method = PathMethod.GET)
+  public String requestParam(@Param String name) {
     log.info("request param:" + name);
     return "requestParam:" + name;
   }
 
-  @ResponseBody
-  @RequestMapping(value = "/requestParamJson", method = RequestMethod.GET)
-  public User requestParamJson(@RequestParam String name) {
+  @JSON
+  @Path(value = "/requestParamJson", method = PathMethod.GET)
+  public User requestParamJson(@Param String name) {
     log.info("request param:" + name);
     return new User("1", 2, (short) 3);
   }
 
-  @RequestMapping(value = "/requestParamAlisa", method = RequestMethod.GET)
-  public String requestParamAlisa(@RequestParam(value = "username") String name) {
+  @Path(value = "/requestParamAlisa", method = PathMethod.GET)
+  public String requestParamAlisa(@Param(value = "username") String name) {
     log.info("request param:" + name);
     return "requestParamAlisa:" + name;
   }
 
-  @RequestMapping(value = "/requestCookies", method = RequestMethod.GET)
-  public String requestCookies(@RequestCookies String name) {
+  @Path(value = "/requestCookies", method = PathMethod.GET)
+  public String requestCookies(@Cookies String name) {
     log.info("request param:" + name);
     return "requestCookies:" + name;
   }
 
-  @RequestMapping(value = "/requestHeaders", method = RequestMethod.GET)
-  public String requestHeaders(@RequestHeader(value = "Accept") String name) {
+  @Path(value = "/requestHeaders", method = PathMethod.GET)
+  public String requestHeaders(@Header(value = "Accept") String name) {
     log.info("request param:" + name);
     return "requestHeaders:" + name;
   }
 
-  @RequestMapping(value = "/pathVariable/{name}/{code}", method = RequestMethod.GET)
-  public String pathVariable(@PathVariable String name, @PathVariable String code) {
+  @Path(value = "/pathVariable/{name}/{code}", method = PathMethod.GET)
+  public String pathVariable(@PathVar String name, @PathVar String code) {
     log.info("request param:" + name + ":" + "request param:" + code);
     return "pathVariable:" + name + ":" + code;
   }
