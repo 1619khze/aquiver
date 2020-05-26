@@ -29,14 +29,10 @@ import org.aquiver.annotation.PathMethod;
 import org.aquiver.mvc.ArgsResolver;
 import org.aquiver.mvc.RequestHandlerParam;
 import org.aquiver.mvc.Route;
-import org.objectweb.asm.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -131,14 +127,11 @@ public final class RouteContext {
 
     boolean isJsonResponse = !Objects.isNull(method.getAnnotation(JSON.class));
     Route route = new Route(completeUrl, clazz, method.getName(), isJsonResponse, pathMethod);
-    try {
-      Parameter[] parameters = method.getParameters();
-      String[] paramNames = this.getMethodParameterNamesByAsm(clazz, method);
-      this.execuArgsResolver(route, parameters, paramNames);
-    } catch (IOException e) {
-      log.error("An exception occurred while parsing the method parameter name", e);
-    }
 
+    Parameter[] parameters = method.getParameters();
+    String[] paramNames = this.getMethodParamName(method);
+
+    this.execuArgsResolver(route, parameters, paramNames);
     if (this.repeat(completeUrl)) {
       if (log.isDebugEnabled()) {
         log.debug("Registered request processor URL is duplicated :{}", completeUrl);
@@ -195,46 +188,13 @@ public final class RouteContext {
     return url.toString();
   }
 
-  protected String[] getMethodParameterNamesByAsm(Class<?> clazz, final Method method) throws IOException {
-    final Class<?>[] parameterTypes = method.getParameterTypes();
-    if (parameterTypes.length == 0) {
-      return null;
+  protected String[] getMethodParamName(final Method method) {
+    Parameter[] parameters = method.getParameters();
+    List<String> nameList = new ArrayList<>();
+    for (Parameter param : parameters) {
+      String name = param.getName();
+      nameList.add(name);
     }
-    final Type[] types = new Type[parameterTypes.length];
-    for (int i = 0; i < parameterTypes.length; i++) {
-      types[i] = Type.getType(parameterTypes[i]);
-    }
-    final String[] parameterNames = new String[parameterTypes.length];
-
-    String className = clazz.getName();
-    int lastDotIndex = className.lastIndexOf(".");
-    className = className.substring(lastDotIndex + 1) + ".class";
-
-    InputStream inputStream = clazz.getResourceAsStream(className);
-    ClassReader classReader = new ClassReader(inputStream);
-    classReader.accept(new ClassVisitor(Opcodes.ASM4) {
-      @Override
-      public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        return getMethodVisitor(name, desc, method, types, parameterNames);
-      }
-    }, 0);
-    return parameterNames;
-  }
-
-  private MethodVisitor getMethodVisitor(String name, String desc, Method method, Type[] types, String[] parameterNames) {
-    Type[] argumentTypes = Type.getArgumentTypes(desc);
-    if (!method.getName().equals(name) || !Arrays.equals(argumentTypes, types)) {
-      return null;
-    }
-    return new MethodVisitor(Opcodes.ASM4) {
-      @Override
-      public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
-        if (Modifier.isStatic(method.getModifiers())) {
-          parameterNames[index] = name;
-        } else if (index > 0 && index <= parameterNames.length) {
-          parameterNames[index - 1] = name;
-        }
-      }
-    };
+    return nameList.toArray(value -> new String[0]);
   }
 }
