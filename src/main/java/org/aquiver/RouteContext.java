@@ -143,7 +143,7 @@ public final class RouteContext {
       if (log.isDebugEnabled()) {
         log.debug("Registered request processor URL is duplicated :{}", completeUrl);
       }
-      throw new HandlerRepeatException("Registered request processor URL is duplicated : " + completeUrl);
+      throw new RouteRepeatException("Registered request processor URL is duplicated : " + completeUrl);
     } else {
       this.addRoute(completeUrl, route);
     }
