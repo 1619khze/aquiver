@@ -23,28 +23,28 @@
  */
 package org.aquiver.mvc;
 
-import org.aquiver.annotation.RequestMethod;
+import org.aquiver.annotation.PathMethod;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class RequestHandler {
+public class Route {
   private String url;
   private Class<?> clazz;
   private String method;
   private Object bean;
   private boolean jsonResponse;
-  private RequestMethod requestMethod;
+  private PathMethod pathMethod;
 
   private List<RequestHandlerParam> params = new ArrayList<>();
 
-  public RequestHandler(String url, Class<?> clazz, String method, boolean jsonResponse, RequestMethod requestMethod) {
+  public Route(String url, Class<?> clazz, String method, boolean jsonResponse, PathMethod pathMethod) {
     this.url = url;
     this.clazz = clazz;
     this.method = method;
     this.jsonResponse = jsonResponse;
-    this.requestMethod = requestMethod;
+    this.pathMethod = pathMethod;
     try {
       this.bean = clazz.getDeclaredConstructor().newInstance();
     } catch (ReflectiveOperationException e) {
@@ -84,12 +84,12 @@ public class RequestHandler {
     this.jsonResponse = jsonResponse;
   }
 
-  public RequestMethod getRequestMethod() {
-    return requestMethod;
+  public PathMethod getPathMethod() {
+    return pathMethod;
   }
 
-  public void setRequestMethod(RequestMethod requestMethod) {
-    this.requestMethod = requestMethod;
+  public void setPathMethod(PathMethod pathMethod) {
+    this.pathMethod = pathMethod;
   }
 
   public Object getBean() {
@@ -112,19 +112,19 @@ public class RequestHandler {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    RequestHandler that = (RequestHandler) o;
+    Route that = (Route) o;
     return jsonResponse == that.jsonResponse &&
             Objects.equals(url, that.url) &&
             Objects.equals(clazz, that.clazz) &&
             Objects.equals(method, that.method) &&
             Objects.equals(bean, that.bean) &&
-            requestMethod == that.requestMethod &&
+            pathMethod == that.pathMethod &&
             Objects.equals(params, that.params);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(url, clazz, method, bean, jsonResponse, requestMethod, params);
+    return Objects.hash(url, clazz, method, bean, jsonResponse, pathMethod, params);
   }
 
   @Override
@@ -135,7 +135,7 @@ public class RequestHandler {
             ", method=" + method +
             ", bean=" + bean +
             ", jsonResponse=" + jsonResponse +
-            ", requestMethod=" + requestMethod +
+            ", requestMethod=" + pathMethod +
             ", params=" + params +
             '}';
   }

@@ -23,7 +23,7 @@
  */
 package org.aquiver.mvc.resolver;
 
-import org.aquiver.annotation.bind.RequestCookies;
+import org.aquiver.annotation.bind.Cookies;
 import org.aquiver.mvc.ArgsResolver;
 import org.aquiver.mvc.RequestHandlerParam;
 import org.aquiver.mvc.RequestParamType;
@@ -34,15 +34,15 @@ public class RequestCookiesArgsResolver implements ArgsResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(RequestCookies.class);
+    return parameter.isAnnotationPresent(Cookies.class);
   }
 
   @Override
   public RequestHandlerParam resolve(Parameter parameter, String paramName) {
     RequestHandlerParam handlerParam = new RequestHandlerParam();
-    RequestCookies requestCookies = parameter.getAnnotation(RequestCookies.class);
+    Cookies cookies = parameter.getAnnotation(Cookies.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(requestCookies.value()) ? paramName : requestCookies.value());
+    handlerParam.setName("".equals(cookies.value()) ? paramName : cookies.value());
     handlerParam.setRequired(true);
     handlerParam.setType(RequestParamType.REQUEST_COOKIES);
     return handlerParam;

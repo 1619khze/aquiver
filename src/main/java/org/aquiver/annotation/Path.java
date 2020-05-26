@@ -21,14 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.annotation.bind;
-
+package org.aquiver.annotation;
 
 import java.lang.annotation.*;
 
-@Target(ElementType.PARAMETER)
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface PathVariable {
+public @interface Path {
   String value() default "";
+
+  PathMethod method() default PathMethod.GET;
 }

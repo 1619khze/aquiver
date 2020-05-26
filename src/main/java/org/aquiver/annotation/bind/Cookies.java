@@ -21,11 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.annotation.bind;
 
-import java.util.Set;
+import java.lang.annotation.*;
 
-@FunctionalInterface
-public interface Discoverer {
-  Set<Class<?>> discover(String scanPath);
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Cookies {
+  String value() default "";
 }

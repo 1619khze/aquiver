@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.annotation;
+package org.aquiver.annotation.bind;
 
-public enum RequestMethod {
-  GET,
-  HEAD,
-  POST,
-  PUT,
-  PATCH,
-  DELETE,
-  OPTIONS,
-  TRACE
+
+import java.lang.annotation.*;
+
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface PathVar {
+  String value() default "";
 }

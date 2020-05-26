@@ -45,6 +45,8 @@ import javax.net.ssl.SSLException;
 import java.io.File;
 import java.nio.file.Paths;
 import java.security.cert.CertificateException;
+import java.util.Map;
+import java.util.Set;
 
 import static org.aquiver.Const.*;
 
@@ -74,7 +76,8 @@ public class NettyServer implements Server {
   private SslContext sslContext;
 
   /** request mapping resolver. */
-  private RequestMappingResolver requestMappingResolver;
+  private RouteFinder routeFinder;
+  private RouteContext routeContext;
 
   /** Service startup status, using volatile to ensure threads are visible. */
   private volatile boolean stop = false;
@@ -91,6 +94,8 @@ public class NettyServer implements Server {
 
     this.aquiver = aquiver;
     this.environment = aquiver.environment();
+    this.routeFinder = new PathRouteFinder();
+    this.routeContext = new RouteContext();
     this.printBanner();
 
     final String bootClsName = aquiver.bootClsName();
@@ -109,7 +114,7 @@ public class NettyServer implements Server {
 
     this.initSsl();
     this.initWebSocket();
-    this.initRouteResolve();
+    this.loadRoute();
     this.startServer(startMs);
     this.watchEnv();
     this.shutdownHook();
@@ -134,18 +139,22 @@ public class NettyServer implements Server {
   /**
    * init ioc container
    */
-  private void initRouteResolve() {
+  private void loadRoute() {
     final String scanPath = aquiver.bootCls().getPackage().getName();
 
     final ClassgraphOptions classgraphOptions = ClassgraphOptions.builder()
             .verbose(aquiver.verbose()).enableRealtimeLogging(aquiver.realtimeLogging())
             .scanPackages(aquiver.scanPaths()).build();
 
-    final Discoverer discoverer = new ClassgraphDiscoverer(classgraphOptions);
-    this.requestMappingResolver = new RequestMappingResolver(discoverer, scanPath);
+    final Scanner scanner = new ClassgraphScanner(classgraphOptions);
+    final Set<Class<?>> classSet = scanner.scan(scanPath);
     try {
-      this.requestMappingResolver.start();
-    } catch (ReflectiveOperationException e) {
+      Map<String, Class<?>> routeClsMap = routeFinder.finderRoute(classSet);
+      this.routeContext.loadArgsResolver();
+      for (Map.Entry<String, Class<?>> entry : routeClsMap.entrySet()) {
+        this.routeContext.addRoute(entry.getValue(), entry.getKey());
+      }
+    } catch (Exception e) {
       log.error("An exception occurred while initializing the ioc container", e);
     }
   }
@@ -228,7 +237,7 @@ public class NettyServer implements Server {
 
     ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
 
-    this.serverBootstrap.childHandler(new NettyServerInitializer(sslContext, environment, requestMappingResolver));
+    this.serverBootstrap.childHandler(new NettyServerInitializer(sslContext, environment, routeContext));
 
     int acceptThreadCount = environment.getInteger(PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT, DEFAULT_ACCEPT_THREAD_COUNT);
     int ioThreadCount = environment.getInteger(PATH_SERVER_NETTY_IO_THREAD_COUNT, DEFAULT_IO_THREAD_COUNT);

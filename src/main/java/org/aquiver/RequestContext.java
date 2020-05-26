@@ -33,7 +33,7 @@ import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http.multipart.MemoryAttribute;
-import org.aquiver.mvc.RequestHandler;
+import org.aquiver.mvc.Route;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -43,7 +43,7 @@ public class RequestContext {
   private final ChannelHandlerContext context;
   private FullHttpResponse httpResponse;
 
-  private RequestHandler requestHandler;
+  private Route route;
   private Response response;
   private Map<String, Object> cookies;
   private Map<String, Object> headers;
@@ -220,12 +220,12 @@ public class RequestContext {
     return httpRequest;
   }
 
-  public RequestHandler getRequestHandler() {
-    return requestHandler;
+  public Route getRoute() {
+    return route;
   }
 
-  public void setRequestHandler(RequestHandler requestHandler) {
-    this.requestHandler = requestHandler;
+  public void setRoute(Route route) {
+    this.route = route;
   }
 
   public Response getResponse() {

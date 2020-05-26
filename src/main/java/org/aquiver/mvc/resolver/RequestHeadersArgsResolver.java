@@ -23,7 +23,7 @@
  */
 package org.aquiver.mvc.resolver;
 
-import org.aquiver.annotation.bind.RequestHeader;
+import org.aquiver.annotation.bind.Header;
 import org.aquiver.mvc.ArgsResolver;
 import org.aquiver.mvc.RequestHandlerParam;
 import org.aquiver.mvc.RequestParamType;
@@ -34,15 +34,15 @@ public class RequestHeadersArgsResolver implements ArgsResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(RequestHeader.class);
+    return parameter.isAnnotationPresent(Header.class);
   }
 
   @Override
   public RequestHandlerParam resolve(Parameter parameter, String paramName) {
     RequestHandlerParam handlerParam = new RequestHandlerParam();
-    RequestHeader requestHeader = parameter.getAnnotation(RequestHeader.class);
+    Header header = parameter.getAnnotation(Header.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(requestHeader.value()) ? paramName : requestHeader.value());
+    handlerParam.setName("".equals(header.value()) ? paramName : header.value());
     handlerParam.setRequired(true);
     handlerParam.setType(RequestParamType.REQUEST_HEADER);
     return handlerParam;

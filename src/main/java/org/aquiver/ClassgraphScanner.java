@@ -36,18 +36,18 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @author WangYi
  * @since 2020/5/23
  */
-public class ClassgraphDiscoverer implements Discoverer {
+public class ClassgraphScanner implements Scanner {
 
   private final ClassgraphOptions classgraphOptions;
   private final ClassGraph classGraph;
 
-  public ClassgraphDiscoverer(ClassgraphOptions classgraphOptions) {
+  public ClassgraphScanner(ClassgraphOptions classgraphOptions) {
     this.classgraphOptions = classgraphOptions;
     this.classGraph = new ClassGraph();
   }
 
   @Override
-  public Set<Class<?>> discover(String scanPackageName) {
+  public Set<Class<?>> scan(String scanPackageName) {
     this.classGraph.enableAllInfo();
     if (classgraphOptions != null) {
       this.scanPackageName(classgraphOptions.getScanPackages(), scanPackageName)
@@ -65,7 +65,7 @@ public class ClassgraphDiscoverer implements Discoverer {
    * @param scanPackageName
    * @return
    */
-  private ClassgraphDiscoverer scanPackageName(Set<String> scanPackages, String scanPackageName) {
+  private ClassgraphScanner scanPackageName(Set<String> scanPackages, String scanPackageName) {
     if (scanPackageName == null || !scanPackageName.contains(".")) {
       throw new IllegalArgumentException("scanPackageName cannot be empty and " +
               "needs to conform to the specification");
@@ -84,7 +84,7 @@ public class ClassgraphDiscoverer implements Discoverer {
    * @param blackList
    * @return
    */
-  private ClassgraphDiscoverer blackList(List<String> blackList) {
+  private ClassgraphScanner blackList(List<String> blackList) {
     if (blackList != null && blackList.size() > 0) {
       this.classGraph.blacklistPackages(blackList.toArray(new String[0]));
     }
@@ -97,7 +97,7 @@ public class ClassgraphDiscoverer implements Discoverer {
    * @param verbose
    * @return
    */
-  private ClassgraphDiscoverer verbose(boolean verbose) {
+  private ClassgraphScanner verbose(boolean verbose) {
     if (verbose) {
       this.classGraph.verbose();
     }

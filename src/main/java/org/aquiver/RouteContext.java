@@ -23,15 +23,22 @@
  */
 package org.aquiver;
 
-import org.aquiver.mvc.RequestHandler;
+import org.aquiver.annotation.JSON;
+import org.aquiver.annotation.Path;
+import org.aquiver.annotation.PathMethod;
+import org.aquiver.mvc.ArgsResolver;
+import org.aquiver.mvc.RequestHandlerParam;
+import org.aquiver.mvc.Route;
 import org.objectweb.asm.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Map;
+import java.lang.reflect.Parameter;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -39,11 +46,16 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author WangYi
  * @since 2020/5/23
  */
-public abstract class AbstractRegistry implements RegisterStrategy {
+public final class RouteContext {
+  private static final Logger log = LoggerFactory.getLogger(RouteContext.class);
 
-  private final Map<String, RequestHandler> requestHandlers = new ConcurrentHashMap<>(64);
-
+  private final Map<String, Route> routes = new ConcurrentHashMap<>(64);
   private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+  private final List<ArgsResolver> argsResolvers = new ArrayList<>();
+
+  public List<ArgsResolver> getArgsResolvers() {
+    return argsResolvers;
+  }
 
   protected ReentrantReadWriteLock.ReadLock readLock() {
     return this.readWriteLock.readLock();
@@ -54,33 +66,116 @@ public abstract class AbstractRegistry implements RegisterStrategy {
   }
 
   protected boolean repeat(String url) {
-    return this.requestHandlers.containsKey(url);
+    return this.routes.containsKey(url);
   }
 
-  protected void register(String url, RequestHandler requestHandler) {
-    this.writeLock().lock();
-    try {
-      this.requestHandlers.put(url, requestHandler);
-    } finally {
-      this.readWriteLock.writeLock().unlock();
+  public void loadArgsResolver() throws Exception {
+    ServiceLoader<ArgsResolver> argsResolverLoad = ServiceLoader.load(ArgsResolver.class);
+    for (ArgsResolver ser : argsResolverLoad) {
+      ArgsResolver argsResolver = ser.getClass().getDeclaredConstructor().newInstance();
+      getArgsResolvers().add(argsResolver);
     }
   }
 
-  public void unregister(String url) {
+  private void findArgsResolver(Class<?> cls) throws ReflectiveOperationException {
+    Class<?>[] interfaces = cls.getInterfaces();
+    if (interfaces.length == 0) {
+      return;
+    }
+    for (Class<?> interfaceCls : interfaces) {
+      if (!interfaceCls.equals(ArgsResolver.class)) {
+        continue;
+      }
+      ArgsResolver argsResolver = (ArgsResolver) cls.getDeclaredConstructor().newInstance();
+      getArgsResolvers().add(argsResolver);
+    }
+  }
+
+  public void removeRoute(String url) {
     this.writeLock().lock();
     try {
-      this.requestHandlers.remove(url);
+      this.routes.remove(url);
     } finally {
       this.writeLock().unlock();
     }
   }
 
-  public Map<String, RequestHandler> getRequestHandlers() {
+  public Map<String, Route> getRoutes() {
     readLock().lock();
     try {
-      return this.requestHandlers;
+      return this.routes;
     } finally {
       readLock().unlock();
+    }
+  }
+
+  public void addRoute(Class<?> cls, String url) {
+    Method[] methods = cls.getMethods();
+    for (Method method : methods) {
+      Path methodPath = method.getAnnotation(Path.class);
+      if (Objects.isNull(methodPath)) {
+        continue;
+      }
+      addRoute(cls, url, method, methodPath);
+    }
+  }
+
+  public void addRoute(Class<?> clazz, String baseUrl, Method method, Path methodPath) {
+    String methodUrl = methodPath.value();
+    String completeUrl = this.getMethodUrl(baseUrl, methodUrl);
+
+    PathMethod pathMethod = methodPath.method();
+    if (completeUrl.trim().isEmpty()) {
+      return;
+    }
+
+    boolean isJsonResponse = !Objects.isNull(method.getAnnotation(JSON.class));
+    Route route = new Route(completeUrl, clazz, method.getName(), isJsonResponse, pathMethod);
+    try {
+      Parameter[] parameters = method.getParameters();
+      String[] paramNames = this.getMethodParameterNamesByAsm(clazz, method);
+      this.execuArgsResolver(route, parameters, paramNames);
+    } catch (IOException e) {
+      log.error("An exception occurred while parsing the method parameter name", e);
+    }
+
+    if (this.repeat(completeUrl)) {
+      if (log.isDebugEnabled()) {
+        log.debug("Registered request processor URL is duplicated :{}", completeUrl);
+      }
+      throw new HandlerRepeatException("Registered request processor URL is duplicated : " + completeUrl);
+    } else {
+      this.addRoute(completeUrl, route);
+    }
+  }
+
+  protected void addRoute(String url, Route route) {
+    this.writeLock().lock();
+    try {
+      this.routes.put(url, route);
+    } finally {
+      this.readWriteLock.writeLock().unlock();
+    }
+  }
+
+  private void execuArgsResolver(Route route, Parameter[] ps, String[] paramNames) {
+    for (int i = 0; i < ps.length; i++) {
+      List<ArgsResolver> argsResolvers = getArgsResolvers();
+      if (argsResolvers.isEmpty()) {
+        break;
+      }
+      this.execuArgsResolver(route, ps[i], paramNames[i], argsResolvers);
+    }
+  }
+
+  private void execuArgsResolver(Route route, Parameter parameter,
+                                 String paramName, List<ArgsResolver> argsResolvers) {
+    for (ArgsResolver argsResolver : argsResolvers) {
+      if (!argsResolver.support(parameter)) continue;
+      RequestHandlerParam param = argsResolver.resolve(parameter, paramName);
+      if (param != null) {
+        route.getParams().add(param);
+      }
     }
   }
 

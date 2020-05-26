@@ -21,16 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.annotation.bind;
+package org.aquiver.annotation;
 
 import java.lang.annotation.*;
 
-
-@Target(ElementType.PARAMETER)
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface RequestBody {
-
-  String value() default "";
-
+public @interface RestPath {
 }

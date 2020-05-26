@@ -32,11 +32,11 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.aquiver.RequestContext;
-import org.aquiver.RequestMappingResolver;
 import org.aquiver.Response;
+import org.aquiver.RouteContext;
 import org.aquiver.mvc.LogicExecutionResponse;
 import org.aquiver.mvc.ParameterDispenser;
-import org.aquiver.mvc.RequestHandler;
+import org.aquiver.mvc.Route;
 import org.aquiver.mvc.RequestHandlerParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,16 +57,15 @@ import static org.aquiver.mvc.MediaType.APPLICATION_JSON_VALUE;
 import static org.aquiver.mvc.MediaType.TEXT_PLAIN_VALUE;
 
 public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
 
   private final static String FAVICON_PATH = "/favicon.ico";
   private final static String EMPTY_STRING = "";
 
-  private final Map<String, RequestHandler> requestHandlers;
+  private final Map<String, Route> routeMap;
 
-  public NettyServerHandler(RequestMappingResolver requestMappingResolver) {
-    this.requestHandlers = requestMappingResolver.getMappingRegistry().getRequestHandlers();
+  public NettyServerHandler(RouteContext routeContext) {
+    this.routeMap = routeContext.getRoutes();
   }
 
   @Override
@@ -136,14 +135,14 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   private Response executionLogic(LogicExecutionResponse logicExecutionResponse) {
     MethodHandles.Lookup lookup = MethodHandles.lookup();
     try {
-      RequestHandler requestHandler = logicExecutionResponse.getRequestHandler();
-      Method method = requestHandler.getClazz()
-              .getMethod(requestHandler.getMethod(),
+      Route route = logicExecutionResponse.getRoute();
+      Method method = route.getClazz()
+              .getMethod(route.getMethod(),
                       logicExecutionResponse.getParamTypes());
       MethodHandle methodHandle = lookup.unreflect(method);
-      Object result = methodHandle.bindTo(requestHandler.getBean())
+      Object result = methodHandle.bindTo(route.getBean())
               .invokeWithArguments(logicExecutionResponse.getParamValues());
-      return new Response(result, requestHandler.isJsonResponse());
+      return new Response(result, route.isJsonResponse());
     } catch (Throwable throwable) {
       log.error("An exception occurred when calling the mapping method", throwable);
     }
@@ -170,7 +169,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   }
 
   private boolean loopLookUp(RequestContext requestContext, String lookupPath) {
-    for (Map.Entry<String, RequestHandler> entry : requestHandlers.entrySet()) {
+    for (Map.Entry<String, Route> entry : routeMap.entrySet()) {
       String[] lookupPathSplit = lookupPath.split("/");
       String[] mappingUrlSplit = entry.getKey().split("/");
       String matcher = this.getMatch(entry.getKey());
@@ -179,8 +178,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
       }
 
       if (checkMatch(lookupPathSplit, mappingUrlSplit)) {
-        RequestHandler value = entry.getValue();
-        requestContext.setRequestHandler(value);
+        Route value = entry.getValue();
+        requestContext.setRoute(value);
         return true;
       }
     }
@@ -188,13 +187,13 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   }
 
   private boolean preLookUp(RequestContext requestContext, String lookupPath) {
-    if (requestHandlers == null || requestHandlers.isEmpty()) {
+    if (routeMap == null || routeMap.isEmpty()) {
       throw new RuntimeException("There is no corresponding request mapping program:" + lookupPath);
     }
 
-    if (requestHandlers.containsKey(lookupPath)) {
-      RequestHandler handler = this.requestHandlers.get(lookupPath);
-      requestContext.setRequestHandler(handler);
+    if (routeMap.containsKey(lookupPath)) {
+      Route handler = this.routeMap.get(lookupPath);
+      requestContext.setRoute(handler);
       return true;
     }
     return false;
@@ -224,18 +223,18 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   }
 
   private LogicExecutionResponse invokeParam(RequestContext requestContext) {
-    RequestHandler requestHandler = requestContext.getRequestHandler();
-    List<RequestHandlerParam> params = requestHandler.getParams();
+    Route route = requestContext.getRoute();
+    List<RequestHandlerParam> params = route.getParams();
 
     Object[] paramValues = new Object[params.size()];
     Class<?>[] paramTypes = new Class[params.size()];
 
     for (int i = 0; i < paramValues.length; i++) {
-      RequestHandlerParam handlerParam = requestHandler.getParams().get(i);
+      RequestHandlerParam handlerParam = route.getParams().get(i);
       paramTypes[i] = handlerParam.getDataType();
-      paramValues[i] = ParameterDispenser.dispen(handlerParam, requestContext, requestHandler.getUrl());
+      paramValues[i] = ParameterDispenser.dispen(handlerParam, requestContext, route.getUrl());
     }
-    return LogicExecutionResponse.of(requestHandler, paramValues, paramTypes);
+    return LogicExecutionResponse.of(route, paramValues, paramTypes);
   }
 
   private void writeResponse(RequestContext requestContext) {

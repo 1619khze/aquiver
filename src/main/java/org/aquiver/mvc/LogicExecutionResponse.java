@@ -27,26 +27,26 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class LogicExecutionResponse {
-  private RequestHandler requestHandler;
+  private Route route;
   private Object[] paramValues;
   private Class<?>[] paramTypes;
 
-  private LogicExecutionResponse(RequestHandler requestHandler, Object[] paramValues, Class<?>[] paramTypes) {
-    this.requestHandler = requestHandler;
+  private LogicExecutionResponse(Route route, Object[] paramValues, Class<?>[] paramTypes) {
+    this.route = route;
     this.paramValues = paramValues;
     this.paramTypes = paramTypes;
   }
 
-  public static LogicExecutionResponse of(RequestHandler requestHandler, Object[] paramValues, Class<?>[] paramTypes) {
-    return new LogicExecutionResponse(requestHandler, paramValues, paramTypes);
+  public static LogicExecutionResponse of(Route route, Object[] paramValues, Class<?>[] paramTypes) {
+    return new LogicExecutionResponse(route, paramValues, paramTypes);
   }
 
-  public RequestHandler getRequestHandler() {
-    return requestHandler;
+  public Route getRoute() {
+    return route;
   }
 
-  public void setRequestHandler(RequestHandler requestHandler) {
-    this.requestHandler = requestHandler;
+  public void setRoute(Route route) {
+    this.route = route;
   }
 
   public Object[] getParamValues() {
@@ -70,14 +70,14 @@ public class LogicExecutionResponse {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     LogicExecutionResponse that = (LogicExecutionResponse) o;
-    return Objects.equals(requestHandler, that.requestHandler) &&
+    return Objects.equals(route, that.route) &&
             Arrays.equals(paramValues, that.paramValues) &&
             Arrays.equals(paramTypes, that.paramTypes);
   }
 
   @Override
   public int hashCode() {
-    int result = Objects.hash(requestHandler);
+    int result = Objects.hash(route);
     result = 31 * result + Arrays.hashCode(paramValues);
     result = 31 * result + Arrays.hashCode(paramTypes);
     return result;
@@ -86,7 +86,7 @@ public class LogicExecutionResponse {
   @Override
   public String toString() {
     return "LogicExecutionWrapper{" +
-            "requestHandler=" + requestHandler +
+            "requestHandler=" + route +
             ", paramValues=" + Arrays.toString(paramValues) +
             ", paramTypes=" + Arrays.toString(paramTypes) +
             '}';

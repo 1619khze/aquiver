@@ -21,12 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.annotation;
+package org.aquiver.annotation.bind;
 
 import java.lang.annotation.*;
 
-@Target({ElementType.TYPE})
+
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface RestController {
+public @interface Header {
+
+  String value() default "";
+
+  boolean required() default true;
+
 }

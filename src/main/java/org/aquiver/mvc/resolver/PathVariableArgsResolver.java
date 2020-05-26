@@ -23,7 +23,7 @@
  */
 package org.aquiver.mvc.resolver;
 
-import org.aquiver.annotation.bind.PathVariable;
+import org.aquiver.annotation.bind.PathVar;
 import org.aquiver.mvc.ArgsResolver;
 import org.aquiver.mvc.RequestHandlerParam;
 import org.aquiver.mvc.RequestParamType;
@@ -34,16 +34,16 @@ public class PathVariableArgsResolver implements ArgsResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(PathVariable.class);
+    return parameter.isAnnotationPresent(PathVar.class);
   }
 
   @Override
   public RequestHandlerParam resolve(Parameter parameter, String paramName) {
     RequestHandlerParam handlerParam = new RequestHandlerParam();
-    PathVariable pathVariable = parameter.getAnnotation(PathVariable.class);
+    PathVar pathVar = parameter.getAnnotation(PathVar.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName((!"".equals(pathVariable.value()) && !pathVariable.value().trim().isEmpty()) ?
-            pathVariable.value().trim() : paramName);
+    handlerParam.setName((!"".equals(pathVar.value()) && !pathVar.value().trim().isEmpty()) ?
+            pathVar.value().trim() : paramName);
     handlerParam.setRequired(true);
     handlerParam.setType(RequestParamType.PATH_VARIABLE);
     return handlerParam;
