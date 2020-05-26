@@ -34,6 +34,7 @@ import java.io.StringReader;
 import java.net.BindException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.LongAdder;
 
 import static java.util.Objects.requireNonNull;
 import static org.aquiver.Const.*;
@@ -435,6 +436,33 @@ public final class Aquiver {
     final ThreadPoolExecutor.AbortPolicy abortPolicy = new ThreadPoolExecutor.AbortPolicy();
     this.reusableExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
             TimeUnit.MILLISECONDS, runnableQueue, aquiverThreadFactory, abortPolicy);
+  }
+
+  /**
+   * Aquiver thread factory
+   */
+  static class AquiverThreadFactory implements ThreadFactory {
+
+    private final String prefix;
+    private final LongAdder threadNumber = new LongAdder();
+
+    public AquiverThreadFactory(String prefix) {
+      this.threadNumber.add(1);
+      this.prefix = prefix;
+    }
+
+    /**
+     * Constructs a new {@code Thread}.  Implementations may also initialize
+     * priority, name, daemon status, {@code ThreadGroup}, etc.
+     *
+     * @param runnable a runnable to be executed by new thread instance
+     * @return constructed thread, or {@code null} if the request to
+     * create a thread is rejected
+     */
+    @Override
+    public Thread newThread(Runnable runnable) {
+      return new Thread(runnable, prefix + "thread-" + threadNumber.intValue());
+    }
   }
 
   /**
