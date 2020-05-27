@@ -31,5 +31,12 @@ import java.util.Set;
  * @since 2020/5/26
  */
 public interface RouteFinder {
+  /**
+   * Parse the class and put it into the map
+   *
+   * @param classSet class list
+   * @return url -> class map
+   * @throws Exception common exception
+   */
   Map<String, Class<?>> finderRoute(Set<Class<?>> classSet) throws Exception;
 }
