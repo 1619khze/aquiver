@@ -32,6 +32,8 @@ import org.aquiver.mvc.Route;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
@@ -48,6 +50,7 @@ public final class RouteContext {
   private final Map<String, Route> routes = new ConcurrentHashMap<>(64);
   private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
   private final List<ArgsResolver> argsResolvers = new ArrayList<>();
+  private final MethodHandles.Lookup lookup = MethodHandles.lookup();
 
   public List<ArgsResolver> getArgsResolvers() {
     return argsResolvers;
@@ -105,22 +108,37 @@ public final class RouteContext {
     }
   }
 
-  public void addRoute(Class<?> cls, String url) {
+  public void addRoute(Class<?> cls, String url) throws Throwable {
     Method[] methods = cls.getMethods();
     for (Method method : methods) {
       Path methodPath = method.getAnnotation(Path.class);
-      if (Objects.isNull(methodPath)) {
-        continue;
+      if (!Objects.isNull(methodPath)) {
+        this.addRoute(cls, url, method, methodPath.value(), methodPath.method());
       }
-      addRoute(cls, url, method, methodPath);
+      Annotation[] annotations = method.getAnnotations();
+      if (annotations.length == 0) {
+        return;
+      }
+      for (Annotation annotation : annotations) {
+        String routeUrl = "/";
+        Class<? extends Annotation> annotationType = annotation.annotationType();
+        Path path = annotationType.getAnnotation(Path.class);
+        if (Objects.isNull(path)) {
+          continue;
+        }
+        PathMethod pathMethod = path.method();
+        Method valueMethod = annotationType.getMethod("value");
+        Object valueInvokeResult = lookup.unreflect(valueMethod).bindTo(annotation).invoke();
+        if (!Objects.isNull(valueInvokeResult) && !valueInvokeResult.equals(routeUrl)) {
+          routeUrl = String.join(routeUrl, String.valueOf(valueInvokeResult));
+        }
+        this.addRoute(cls, url, method, routeUrl, pathMethod);
+      }
     }
   }
 
-  public void addRoute(Class<?> clazz, String baseUrl, Method method, Path methodPath) {
-    String methodUrl = methodPath.value();
+  public void addRoute(Class<?> clazz, String baseUrl, Method method, String methodUrl, PathMethod pathMethod) {
     String completeUrl = this.getMethodUrl(baseUrl, methodUrl);
-
-    PathMethod pathMethod = methodPath.method();
     if (completeUrl.trim().isEmpty()) {
       return;
     }

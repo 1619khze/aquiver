@@ -154,7 +154,7 @@ public class NettyServer implements Server {
       for (Map.Entry<String, Class<?>> entry : routeClsMap.entrySet()) {
         this.routeContext.addRoute(entry.getValue(), entry.getKey());
       }
-    } catch (Exception e) {
+    } catch (Throwable e) {
       log.error("An exception occurred while initializing the ioc container", e);
     }
   }
