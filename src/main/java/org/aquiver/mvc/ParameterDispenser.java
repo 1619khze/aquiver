@@ -23,6 +23,8 @@
  */
 package org.aquiver.mvc;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.aquiver.RequestContext;
 
 import java.util.Collection;
@@ -74,7 +76,12 @@ public final class ParameterDispenser {
   }
 
   private static Object getRequestBody(RequestHandlerParam handlerParam, RequestContext requestContext) {
-    return null;
+    Map<String, Object> jsonData = requestContext.getJsonData();
+    String jsonString = JSON.toJSONString(jsonData);
+    if (jsonData.isEmpty() || !JSONObject.isValid(jsonString)) {
+      return null;
+    }
+    return JSONObject.parseObject(jsonString, handlerParam.getDataType());
   }
 
   public static boolean isCollection(Class<?> cls) {
