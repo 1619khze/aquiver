@@ -25,10 +25,7 @@ package org.application.controller;
 
 import org.application.bean.User;
 import org.aquiver.annotation.*;
-import org.aquiver.annotation.bind.Cookies;
-import org.aquiver.annotation.bind.Header;
-import org.aquiver.annotation.bind.Param;
-import org.aquiver.annotation.bind.PathVar;
+import org.aquiver.annotation.bind.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +70,12 @@ public class ApplicationController {
   public String pathVariable(@PathVar String name, @PathVar String code) {
     log.info("request param:" + name + ":" + "request param:" + code);
     return "pathVariable:" + name + ":" + code;
+  }
+
+  @Path(value = "/postBody", method = PathMethod.POST)
+  public String postBody(@Body User user) {
+    log.info("post body param:" + user);
+    return "post body:" + user;
   }
 
   @GET(value = "/get")

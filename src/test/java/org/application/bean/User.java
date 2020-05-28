@@ -74,4 +74,13 @@ public class User {
   public int hashCode() {
     return Objects.hash(name, age, ext);
   }
+
+  @Override
+  public String toString() {
+    return "User{" +
+            "name='" + name + '\'' +
+            ", age=" + age +
+            ", ext=" + ext +
+            '}';
+  }
 }
