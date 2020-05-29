@@ -23,18 +23,14 @@
  */
 package org.aquiver.handler;
 
-import org.aquiver.ExceptionHandler;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.aquiver.RequestContext;
 
-public class DefaultExceptionHandler implements ExceptionHandler {
-
-  @Override
-  public boolean support(Throwable cause) {
-    return true;
-  }
-
-  @Override
-  public void handle(RequestContext requestContext, Throwable throwable, Object handler) {
-
-  }
+public interface ExceptionHandler {
+  /**
+   * @param requestContext Current request
+   * @param throwable      The Throwable caused in handler
+   * @param status         The Response Status
+   */
+  void handle(RequestContext requestContext, Throwable throwable, HttpResponseStatus status);
 }

@@ -21,16 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.handler;
 
-public interface ExceptionHandler {
+import io.netty.handler.codec.http.HttpResponseStatus;
 
-  boolean support(Throwable cause);
+/**
+ * @author WangYi
+ * @since 2020/5/29
+ */
+interface HttpSupport {
+  /**
+   * Returns the {@link HttpResponseStatus} represented by the specified code.
+   * If the specified code is a standard HTTP status code, a cached instance
+   * will be returned.  Otherwise, a new instance will be returned.
+   */
+  boolean support(int code);
 
   /**
-   * @param requestContext Current request
-   * @param throwable      The Throwable caused in handler
-   * @param handler        Target handler that handles current request
+   * Returns the {@link HttpResponseStatus} represented by the specified {@code code} and {@code reasonPhrase}.
+   * If the specified code is a standard HTTP status {@code code} and {@code reasonPhrase}, a cached instance
+   * will be returned. Otherwise, a new instance will be returned.
+   *
+   * @param code         The response code value.
+   * @param reasonPhrase The response code reason phrase.
+   * @return the {@link HttpResponseStatus} represented by the specified {@code code} and {@code reasonPhrase}.
    */
-  void handle(RequestContext requestContext, Throwable throwable, Object handler);
+  boolean support(int code, String reasonPhrase);
 }
