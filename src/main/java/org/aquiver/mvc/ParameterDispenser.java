@@ -25,6 +25,7 @@ package org.aquiver.mvc;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.aquiver.PathVarMatcher;
 import org.aquiver.RequestContext;
 
 import java.util.Collection;
@@ -72,7 +73,8 @@ public final class ParameterDispenser {
   }
 
   private static Object getPathVariable(RequestHandlerParam handlerParam, RequestContext requestContext, String url) {
-    return handlerParam.getDataType().cast(getPathVariable(requestContext.getUri(), url, handlerParam.getName()));
+    return handlerParam.getDataType().cast(
+            PathVarMatcher.getPathVariable(requestContext.getUri(), url, handlerParam.getName()));
   }
 
   private static Object getRequestBody(RequestHandlerParam handlerParam, RequestContext requestContext) {
@@ -90,22 +92,5 @@ public final class ParameterDispenser {
 
   public static boolean isMap(Class<?> cls) {
     return Map.class.isAssignableFrom(cls);
-  }
-
-  private static String getPathVariable(String url, String mappingUrl, String name) {
-    String[] urlSplit = url.split("/");
-    String[] mappingUrlSplit = mappingUrl.split("/");
-    for (int i = 0; i < mappingUrlSplit.length; i++) {
-      if (mappingUrlSplit[i].equals("{" + name + "}")) {
-        if (urlSplit[i].contains("?")) {
-          return urlSplit[i].split("[?]")[0];
-        }
-        if (urlSplit[i].contains("&")) {
-          return urlSplit[i].split("&")[0];
-        }
-        return urlSplit[i];
-      }
-    }
-    return null;
   }
 }
