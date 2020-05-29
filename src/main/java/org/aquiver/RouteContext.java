@@ -76,17 +76,19 @@ public final class RouteContext {
     }
   }
 
-  private void findArgsResolver(Class<?> cls) throws ReflectiveOperationException {
-    Class<?>[] interfaces = cls.getInterfaces();
-    if (interfaces.length == 0) {
-      return;
-    }
-    for (Class<?> interfaceCls : interfaces) {
-      if (!interfaceCls.equals(ArgsResolver.class)) {
-        continue;
+  public void findArgsResolver(Set<Class<?>> classSet) throws ReflectiveOperationException {
+    for (Class<?> cls : classSet) {
+      Class<?>[] interfaces = cls.getInterfaces();
+      if (interfaces.length == 0) {
+        return;
       }
-      ArgsResolver argsResolver = (ArgsResolver) cls.getDeclaredConstructor().newInstance();
-      getArgsResolvers().add(argsResolver);
+      for (Class<?> interfaceCls : interfaces) {
+        if (!interfaceCls.equals(ArgsResolver.class)) {
+          continue;
+        }
+        ArgsResolver argsResolver = (ArgsResolver) cls.getDeclaredConstructor().newInstance();
+        getArgsResolvers().add(argsResolver);
+      }
     }
   }
 

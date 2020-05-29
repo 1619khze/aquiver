@@ -150,6 +150,7 @@ public class NettyServer implements Server {
     final Set<Class<?>> classSet = scanner.scan(scanPath);
     try {
       Map<String, Class<?>> routeClsMap = routeFinder.finderRoute(classSet);
+      this.routeContext.findArgsResolver(classSet);
       this.routeContext.loadArgsResolver();
       for (Map.Entry<String, Class<?>> entry : routeClsMap.entrySet()) {
         this.routeContext.addRoute(entry.getValue(), entry.getKey());
