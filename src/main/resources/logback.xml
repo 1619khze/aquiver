@@ -2,9 +2,9 @@
 <configuration info="false">
 
     <property name="STDOUT_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %easyHighlight(%5.5level) %magenta(%pid) --- [%15.15thread] %cyan(%-40.40logger{39} [%4.4line]) : %msg%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %easyHighlight(%5.5level) %magenta(%pid) --- [%10.15thread] %cyan(%-20.40logger{39} [%4.4line]) : %msg%n"/>
     <property name="FILE_PATTERN"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5.5level %pid --- [%15.15thread] %-40.40logger{40} [%4.4line] : %msg%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5.5level %pid --- [%10.15thread] %-20.40logger{40} [%4.4line] : %msg%n"/>
     <property name="LOGGINE_FILE_HOME" value="log"/>
 
     <appender name="STDOUT"
