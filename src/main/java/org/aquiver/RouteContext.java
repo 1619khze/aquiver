@@ -108,6 +108,13 @@ public final class RouteContext {
     }
   }
 
+  /**
+   * add route
+   *
+   * @param cls route class
+   * @param url @Path value
+   * @throws Throwable reflection exception
+   */
   public void addRoute(Class<?> cls, String url) throws Throwable {
     Method[] methods = cls.getMethods();
     for (Method method : methods) {
@@ -115,10 +122,21 @@ public final class RouteContext {
       if (!Objects.isNull(methodPath)) {
         this.addRoute(cls, url, method, methodPath.value(), methodPath.method());
       }
-      Annotation[] annotations = method.getAnnotations();
-      if (annotations.length == 0) {
-        return;
-      }
+      addRoute(cls, url, method);
+    }
+  }
+
+  /**
+   * add route
+   *
+   * @param cls    route class
+   * @param url    @GET/@POST.. value
+   * @param method Mapping annotation annotation method
+   * @throws Throwable reflection exception
+   */
+  private void addRoute(Class<?> cls, String url, Method method) throws Throwable {
+    Annotation[] annotations = method.getAnnotations();
+    if (annotations.length != 0) {
       for (Annotation annotation : annotations) {
         String routeUrl = "/";
         Class<? extends Annotation> annotationType = annotation.annotationType();
@@ -137,6 +155,15 @@ public final class RouteContext {
     }
   }
 
+  /**
+   * add route
+   *
+   * @param clazz      route class
+   * @param baseUrl    url
+   * @param method     Mapping annotation annotation method
+   * @param methodUrl  method url
+   * @param pathMethod http method
+   */
   public void addRoute(Class<?> clazz, String baseUrl, Method method, String methodUrl, PathMethod pathMethod) {
     String completeUrl = this.getMethodUrl(baseUrl, methodUrl);
     if (completeUrl.trim().isEmpty()) {
@@ -160,6 +187,12 @@ public final class RouteContext {
     }
   }
 
+  /**
+   * add route
+   *
+   * @param url   url
+   * @param route Route info
+   */
   protected void addRoute(String url, Route route) {
     this.writeLock().lock();
     try {

@@ -29,10 +29,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
-import org.aquiver.RequestContext;
-import org.aquiver.Response;
-import org.aquiver.RouteContext;
-import org.aquiver.RouteMatcher;
+import org.aquiver.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,10 +53,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
   private final static String FAVICON_PATH = "/favicon.ico";
   private final static String EMPTY_STRING = "";
-  private final RouteMatcher routeMatcher;
+  private final RouteMatcher<RequestContext> matcher;
 
   public NettyServerHandler(RouteContext routeContext) {
-    this.routeMatcher = new RouteMatcher(routeContext.getRoutes());
+    this.matcher = new PathRouteMatcher(routeContext.getRoutes());
   }
 
   @Override
@@ -88,7 +85,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
 
     future.thenApply(request -> this.thenApplyRequestContext(request, ctx))
-            .thenApplyAsync(this.routeMatcher::thenExecutionLogic, forkJoinPool)
+            .thenApplyAsync(this.matcher::match, forkJoinPool)
             .thenAcceptAsync(this::writeResponse, forkJoinPool);
     future.complete(fullHttpRequest);
   }

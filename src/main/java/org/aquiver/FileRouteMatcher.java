@@ -25,8 +25,11 @@ package org.aquiver;
 
 /**
  * @author WangYi
- * @since 2020/5/26
+ * @since 2020/5/29
  */
-public interface RouteMatcher<R> {
-  R match(RequestContext context);
+public class FileRouteMatcher implements RouteMatcher<Boolean> {
+  @Override
+  public Boolean match(RequestContext context) {
+    return null;
+  }
 }

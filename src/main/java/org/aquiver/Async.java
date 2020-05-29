@@ -23,10 +23,37 @@
  */
 package org.aquiver;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 /**
  * @author WangYi
- * @since 2020/5/26
+ * @since 2020/5/29
  */
-public interface RouteMatcher<R> {
-  R match(RequestContext context);
+final class Async {
+  private Async() {}
+
+  /** Returns if the future has successfully completed. */
+  static boolean isReady(CompletableFuture<?> future) {
+    return (future != null) && future.isDone()
+            && !future.isCompletedExceptionally()
+            && (future.join() != null);
+  }
+
+  /** Returns the current value or null if either not done or failed. */
+  static <V> V getIfReady(CompletableFuture<V> future) {
+    return isReady(future) ? future.join() : null;
+  }
+
+  /** Returns the value when completed successfully or null if failed. */
+  static <V> V getWhenSuccessful(CompletableFuture<V> future) {
+    try {
+      return (future == null) ? null : future.get();
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      return null;
+    } catch (ExecutionException e) {
+      return null;
+    }
+  }
 }
