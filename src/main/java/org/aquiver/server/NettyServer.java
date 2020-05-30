@@ -156,7 +156,7 @@ public class NettyServer implements Server {
         this.routeContext.addRoute(entry.getValue(), entry.getKey());
       }
     } catch (Throwable e) {
-      log.error("An exception occurred while initializing the ioc container", e);
+      log.error("An exception occurred while load route", e);
     }
   }
 
