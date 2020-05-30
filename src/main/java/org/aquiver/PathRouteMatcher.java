@@ -48,12 +48,10 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
 
   private final Map<String, Route> routeMap;
   private final HttpExceptionHandler exceptionHandler;
-  private final FileRouteMatcher fileRouteMatcher;
 
   public PathRouteMatcher(Map<String, Route> routeMap) {
     this.routeMap = routeMap;
     this.exceptionHandler = new HttpExceptionHandler();
-    this.fileRouteMatcher = new FileRouteMatcher();
   }
 
   @Override
@@ -144,22 +142,17 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
       lookupPath = lookupPath.substring(0, paramStartIndex);
     }
     if (routeMap == null || routeMap.isEmpty()) {
-      fileMatch(context);
+      this.handlerNoRouteFoundException(context);
     }
     if (preLookUp(context, lookupPath)) {
       return context;
     }
     if (loopLookUp(context, lookupPath)) {
       return context;
+    } else {
+      this.handlerNoRouteFoundException(context);
     }
-    fileMatch(context);
     return context;
-  }
-
-  private void fileMatch(RequestContext context) {
-    if (!fileRouteMatcher.match(context)) {
-      handlerNoRouteFoundException(context);
-    }
   }
 
   private void handlerNoRouteFoundException(RequestContext requestContext) {
