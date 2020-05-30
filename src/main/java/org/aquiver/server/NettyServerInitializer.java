@@ -34,6 +34,7 @@ import io.netty.handler.codec.http.cors.CorsConfig;
 import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.cors.CorsHandler;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.stream.ChunkedWriteHandler;
 import org.aquiver.Const;
 import org.aquiver.Environment;
 import org.aquiver.RouteContext;
@@ -77,6 +78,8 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
     channelPipeline.addLast(new HttpRequestDecoder());
     channelPipeline.addLast(new HttpResponseEncoder());
     channelPipeline.addLast(new HttpObjectAggregator(65536));
+    channelPipeline.addLast(new ChunkedWriteHandler());
+    channelPipeline.addLast(new StaticFileServerHandler());
     channelPipeline.addLast(new NettyServerHandler(routeContext));
   }
 }
