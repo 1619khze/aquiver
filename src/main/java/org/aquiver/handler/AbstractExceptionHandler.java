@@ -77,7 +77,7 @@ public abstract class AbstractExceptionHandler implements ExceptionHandler, Http
   protected FullHttpResponse buildResponse(RequestContext requestContext,
                                            Throwable throwable, HttpResponseStatus status) {
     HttpVersion httpVersion = requestContext.getHttpRequest().protocolVersion();
-    byte[] exceptionMessageByte = getExceptionMessageByte(throwable);
+    byte[] exceptionMessageByte = this.getExceptionMessageByte("Failure: " + throwable.getLocalizedMessage() + "\r\n");
     ByteBuf byteBuf = Unpooled.copiedBuffer(exceptionMessageByte);
     return new DefaultFullHttpResponse(httpVersion, status, byteBuf);
   }
@@ -85,10 +85,10 @@ public abstract class AbstractExceptionHandler implements ExceptionHandler, Http
   /**
    * Get byte array of exception message in standard character set encoding format
    *
-   * @param throwable exception
+   * @param message exception message
    * @return byte array of exception message in standard character set encoding format
    */
-  private byte[] getExceptionMessageByte(Throwable throwable) {
-    return throwable.getMessage().getBytes(StandardCharsets.UTF_8);
+  private byte[] getExceptionMessageByte(String message) {
+    return message.getBytes(StandardCharsets.UTF_8);
   }
 }

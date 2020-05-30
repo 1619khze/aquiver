@@ -25,6 +25,7 @@ package org.aquiver.handler;
 
 import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.aquiver.RequestContext;
 
@@ -43,6 +44,7 @@ public class HttpExceptionHandler extends AbstractExceptionHandler {
   @Override
   public void handle(RequestContext requestContext, Throwable throwable, HttpResponseStatus status) {
     FullHttpResponse fullHttpResponse = buildResponse(requestContext, throwable, status);
+    fullHttpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
     if (super.support(status.hashCode(), throwable.getMessage())) {
       ChannelFuture channelFuture = super.writeResponse(requestContext, fullHttpResponse);
       super.closeFuture(channelFuture);
