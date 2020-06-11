@@ -23,26 +23,16 @@
  */
 package org.aquiver.server;
 
-import com.alibaba.fastjson.JSONObject;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.*;
-import io.netty.util.CharsetUtil;
+import io.netty.handler.codec.http.FullHttpRequest;
 import org.aquiver.*;
+import org.aquiver.mvc.render.JsonResponseRender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
-
-import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-import static org.aquiver.mvc.MediaType.APPLICATION_JSON_VALUE;
-import static org.aquiver.mvc.MediaType.TEXT_PLAIN_VALUE;
 
 /**
  * @author WangYi
@@ -52,11 +42,12 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
 
   private final static String FAVICON_PATH = "/favicon.ico";
-  private final static String EMPTY_STRING = "";
   private final RouteMatcher<RequestContext> matcher;
+  private final ResponseRender responseRender;
 
   public NettyServerHandler(RouteContext routeContext) {
     this.matcher = new PathRouteMatcher(routeContext.getRoutes());
+    this.responseRender = new JsonResponseRender();
   }
 
   @Override
@@ -95,24 +86,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   }
 
   private void writeResponse(RequestContext requestContext) {
-    FullHttpRequest httpRequest = requestContext.getHttpRequest();
-    Response response = requestContext.getResponse();
-    Object result = response.getResult();
-    FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(
-            HTTP_1_1, httpRequest.decoderResult().isSuccess() ? OK : BAD_REQUEST,
-            Unpooled.copiedBuffer(Objects.isNull(result)
-                    ? EMPTY_STRING.getBytes(CharsetUtil.UTF_8)
-                    : response.isJsonResponse()
-                    ? JSONObject.toJSONString(result).getBytes(StandardCharsets.UTF_8)
-                    : result.toString().getBytes(StandardCharsets.UTF_8)
-            )
-    );
-    HttpHeaders headers = fullHttpResponse.headers();
-    headers.set(HttpHeaderNames.CONTENT_TYPE, response.isJsonResponse() ? APPLICATION_JSON_VALUE : TEXT_PLAIN_VALUE);
-    if (HttpUtil.isKeepAlive(httpRequest)) {
-      headers.set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-      headers.setInt(HttpHeaderNames.CONTENT_LENGTH, fullHttpResponse.content().readableBytes());
-    }
-    requestContext.getContext().writeAndFlush(fullHttpResponse);
+    this.responseRender.render(requestContext);
   }
 }
