@@ -29,6 +29,8 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
+import org.aquiver.RequestContext;
+import org.aquiver.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +54,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @author WangYi
  * @since 2020/5/28
  */
-public class StaticFileServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+public class StaticFileServerHandler implements RequestHandler {
   private static final Logger log = LoggerFactory.getLogger(StaticFileServerHandler.class);
 
   public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
@@ -65,8 +67,9 @@ public class StaticFileServerHandler extends SimpleChannelInboundHandler<FullHtt
   private FullHttpRequest request;
 
   @Override
-  public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
-    this.request = request;
+  public void handle(RequestContext requestContext) throws Exception {
+    this.request = requestContext.getHttpRequest();
+    ChannelHandlerContext ctx = requestContext.getContext();
 
     /** if the decoder result is fail, it return the http status that the bad request . */
     if (!request.decoderResult().isSuccess()) {
@@ -185,14 +188,6 @@ public class StaticFileServerHandler extends SimpleChannelInboundHandler<FullHtt
     if (!keepAlive) {
       // Close the connection when the whole content is written out.
       lastContentFuture.addListener(ChannelFutureListener.CLOSE);
-    }
-  }
-
-  @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-    cause.printStackTrace();
-    if (ctx.channel().isActive()) {
-      sendError(ctx, INTERNAL_SERVER_ERROR);
     }
   }
 

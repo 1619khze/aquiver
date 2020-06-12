@@ -79,7 +79,6 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
     channelPipeline.addLast(new HttpResponseEncoder());
     channelPipeline.addLast(new HttpObjectAggregator(65536));
     channelPipeline.addLast(new ChunkedWriteHandler());
-    channelPipeline.addLast(new StaticFileServerHandler());
     channelPipeline.addLast(new NettyServerHandler(routeContext));
   }
 }

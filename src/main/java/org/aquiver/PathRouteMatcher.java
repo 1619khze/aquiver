@@ -30,6 +30,7 @@ import org.aquiver.mvc.ParameterDispenser;
 import org.aquiver.mvc.RequestHandlerParam;
 import org.aquiver.mvc.Route;
 import org.aquiver.mvc.RouteInvokeWrapper;
+import org.aquiver.server.StaticFileServerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -48,10 +50,12 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
 
   private final Map<String, Route> routeMap;
   private final HttpExceptionHandler exceptionHandler;
+  private final StaticFileServerHandler fileServerHandler;
 
   public PathRouteMatcher(Map<String, Route> routeMap) {
     this.routeMap = routeMap;
     this.exceptionHandler = new HttpExceptionHandler();
+    this.fileServerHandler = new StaticFileServerHandler();
   }
 
   @Override
@@ -106,7 +110,10 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     return route.getClazz().getMethod(route.getMethod(), wrapper.getParamTypes());
   }
 
-  private boolean loopLookUp(RequestContext context, String lookupPath) {
+  private Route loopLookUp(String lookupPath) {
+    if (routeMap.containsKey(lookupPath)) {
+      return this.routeMap.get(lookupPath);
+    }
     for (Map.Entry<String, Route> entry : routeMap.entrySet()) {
       String[] lookupPathSplit = lookupPath.split("/");
       String[] mappingUrlSplit = entry.getKey().split("/");
@@ -115,22 +122,10 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
         continue;
       }
       if (PathVarMatcher.checkMatch(lookupPathSplit, mappingUrlSplit)) {
-        Route value = entry.getValue();
-        context.setRoute(value);
-        return true;
+        return entry.getValue();
       }
     }
-    return false;
-  }
-
-  private boolean preLookUp(RequestContext context, String lookupPath) {
-    if (routeMap.containsKey(lookupPath)) {
-      Route handler = this.routeMap.get(lookupPath);
-      context.setRoute(handler);
-      return true;
-    } else {
-      return false;
-    }
+    return null;
   }
 
   private RequestContext lookupRoute(RequestContext context) {
@@ -141,18 +136,21 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     if (paramStartIndex > 0) {
       lookupPath = lookupPath.substring(0, paramStartIndex);
     }
+    Route route = loopLookUp(lookupPath);
     if (routeMap == null || routeMap.isEmpty()) {
       this.handlerNoRouteFoundException(context);
     }
-    if (preLookUp(context, lookupPath)) {
+    if (!Objects.isNull(route)) {
+      context.setRoute(route);
       return context;
     }
-    if (loopLookUp(context, lookupPath)) {
+    try {
+      this.fileServerHandler.handle(context);
       return context;
-    } else {
-      this.handlerNoRouteFoundException(context);
+    } catch (Exception e) {
+      log.error("An exception occurred while processing static files", e);
+      return context;
     }
-    return context;
   }
 
   private void handlerNoRouteFoundException(RequestContext requestContext) {
