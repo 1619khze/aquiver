@@ -29,10 +29,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
-import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
-import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData;
-import io.netty.handler.codec.http.multipart.MemoryAttribute;
+import io.netty.handler.codec.http.multipart.*;
+import org.aquiver.mvc.MediaType;
 import org.aquiver.mvc.Route;
 
 import java.nio.charset.StandardCharsets;
@@ -50,6 +48,7 @@ public class RequestContext {
   private Map<String, String> queryString;
   private Map<String, Object> formData;
   private Map<String, Object> jsonData;
+  private Map<String,FileUpload> fileUploads;
   private String uri;
   private String httpMethod;
   private String version;
@@ -62,6 +61,7 @@ public class RequestContext {
     this.queryString = new HashMap<>();
     this.formData = new HashMap<>();
     this.jsonData = new HashMap<>();
+    this.fileUploads = new HashMap<>();
     this.init();
   }
 
@@ -77,22 +77,25 @@ public class RequestContext {
   }
 
   private void jsonData() {
-    ByteBuf content = httpRequest.content();
-    byte[] reqContent = new byte[content.readableBytes()];
-    content.readBytes(reqContent);
-    String strContent = new String(reqContent, StandardCharsets.UTF_8);
-    JSONObject jsonParams = JSONObject.parseObject(strContent);
-    if (Objects.isNull(jsonParams) || jsonParams.keySet().isEmpty()) {
-      return;
-    }
-    for (Object key : jsonParams.keySet()) {
-      jsonData.put(key.toString(), jsonParams.get(key.toString()));
+    Object contentType = headers.get("Content-Type");
+    if(!Objects.isNull(contentType) && String.valueOf(contentType).equals(MediaType.APPLICATION_JSON_VALUE)){
+      ByteBuf content = httpRequest.content();
+      byte[] reqContent = new byte[content.readableBytes()];
+      content.readBytes(reqContent);
+      String strContent = new String(reqContent, StandardCharsets.UTF_8);
+      JSONObject jsonParams = JSONObject.parseObject(strContent);
+      if (Objects.isNull(jsonParams) || jsonParams.keySet().isEmpty()) {
+        return;
+      }
+      for (Object key : jsonParams.keySet()) {
+        jsonData.put(key.toString(), jsonParams.get(key.toString()));
+      }
     }
   }
 
   private void formData() {
     HttpPostRequestDecoder decoder = new HttpPostRequestDecoder(
-            new DefaultHttpDataFactory(false), httpRequest);
+            new DefaultHttpDataFactory(true), httpRequest);
     List<InterfaceHttpData> formDataList = decoder.getBodyHttpDatas();
     if (Objects.isNull(formDataList) || formDataList.isEmpty()) {
       return;
@@ -101,6 +104,10 @@ public class RequestContext {
       if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
         MemoryAttribute attribute = (MemoryAttribute) data;
         formData.put(attribute.getName(), attribute.getValue());
+      }
+      if (InterfaceHttpData.HttpDataType.FileUpload.equals(data.getHttpDataType())) {
+        final FileUpload fileUpload = (FileUpload) data;
+        fileUploads.put(fileUpload.getName(),fileUpload);
       }
     }
   }
@@ -238,5 +245,13 @@ public class RequestContext {
 
   public ChannelHandlerContext getContext() {
     return context;
+  }
+
+  public Map<String, FileUpload> getFileUploads() {
+    return fileUploads;
+  }
+
+  public void setFileUploads(Map<String, FileUpload> fileUploads) {
+    this.fileUploads = fileUploads;
   }
 }

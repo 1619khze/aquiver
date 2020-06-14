@@ -27,6 +27,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpObject;
+import io.netty.util.concurrent.EventExecutor;
 import org.aquiver.*;
 import org.aquiver.mvc.render.JsonResponseRender;
 import org.slf4j.Logger;
@@ -39,13 +40,12 @@ import java.util.concurrent.ForkJoinPool;
  * @author WangYi
  * @since 2020/5/26
  */
-public class NettyServerHandler extends SimpleChannelInboundHandler<HttpObject> {
+public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
 
   private final static String FAVICON_PATH = "/favicon.ico";
   private final RouteMatcher<RequestContext> matcher;
   private final ResponseRender responseRender;
-  private FullHttpRequest fullHttpRequest;
 
   public NettyServerHandler(RouteContext routeContext) {
     this.matcher = new PathRouteMatcher(routeContext.getRoutes());
@@ -69,25 +69,22 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<HttpObject> 
   }
 
   @Override
-  protected void channelRead0(ChannelHandlerContext ctx, HttpObject httpObject) {
-    if (httpObject instanceof FullHttpRequest) {
-      fullHttpRequest = (FullHttpRequest) httpObject;
-    }
+  protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest fullHttpRequest) {
     if (FAVICON_PATH.equals(fullHttpRequest.uri())) {
       return;
     }
 
     CompletableFuture<FullHttpRequest> future = CompletableFuture.completedFuture(fullHttpRequest);
-    ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
+    EventExecutor executor = ctx.executor();
 
-    future.thenApply(request -> this.thenApplyRequestContext(httpObject, request, ctx))
-            .thenApplyAsync(this.matcher::match, forkJoinPool)
-            .thenAcceptAsync(this::writeResponse, forkJoinPool);
+    future.thenApply(request -> this.thenApplyRequestContext(request, ctx))
+            .thenApplyAsync(this.matcher::match, executor)
+            .thenAcceptAsync(this::writeResponse, executor);
     future.complete(fullHttpRequest);
   }
 
-  private RequestContext thenApplyRequestContext(HttpObject httpObject, FullHttpRequest request, ChannelHandlerContext ctx) {
-    return new RequestContext(httpObject, request, ctx);
+  private RequestContext thenApplyRequestContext(FullHttpRequest request, ChannelHandlerContext ctx) {
+    return new RequestContext(request, ctx);
   }
 
   private void writeResponse(RequestContext requestContext) {
