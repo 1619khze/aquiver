@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.List;
 
 @RestPath
 @Path(value = "/controller")
@@ -101,5 +102,25 @@ public class ApplicationController {
       log.error("error:", e);
     }
     return "controller/uploadFile";
+  }
+
+  @POST(value = "/uploadFiles")
+  public String uploadFileS(@MultiFileUpload List<MultipartFile> files) {
+    log.info("file size:{}", files.size());
+    for (MultipartFile multipartFile : files) {
+      log.info("fileName:{}", multipartFile.getFileName());
+      try (InputStream inputStream = multipartFile.getInputStream();
+           BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+          sb.append(line);
+        }
+        System.out.println(sb.toString());
+      } catch (IOException e) {
+        log.error("error:", e);
+      }
+    }
+    return "controller/uploadFiles";
   }
 }
