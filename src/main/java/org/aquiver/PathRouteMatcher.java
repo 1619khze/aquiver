@@ -67,7 +67,10 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
             .thenApply(this::lookupRoute)
             .thenApply(this::invokeParam)
             .thenApply(this::invokeMethod);
-    Response response = Async.getIfReady(resultFuture);
+
+    Response response = Objects.requireNonNullElse(
+            Async.getIfReady(resultFuture), new Response(Const.SPACE, false));
+
     context.setResponse(response);
     resultFuture.complete(response);
     return context;
@@ -128,7 +131,7 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     return null;
   }
 
-  private RequestContext lookupRoute(RequestContext context) {
+  private RequestContext lookupRoute(RequestContext context) throws NoRouteFoundException {
     String lookupPath = context.getUri().endsWith("/")
             ? context.getUri().substring(0, context.getUri().length() - 1)
             : context.getUri();
@@ -139,6 +142,7 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     Route route = loopLookUp(lookupPath);
     if (routeMap == null || routeMap.isEmpty()) {
       this.handlerNoRouteFoundException(context);
+      throw new NoRouteFoundException(context.getHttpMethod(), context.getUri());
     }
     if (!Objects.isNull(route)) {
       context.setRoute(route);
@@ -148,10 +152,11 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
       Boolean result = this.fileServerHandler.handle(context);
       if (!result) {
         this.handlerNoRouteFoundException(context);
+        throw new NoRouteFoundException(context.getHttpMethod(), context.getUri());
       }
       return context;
     } catch (Exception e) {
-      log.error("An exception occurred while processing static files", e);
+      log.error("An exception occurred while looking up the route", e);
       return context;
     }
   }

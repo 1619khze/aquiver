@@ -26,6 +26,7 @@ package org.aquiver.server;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpObject;
 import org.aquiver.*;
 import org.aquiver.mvc.render.JsonResponseRender;
 import org.slf4j.Logger;
@@ -38,12 +39,13 @@ import java.util.concurrent.ForkJoinPool;
  * @author WangYi
  * @since 2020/5/26
  */
-public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+public class NettyServerHandler extends SimpleChannelInboundHandler<HttpObject> {
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
 
   private final static String FAVICON_PATH = "/favicon.ico";
   private final RouteMatcher<RequestContext> matcher;
   private final ResponseRender responseRender;
+  private FullHttpRequest fullHttpRequest;
 
   public NettyServerHandler(RouteContext routeContext) {
     this.matcher = new PathRouteMatcher(routeContext.getRoutes());
@@ -67,7 +69,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   }
 
   @Override
-  protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest fullHttpRequest) {
+  protected void channelRead0(ChannelHandlerContext ctx, HttpObject httpObject) {
+    if (httpObject instanceof FullHttpRequest) {
+      fullHttpRequest = (FullHttpRequest) httpObject;
+    }
     if (FAVICON_PATH.equals(fullHttpRequest.uri())) {
       return;
     }
@@ -75,14 +80,14 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     CompletableFuture<FullHttpRequest> future = CompletableFuture.completedFuture(fullHttpRequest);
     ForkJoinPool forkJoinPool = ForkJoinPool.commonPool();
 
-    future.thenApply(request -> this.thenApplyRequestContext(request, ctx))
+    future.thenApply(request -> this.thenApplyRequestContext(httpObject, request, ctx))
             .thenApplyAsync(this.matcher::match, forkJoinPool)
             .thenAcceptAsync(this::writeResponse, forkJoinPool);
     future.complete(fullHttpRequest);
   }
 
-  private RequestContext thenApplyRequestContext(FullHttpRequest request, ChannelHandlerContext ctx) {
-    return new RequestContext(request, ctx);
+  private RequestContext thenApplyRequestContext(HttpObject httpObject, FullHttpRequest request, ChannelHandlerContext ctx) {
+    return new RequestContext(httpObject, request, ctx);
   }
 
   private void writeResponse(RequestContext requestContext) {
