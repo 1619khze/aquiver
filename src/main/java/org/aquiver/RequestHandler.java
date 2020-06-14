@@ -27,6 +27,6 @@ package org.aquiver;
  * @author WangYi
  * @since 2020/6/12
  */
-public interface RequestHandler {
-  void handle(RequestContext context) throws Exception;
+public interface RequestHandler<R> {
+  R handle(RequestContext context) throws Exception;
 }

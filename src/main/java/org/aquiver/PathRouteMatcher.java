@@ -145,7 +145,10 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
       return context;
     }
     try {
-      this.fileServerHandler.handle(context);
+      Boolean result = this.fileServerHandler.handle(context);
+      if (!result) {
+        this.handlerNoRouteFoundException(context);
+      }
       return context;
     } catch (Exception e) {
       log.error("An exception occurred while processing static files", e);
