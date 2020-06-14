@@ -39,6 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -64,10 +65,29 @@ public final class ParameterDispenser {
         } catch (Exception e) {
           e.printStackTrace();
         }
+      case UPLOAD_FILES:
+        try {
+          return getUploadFiles(handlerParam, requestContext);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
       default:
         break;
     }
     return null;
+  }
+
+  private static Object getUploadFiles(RequestHandlerParam handlerParam, RequestContext requestContext) throws IOException {
+    Map<String, FileUpload> fileUploads = requestContext.getFileUploads();
+    List<MultipartFile> multipartFiles = new ArrayList<>();
+    if (List.class.isAssignableFrom(handlerParam.getDataType())) {
+      for (Map.Entry<String, FileUpload> entry : fileUploads.entrySet()) {
+        FileUpload value = entry.getValue();
+        MultipartFile multipartFile = buildMultipartFile(handlerParam, value);
+        multipartFiles.add(multipartFile);
+      }
+    }
+    return multipartFiles;
   }
 
   private static Object getUploadFile(RequestHandlerParam handlerParam, RequestContext requestContext) throws Exception {
@@ -75,28 +95,31 @@ public final class ParameterDispenser {
     if (MultipartFile.class.isAssignableFrom(handlerParam.getDataType()) &&
             fileUploads.containsKey(handlerParam.getName())) {
       FileUpload fileUpload = fileUploads.get(handlerParam.getName());
-
-      MultipartFile multipartFile = new MultipartFile();
-      multipartFile.setCharset(fileUpload.getCharset());
-      multipartFile.setCharsetName(fileUpload.getCharset().name());
-      multipartFile.setContentTransferEncoding(fileUpload.getContentTransferEncoding());
-      multipartFile.setContentType(fileUpload.getContentType());
-      multipartFile.setFileName(fileUpload.getFilename());
-
-      Path tmpFile = Files.createTempFile(
-              Paths.get(fileUpload.getFile().getParent()), "aquiver", "_upload");
-
-      Path fileUploadPath = Paths.get(fileUpload.getFile().getPath());
-      Files.move(fileUploadPath, tmpFile, StandardCopyOption.REPLACE_EXISTING);
-
-      multipartFile.setFile(tmpFile.toFile());
-      multipartFile.setInputStream(new FileInputStream(multipartFile.getFile()));
-      multipartFile.setPath(tmpFile.toFile().getPath());
-      multipartFile.setLength(fileUpload.length());
-
-      return multipartFile;
+      return buildMultipartFile(handlerParam, fileUpload);
     }
     return null;
+  }
+
+  private static MultipartFile buildMultipartFile(RequestHandlerParam handlerParam,
+                                                  FileUpload fileUpload) throws IOException {
+    MultipartFile multipartFile = new MultipartFile();
+    multipartFile.setCharset(fileUpload.getCharset());
+    multipartFile.setCharsetName(fileUpload.getCharset().name());
+    multipartFile.setContentTransferEncoding(fileUpload.getContentTransferEncoding());
+    multipartFile.setContentType(fileUpload.getContentType());
+    multipartFile.setFileName(fileUpload.getFilename());
+
+    Path tmpFile = Files.createTempFile(
+            Paths.get(fileUpload.getFile().getParent()), "aquiver", "_upload");
+
+    Path fileUploadPath = Paths.get(fileUpload.getFile().getPath());
+    Files.move(fileUploadPath, tmpFile, StandardCopyOption.REPLACE_EXISTING);
+
+    multipartFile.setFile(tmpFile.toFile());
+    multipartFile.setInputStream(new FileInputStream(multipartFile.getFile()));
+    multipartFile.setPath(tmpFile.toFile().getPath());
+    multipartFile.setLength(fileUpload.length());
+    return multipartFile;
   }
 
   private static Object getQueryString(RequestHandlerParam handlerParam, RequestContext requestContext) {
