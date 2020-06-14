@@ -46,16 +46,17 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static io.netty.handler.codec.http.HttpMethod.GET;
-import static io.netty.handler.codec.http.HttpResponseStatus.*;
+import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_0;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-import static org.aquiver.ResponseUtils.*;
+import static org.aquiver.ResponseUtils.setContentTypeHeader;
+import static org.aquiver.ResponseUtils.setDateAndCacheHeaders;
 
 /**
  * @author WangYi
  * @since 2020/5/28
  */
-public class StaticFileServerHandler implements RequestHandler {
+public class StaticFileServerHandler implements RequestHandler<Boolean> {
   private static final Logger log = LoggerFactory.getLogger(StaticFileServerHandler.class);
 
   public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
@@ -66,20 +67,18 @@ public class StaticFileServerHandler implements RequestHandler {
   private static final Pattern ALLOWED_FILE_NAME = Pattern.compile("[^-._]?[^<>&\"]*");
 
   @Override
-  public void handle(RequestContext requestContext) throws Exception {
+  public Boolean handle(RequestContext requestContext) throws Exception {
     FullHttpRequest request = requestContext.getHttpRequest();
     ChannelHandlerContext ctx = requestContext.getContext();
 
     /** if the decoder result is fail, it return the http status that the bad request . */
     if (!request.decoderResult().isSuccess()) {
-      sendError(ctx, request, BAD_REQUEST);
-      return;
+      return false;
     }
 
     /** If the request method is not obtained, it returns the http status that the method does not allowed. */
     if (!GET.equals(request.method())) {
-      sendError(ctx, request, METHOD_NOT_ALLOWED);
-      return;
+      return false;
     }
 
     /** if the access file path is forbidden, it returns the http status that the method does forbidden. */
@@ -87,7 +86,7 @@ public class StaticFileServerHandler implements RequestHandler {
     String fileUri = request.uri();
 
     if (INSECURE_URI.matcher(fileUri).matches() || !ALLOWED_FILE_NAME.matcher(fileUri).matches()) {
-      sendError(ctx, request, FORBIDDEN);
+      return false;
     }
 
     if (fileUri.startsWith("/")) {
@@ -96,21 +95,18 @@ public class StaticFileServerHandler implements RequestHandler {
 
     URL url = this.getClass().getClassLoader().getResource(fileUri);
     if (Objects.isNull(url)) {
-      sendError(ctx, request, NOT_FOUND);
-      return;
+      return false;
     }
 
     Path filePath = Paths.get(url.toURI());
     if (Files.isHidden(filePath) || !Files.exists(filePath)) {
-      sendError(ctx, request, NOT_FOUND);
-      return;
+      return false;
     }
 
     File file = filePath.toFile();
 
     if (Files.isDirectory(filePath) || !Files.isRegularFile(filePath)) {
-      sendError(ctx, request, FORBIDDEN);
-      return;
+      return false;
     }
 
     // Cache Validation
@@ -124,8 +120,7 @@ public class StaticFileServerHandler implements RequestHandler {
       long ifModifiedSinceDateSeconds = ifModifiedSinceDate.getTime() / 1000;
       long fileLastModifiedSeconds = file.lastModified() / 1000;
       if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
-        sendNotModified(ctx, request);
-        return;
+        return false;
       }
     }
 
@@ -133,8 +128,7 @@ public class StaticFileServerHandler implements RequestHandler {
     try {
       raf = new RandomAccessFile(file, "r");
     } catch (FileNotFoundException ignore) {
-      sendError(ctx, request, NOT_FOUND);
-      return;
+      return false;
     }
     long fileLength = raf.length();
 
@@ -187,6 +181,8 @@ public class StaticFileServerHandler implements RequestHandler {
     if (!keepAlive) {
       // Close the connection when the whole content is written out.
       lastContentFuture.addListener(ChannelFutureListener.CLOSE);
+      return true;
     }
+    return false;
   }
 }
