@@ -24,14 +24,18 @@
 package org.aquiver.mvc.multipart;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 /**
  * @author WangYi
  * @since 2020/6/14
  */
 public class MultipartFile {
+
   private String fileName;
   private InputStream inputStream;
   private Charset charset;
@@ -41,6 +45,14 @@ public class MultipartFile {
   private File file;
   private String path;
   private long length;
+
+  public String readFileContent() throws IOException {
+    return this.readFileContent(StandardCharsets.UTF_8);
+  }
+
+  public String readFileContent(Charset charset) throws IOException {
+    return Files.readString(file.toPath(), charset);
+  }
 
   public String getFileName() {
     return fileName;
