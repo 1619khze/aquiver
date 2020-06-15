@@ -72,16 +72,10 @@ public String path(@Body User user){
 @POST(value = "/uploadFile")
 public String uploadFile(@FileUpload MultipartFile file) {
   log.info("fileName:{}", file.getFileName());
-  try (InputStream inputStream = file.getInputStream();
-         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-    StringBuilder sb = new StringBuilder();
-    String line;
-    while ((line = bufferedReader.readLine()) != null) {
-      sb.append(line);
-    }
-    System.out.println(sb.toString());
+  try {
+    System.out.println(multipartFile.readFileContent());
   } catch (IOException e) {
-    log.error("error:", e);
+    e.printStackTrace();
   }
   return "controller/uploadFile";
 }
@@ -94,16 +88,10 @@ public String uploadFileS(@MultiFileUpload List<MultipartFile> files) {
   log.info("file size:{}", files.size());
   for (MultipartFile multipartFile : files) {
     log.info("fileName:{}", multipartFile.getFileName());
-    try (InputStream inputStream = multipartFile.getInputStream();
-           BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-    StringBuilder sb = new StringBuilder();
-    String line;
-    while ((line = bufferedReader.readLine()) != null) {
-        sb.append(line);
-    }
-      System.out.println(sb.toString());
+    try {
+      System.out.println(multipartFile.readFileContent());
     } catch (IOException e) {
-      log.error("error:", e);
+      e.printStackTrace();
     }
   }
   return "controller/uploadFiles";
