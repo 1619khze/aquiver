@@ -17,7 +17,7 @@
         <classgraph.version>4.8.37</classgraph.version>
         <junit.version>4.12</junit.version>
         <logback.version>1.2.3</logback.version>
-        <netty.version>4.1.45.Final</netty.version>
+        <netty.version>4.1.50.Final</netty.version>
         <logback.version>1.2.3</logback.version>
         <pebble.version>3.1.4</pebble.version>
         <java.version>8</java.version>
