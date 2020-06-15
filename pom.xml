@@ -19,6 +19,7 @@
         <logback.version>1.2.3</logback.version>
         <netty.version>4.1.45.Final</netty.version>
         <logback.version>1.2.3</logback.version>
+        <pebble.version>3.1.4</pebble.version>
         <java.version>8</java.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-license-plugin.version>1.9.0</maven-license-plugin.version>
@@ -88,6 +89,11 @@
             <groupId>io.github.classgraph</groupId>
             <artifactId>classgraph</artifactId>
             <version>${classgraph.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.pebbletemplates</groupId>
+            <artifactId>pebble</artifactId>
+            <version>${pebble.version}</version>
         </dependency>
     </dependencies>
 
