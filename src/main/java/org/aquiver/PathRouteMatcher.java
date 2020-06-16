@@ -148,6 +148,10 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
       context.setRoute(route);
       return context;
     }
+    return lookupStaticFile(context);
+  }
+
+  private RequestContext lookupStaticFile(RequestContext context) {
     try {
       Boolean result = this.fileServerHandler.handle(context);
       if (!result) {
