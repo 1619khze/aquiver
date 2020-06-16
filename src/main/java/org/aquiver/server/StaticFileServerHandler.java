@@ -23,166 +23,94 @@
  */
 package org.aquiver.server;
 
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.DefaultFileRegion;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslHandler;
-import io.netty.handler.stream.ChunkedFile;
+import io.netty.handler.stream.ChunkedNioFile;
 import org.aquiver.RequestContext;
 import org.aquiver.RequestHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.regex.Pattern;
-
-import static io.netty.handler.codec.http.HttpMethod.GET;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_0;
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-import static org.aquiver.ResponseUtils.setContentTypeHeader;
-import static org.aquiver.ResponseUtils.setDateAndCacheHeaders;
 
 /**
  * @author WangYi
  * @since 2020/5/28
  */
 public class StaticFileServerHandler implements RequestHandler<Boolean> {
-  private static final Logger log = LoggerFactory.getLogger(StaticFileServerHandler.class);
-
-  public static final String HTTP_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
-  public static final String HTTP_DATE_GMT_TIMEZONE = "GMT";
-  public static final int HTTP_CACHE_SECONDS = 60;
-
-  private static final Pattern INSECURE_URI = Pattern.compile(".*[<>&\"].*");
-  private static final Pattern ALLOWED_FILE_NAME = Pattern.compile("[^-._]?[^<>&\"]*");
-
   @Override
   public Boolean handle(RequestContext requestContext) throws Exception {
     FullHttpRequest request = requestContext.getHttpRequest();
     ChannelHandlerContext ctx = requestContext.getContext();
-
-    /** if the decoder result is fail, it return the http status that the bad request . */
-    if (!request.decoderResult().isSuccess()) {
+    // 获取URI
+    String uri = request.uri();
+    // 设置不支持favicon.ico文件
+    if ("favicon.ico".equals(uri)) {
       return false;
     }
+    // 根据路径地址构建文件
+    URL resource = this.getClass().getClassLoader().getResource(uri.replaceFirst("/", ""));
+    URL notFoundUrl = this.getClass().getClassLoader().getResource("404.html");
 
-    /** If the request method is not obtained, it returns the http status that the method does not allowed. */
-    if (!GET.equals(request.method())) {
-      return false;
+    File html = new File(resource.toURI());
+    File NOT_FOUND = new File(notFoundUrl.toURI());
+
+    // 状态为1xx的话，继续请求
+    if (HttpUtil.is100ContinueExpected(request)) {
+      send100Continue(ctx);
     }
 
-    /** if the access file path is forbidden, it returns the http status that the method does forbidden. */
-    final boolean keepAlive = HttpUtil.isKeepAlive(request);
-    String fileUri = request.uri();
-
-    if (INSECURE_URI.matcher(fileUri).matches() || !ALLOWED_FILE_NAME.matcher(fileUri).matches()) {
-      return false;
+    // 当文件不存在的时候，将资源指向NOT_FOUND
+    if (!html.exists()) {
+      html = NOT_FOUND;
     }
 
-    if (fileUri.startsWith("/")) {
-      fileUri = fileUri.replaceFirst("/", "");
+    RandomAccessFile file = new RandomAccessFile(html, "r");
+    HttpResponse response = new DefaultHttpResponse(request.getProtocolVersion(), HttpResponseStatus.OK);
+
+    // 文件没有发现设置状态为404
+    if (html == NOT_FOUND) {
+      response.setStatus(HttpResponseStatus.NOT_FOUND);
     }
 
-    URL url = this.getClass().getClassLoader().getResource(fileUri);
-    if (Objects.isNull(url)) {
-      return false;
+    // 设置文件格式内容
+    if (uri.endsWith(".html")) {
+      response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "text/html; charset=UTF-8");
+    } else if (uri.endsWith(".js")) {
+      response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/x-javascript");
+    } else if (uri.endsWith(".css")) {
+      response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "text/css; charset=UTF-8");
     }
 
-    Path filePath = Paths.get(url.toURI());
-    if (Files.isHidden(filePath) || !Files.exists(filePath)) {
-      return false;
-    }
+    boolean keepAlive = HttpUtil.isKeepAlive(request);
 
-    File file = filePath.toFile();
-
-    if (Files.isDirectory(filePath) || !Files.isRegularFile(filePath)) {
-      return false;
-    }
-
-    // Cache Validation
-    String ifModifiedSince = request.headers().get(HttpHeaderNames.IF_MODIFIED_SINCE);
-    if (ifModifiedSince != null && !ifModifiedSince.isEmpty()) {
-      SimpleDateFormat dateFormatter = new SimpleDateFormat(HTTP_DATE_FORMAT, Locale.US);
-      Date ifModifiedSinceDate = dateFormatter.parse(ifModifiedSince);
-
-      // Only compare up to the second because the datetime format we send to the client
-      // does not have milliseconds
-      long ifModifiedSinceDateSeconds = ifModifiedSinceDate.getTime() / 1000;
-      long fileLastModifiedSeconds = file.lastModified() / 1000;
-      if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
-        return false;
-      }
-    }
-
-    RandomAccessFile raf;
-    try {
-      raf = new RandomAccessFile(file, "r");
-    } catch (FileNotFoundException ignore) {
-      return false;
-    }
-    long fileLength = raf.length();
-
-    HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
-    HttpUtil.setContentLength(response, fileLength);
-    setContentTypeHeader(response, file);
-    setDateAndCacheHeaders(response, file);
-
-    if (!keepAlive) {
-      response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
-    } else if (request.protocolVersion().equals(HTTP_1_0)) {
+    if (keepAlive) {
+      response.headers().set(HttpHeaderNames.CONTENT_LENGTH, file.length());
       response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
     }
-
-    // Write the initial line and the header.
     ctx.write(response);
 
-    // Write the content.
-    ChannelFuture sendFileFuture;
-    ChannelFuture lastContentFuture;
     if (ctx.pipeline().get(SslHandler.class) == null) {
-      sendFileFuture =
-              ctx.write(new DefaultFileRegion(raf.getChannel(), 0, fileLength), ctx.newProgressivePromise());
-      // Write the end marker.
-      lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+      ctx.write(new DefaultFileRegion(file.getChannel(), 0, file.length()));
     } else {
-      sendFileFuture = ctx.writeAndFlush(
-              new HttpChunkedInput(new ChunkedFile(raf, 0, fileLength, 8192)),
-              ctx.newProgressivePromise());
-      // HttpChunkedInput will write the end marker (LastHttpContent) for us.
-      lastContentFuture = sendFileFuture;
+      ctx.write(new ChunkedNioFile(file.getChannel()));
     }
-
-    sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
-      @Override
-      public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) {
-        if (total < 0) { // total unknown
-          log.info(future.channel() + " Transfer progress: " + progress);
-        } else {
-          log.info(future.channel() + " Transfer progress: " + progress + " / " + total);
-        }
-      }
-
-      @Override
-      public void operationComplete(ChannelProgressiveFuture future) {
-        log.info(future.channel() + " Transfer complete.");
-      }
-    });
-    // Decide whether to close the connection or not.
+    // 写入文件尾部
+    ChannelFuture future = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
     if (!keepAlive) {
-      // Close the connection when the whole content is written out.
-      lastContentFuture.addListener(ChannelFutureListener.CLOSE);
-      return true;
+      future.addListener(ChannelFutureListener.CLOSE);
     }
-    return false;
+    file.close();
+
+    return true;
+  }
+
+  private static void send100Continue(ChannelHandlerContext ctx) {
+    FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE);
+    ctx.writeAndFlush(response);
   }
 }
