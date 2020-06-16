@@ -152,25 +152,27 @@ public final class Aquiver {
 
   /** Set the listening port number. */
   public Aquiver bind(int port) {
-    requireArgument(this.port > 0 && port <= 65533, "Port number must be available");
-    requireState(this.bannerText == null, "port was already set to %s", this.port);
+    requireArgument(port > 0 && port <= 65533, "Port number must be available");
+    requireArgument(port >= 0, "port was already set to %s", this.port);
     this.port = port;
     this.environment.add(PATH_SERVER_PORT, port);
     return this;
   }
 
   /** Set the print banner text */
-  public void bannerText(String bannerText) {
+  public Aquiver bannerText(String bannerText) {
     requireState(this.bannerText == null, "bannerText was already set to %s", this.bannerText);
     this.bannerText = requireNonNull(bannerText);
     this.environment.add(PATH_APP_BANNER_TEXT, bannerText);
+    return this;
   }
 
   /** Set the print banner font */
-  public void bannerFont(String bannerFont) {
+  public Aquiver bannerFont(String bannerFont) {
     requireState(this.bannerFont == null, "bannerFont was already set to %s", this.bannerFont);
     this.bannerFont = requireNonNull(bannerFont);
     this.environment.add(PATH_APP_BANNER_FONT, bannerFont);
+    return this;
   }
 
   /** Set the print banner name */
