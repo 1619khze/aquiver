@@ -39,7 +39,7 @@ public class NettyServerBanner extends BannerTemplate {
 
   @Override
   public void prePrintBannerText(PrintStream printStream, String bannerText, String bannerFont) {
-    printStream.println(BananaUtils.bananaify(Const.BANNER_TEXT, bannerFont));
+    printStream.println(BananaUtils.bananaify(bannerText, bannerFont));
   }
 
   @Override
