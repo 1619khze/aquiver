@@ -70,7 +70,7 @@ public class StaticFileServerHandler implements RequestHandler<Boolean> {
     }
 
     RandomAccessFile file = new RandomAccessFile(html, "r");
-    HttpResponse response = new DefaultHttpResponse(request.getProtocolVersion(), HttpResponseStatus.OK);
+    HttpResponse response = new DefaultHttpResponse(request.protocolVersion(), HttpResponseStatus.OK);
 
     // 文件没有发现设置状态为404
     if (html == NOT_FOUND) {
@@ -79,11 +79,11 @@ public class StaticFileServerHandler implements RequestHandler<Boolean> {
 
     // 设置文件格式内容
     if (uri.endsWith(".html")) {
-      response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "text/html; charset=UTF-8");
+      response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html; charset=UTF-8");
     } else if (uri.endsWith(".js")) {
-      response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "application/x-javascript");
+      response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/x-javascript");
     } else if (uri.endsWith(".css")) {
-      response.headers().set(HttpHeaders.Names.CONTENT_TYPE, "text/css; charset=UTF-8");
+      response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/css; charset=UTF-8");
     }
 
     boolean keepAlive = HttpUtil.isKeepAlive(request);
