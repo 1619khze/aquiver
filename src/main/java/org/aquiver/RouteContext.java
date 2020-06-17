@@ -207,7 +207,7 @@ public final class RouteContext {
       route.setViewType(ViewType.HTML);
       route.setHtmlView(new PebbleHTMLView());
     }
-    if (!isAllJsonResponse && !isJsonResponse && !isViewResponse) {
+    if (isAllJsonResponse && isJsonResponse && isViewResponse) {
       route.setViewType(ViewType.TEXT);
     }
     return route;
