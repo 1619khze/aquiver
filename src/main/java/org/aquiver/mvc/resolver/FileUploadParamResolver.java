@@ -23,28 +23,30 @@
  */
 package org.aquiver.mvc.resolver;
 
-import org.aquiver.annotation.bind.Param;
-import org.aquiver.mvc.ArgsResolver;
-import org.aquiver.mvc.RequestHandlerParam;
-import org.aquiver.mvc.RequestParamType;
+import org.aquiver.annotation.bind.FileUpload;
+import org.aquiver.mvc.ParamResolver;
+import org.aquiver.mvc.RouteParam;
+import org.aquiver.mvc.RouteParamType;
 
 import java.lang.reflect.Parameter;
 
-public class RequestParamArgsResolver implements ArgsResolver {
-
+/**
+ * @author WangYi
+ * @since 2020/6/14
+ */
+public class FileUploadParamResolver implements ParamResolver {
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(Param.class);
+    return parameter.isAnnotationPresent(FileUpload.class);
   }
 
   @Override
-  public RequestHandlerParam resolve(Parameter parameter, String paramName) {
-    RequestHandlerParam handlerParam = new RequestHandlerParam();
-    Param param = parameter.getAnnotation(Param.class);
+  public RouteParam resolve(Parameter parameter, String paramName) {
+    RouteParam handlerParam = new RouteParam();
+    FileUpload param = parameter.getAnnotation(FileUpload.class);
     handlerParam.setDataType(parameter.getType());
     handlerParam.setName("".equals(param.value()) ? paramName : param.value());
-    handlerParam.setRequired(param.required());
-    handlerParam.setType(RequestParamType.REQUEST_PARAM);
+    handlerParam.setType(RouteParamType.UPLOAD_FILE);
     return handlerParam;
   }
 }

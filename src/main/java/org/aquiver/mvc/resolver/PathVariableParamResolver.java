@@ -23,28 +23,29 @@
  */
 package org.aquiver.mvc.resolver;
 
-import org.aquiver.annotation.bind.Header;
-import org.aquiver.mvc.ArgsResolver;
-import org.aquiver.mvc.RequestHandlerParam;
-import org.aquiver.mvc.RequestParamType;
+import org.aquiver.annotation.bind.PathVar;
+import org.aquiver.mvc.ParamResolver;
+import org.aquiver.mvc.RouteParam;
+import org.aquiver.mvc.RouteParamType;
 
 import java.lang.reflect.Parameter;
 
-public class RequestHeadersArgsResolver implements ArgsResolver {
+public class PathVariableParamResolver implements ParamResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(Header.class);
+    return parameter.isAnnotationPresent(PathVar.class);
   }
 
   @Override
-  public RequestHandlerParam resolve(Parameter parameter, String paramName) {
-    RequestHandlerParam handlerParam = new RequestHandlerParam();
-    Header header = parameter.getAnnotation(Header.class);
+  public RouteParam resolve(Parameter parameter, String paramName) {
+    RouteParam handlerParam = new RouteParam();
+    PathVar pathVar = parameter.getAnnotation(PathVar.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(header.value()) ? paramName : header.value());
+    handlerParam.setName((!"".equals(pathVar.value()) && !pathVar.value().trim().isEmpty()) ?
+            pathVar.value().trim() : paramName);
     handlerParam.setRequired(true);
-    handlerParam.setType(RequestParamType.REQUEST_HEADER);
+    handlerParam.setType(RouteParamType.PATH_VARIABLE);
     return handlerParam;
   }
 }

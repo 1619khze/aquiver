@@ -23,32 +23,28 @@
  */
 package org.aquiver.mvc.resolver;
 
-import org.aquiver.annotation.bind.Body;
-import org.aquiver.annotation.bind.Cookies;
-import org.aquiver.mvc.ArgsResolver;
-import org.aquiver.mvc.RequestHandlerParam;
-import org.aquiver.mvc.RequestParamType;
+import org.aquiver.annotation.bind.Param;
+import org.aquiver.mvc.ParamResolver;
+import org.aquiver.mvc.RouteParam;
+import org.aquiver.mvc.RouteParamType;
 
 import java.lang.reflect.Parameter;
 
-/**
- * @author WangYi
- * @since 2020/5/28
- */
-public class RequestBodyArgsResolver implements ArgsResolver {
+public class RequestParamParamResolver implements ParamResolver {
+
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(Body.class);
+    return parameter.isAnnotationPresent(Param.class);
   }
 
   @Override
-  public RequestHandlerParam resolve(Parameter parameter, String paramName) {
-    RequestHandlerParam handlerParam = new RequestHandlerParam();
-    Body body = parameter.getAnnotation(Body.class);
+  public RouteParam resolve(Parameter parameter, String paramName) {
+    RouteParam handlerParam = new RouteParam();
+    Param param = parameter.getAnnotation(Param.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(body.value()) ? paramName : body.value());
-    handlerParam.setRequired(true);
-    handlerParam.setType(RequestParamType.REQUEST_BODY);
+    handlerParam.setName("".equals(param.value()) ? paramName : param.value());
+    handlerParam.setRequired(param.required());
+    handlerParam.setType(RouteParamType.REQUEST_PARAM);
     return handlerParam;
   }
 }

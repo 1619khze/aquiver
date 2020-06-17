@@ -23,29 +23,28 @@
  */
 package org.aquiver.mvc.resolver;
 
-import org.aquiver.annotation.bind.PathVar;
-import org.aquiver.mvc.ArgsResolver;
-import org.aquiver.mvc.RequestHandlerParam;
-import org.aquiver.mvc.RequestParamType;
+import org.aquiver.annotation.bind.Cookies;
+import org.aquiver.mvc.ParamResolver;
+import org.aquiver.mvc.RouteParam;
+import org.aquiver.mvc.RouteParamType;
 
 import java.lang.reflect.Parameter;
 
-public class PathVariableArgsResolver implements ArgsResolver {
+public class RequestCookiesParamResolver implements ParamResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(PathVar.class);
+    return parameter.isAnnotationPresent(Cookies.class);
   }
 
   @Override
-  public RequestHandlerParam resolve(Parameter parameter, String paramName) {
-    RequestHandlerParam handlerParam = new RequestHandlerParam();
-    PathVar pathVar = parameter.getAnnotation(PathVar.class);
+  public RouteParam resolve(Parameter parameter, String paramName) {
+    RouteParam handlerParam = new RouteParam();
+    Cookies cookies = parameter.getAnnotation(Cookies.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName((!"".equals(pathVar.value()) && !pathVar.value().trim().isEmpty()) ?
-            pathVar.value().trim() : paramName);
+    handlerParam.setName("".equals(cookies.value()) ? paramName : cookies.value());
     handlerParam.setRequired(true);
-    handlerParam.setType(RequestParamType.PATH_VARIABLE);
+    handlerParam.setType(RouteParamType.REQUEST_COOKIES);
     return handlerParam;
   }
 }

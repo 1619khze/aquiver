@@ -25,7 +25,6 @@ package org.aquiver.mvc;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.multipart.FileUpload;
 import org.aquiver.PathVarMatcher;
 import org.aquiver.RequestContext;
@@ -34,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,10 +42,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public final class ParameterDispenser {
-  private static final Logger log = LoggerFactory.getLogger(ParameterDispenser.class);
+public final class ParamDispen {
+  private static final Logger log = LoggerFactory.getLogger(ParamDispen.class);
 
-  public static Object dispen(RequestHandlerParam handlerParam, RequestContext requestContext, String url) {
+  public static Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
     switch (handlerParam.getType()) {
       case REQUEST_PARAM:
         return getQueryString(handlerParam, requestContext);
@@ -77,7 +75,7 @@ public final class ParameterDispenser {
     return null;
   }
 
-  private static Object getUploadFiles(RequestHandlerParam handlerParam, RequestContext requestContext) throws IOException {
+  private static Object getUploadFiles(RouteParam handlerParam, RequestContext requestContext) throws IOException {
     Map<String, FileUpload> fileUploads = requestContext.getFileUploads();
     List<MultipartFile> multipartFiles = new ArrayList<>();
     if (List.class.isAssignableFrom(handlerParam.getDataType())) {
@@ -90,7 +88,7 @@ public final class ParameterDispenser {
     return multipartFiles;
   }
 
-  private static Object getUploadFile(RequestHandlerParam handlerParam, RequestContext requestContext) throws Exception {
+  private static Object getUploadFile(RouteParam handlerParam, RequestContext requestContext) throws Exception {
     Map<String, FileUpload> fileUploads = requestContext.getFileUploads();
     if (MultipartFile.class.isAssignableFrom(handlerParam.getDataType()) &&
             fileUploads.containsKey(handlerParam.getName())) {
@@ -100,7 +98,7 @@ public final class ParameterDispenser {
     return null;
   }
 
-  private static MultipartFile buildMultipartFile(RequestHandlerParam handlerParam,
+  private static MultipartFile buildMultipartFile(RouteParam handlerParam,
                                                   FileUpload fileUpload) throws IOException {
     MultipartFile multipartFile = new MultipartFile();
     multipartFile.setCharset(fileUpload.getCharset());
@@ -122,33 +120,33 @@ public final class ParameterDispenser {
     return multipartFile;
   }
 
-  private static Object getQueryString(RequestHandlerParam handlerParam, RequestContext requestContext) {
+  private static Object getQueryString(RouteParam handlerParam, RequestContext requestContext) {
     if (isMap(handlerParam.getDataType())) {
       return requestContext.getQueryString();
     }
     return handlerParam.getDataType().cast(requestContext.getQueryString().get(handlerParam.getName()));
   }
 
-  private static Object getRequestCookies(RequestHandlerParam handlerParam, RequestContext requestContext) {
+  private static Object getRequestCookies(RouteParam handlerParam, RequestContext requestContext) {
     if (isMap(handlerParam.getDataType())) {
       return requestContext.getCookies();
     }
     return handlerParam.getDataType().cast(requestContext.getCookies().get(handlerParam.getName()));
   }
 
-  private static Object getRequestHeaders(RequestHandlerParam handlerParam, RequestContext requestContext) {
+  private static Object getRequestHeaders(RouteParam handlerParam, RequestContext requestContext) {
     if (isMap(handlerParam.getDataType())) {
       return requestContext.getHeaders();
     }
     return handlerParam.getDataType().cast(requestContext.getHeaders().get(handlerParam.getName()));
   }
 
-  private static Object getPathVariable(RequestHandlerParam handlerParam, RequestContext requestContext, String url) {
+  private static Object getPathVariable(RouteParam handlerParam, RequestContext requestContext, String url) {
     return handlerParam.getDataType().cast(
             PathVarMatcher.getPathVariable(requestContext.getUri(), url, handlerParam.getName()));
   }
 
-  private static Object getRequestBody(RequestHandlerParam handlerParam, RequestContext requestContext) {
+  private static Object getRequestBody(RouteParam handlerParam, RequestContext requestContext) {
     Map<String, Object> jsonData = requestContext.getFormData();
     String jsonString = JSON.toJSONString(jsonData);
     if (jsonData.isEmpty() || !JSONObject.isValid(jsonString)) {

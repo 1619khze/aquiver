@@ -23,33 +23,31 @@
  */
 package org.aquiver.mvc.resolver;
 
-import org.aquiver.annotation.bind.MultiFileUpload;
-import org.aquiver.mvc.ArgsResolver;
-import org.aquiver.mvc.RequestHandlerParam;
-import org.aquiver.mvc.RequestParamType;
+import org.aquiver.annotation.bind.Body;
+import org.aquiver.mvc.ParamResolver;
+import org.aquiver.mvc.RouteParam;
+import org.aquiver.mvc.RouteParamType;
 
 import java.lang.reflect.Parameter;
-import java.util.List;
 
 /**
  * @author WangYi
- * @since 2020/6/14
+ * @since 2020/5/28
  */
-public class MultiFileUploadArgsResolver implements ArgsResolver {
-
+public class RequestBodyParamResolver implements ParamResolver {
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(MultiFileUpload.class) &&
-            parameter.getType().isAssignableFrom(List.class);
+    return parameter.isAnnotationPresent(Body.class);
   }
 
   @Override
-  public RequestHandlerParam resolve(Parameter parameter, String paramName) {
-    RequestHandlerParam handlerParam = new RequestHandlerParam();
-    MultiFileUpload param = parameter.getAnnotation(MultiFileUpload.class);
+  public RouteParam resolve(Parameter parameter, String paramName) {
+    RouteParam handlerParam = new RouteParam();
+    Body body = parameter.getAnnotation(Body.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(param.value()) ? paramName : param.value());
-    handlerParam.setType(RequestParamType.UPLOAD_FILES);
+    handlerParam.setName("".equals(body.value()) ? paramName : body.value());
+    handlerParam.setRequired(true);
+    handlerParam.setType(RouteParamType.REQUEST_BODY);
     return handlerParam;
   }
 }

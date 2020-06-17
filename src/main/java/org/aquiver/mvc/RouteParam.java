@@ -25,10 +25,10 @@ package org.aquiver.mvc;
 
 import java.util.Objects;
 
-public class RequestHandlerParam {
+public class RouteParam {
   private String name;
   private Class<?> dataType;
-  private RequestParamType type;
+  private RouteParamType type;
   private boolean required = true;
 
   public String getName() {
@@ -47,11 +47,11 @@ public class RequestHandlerParam {
     this.dataType = dataType;
   }
 
-  public RequestParamType getType() {
+  public RouteParamType getType() {
     return type;
   }
 
-  public void setType(RequestParamType type) {
+  public void setType(RouteParamType type) {
     this.type = type;
   }
 
@@ -67,7 +67,7 @@ public class RequestHandlerParam {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    RequestHandlerParam that = (RequestHandlerParam) o;
+    RouteParam that = (RouteParam) o;
     return required == that.required &&
             Objects.equals(name, that.name) &&
             Objects.equals(dataType, that.dataType) &&

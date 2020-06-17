@@ -24,26 +24,31 @@
 package org.aquiver.mvc;
 
 import org.aquiver.annotation.PathMethod;
+import org.aquiver.mvc.view.HTMLView;
+import org.aquiver.mvc.view.ViewType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class Route {
   private String url;
   private Class<?> clazz;
   private String method;
   private Object bean;
-  private boolean jsonResponse;
   private PathMethod pathMethod;
+  private Object[] paramValues;
+  private Class<?>[] paramTypes;
+  private Object invokeResult;
+  private ViewType viewType;
+  private HTMLView htmlView;
 
-  private List<RequestHandlerParam> params = new ArrayList<>();
+  private List<RouteParam> params = new ArrayList<>();
 
-  public Route(String url, Class<?> clazz, String method, boolean jsonResponse, PathMethod pathMethod) {
+  public Route(String url, Class<?> clazz, String method, PathMethod pathMethod) {
     this.url = url;
     this.clazz = clazz;
     this.method = method;
-    this.jsonResponse = jsonResponse;
     this.pathMethod = pathMethod;
     try {
       this.bean = clazz.getDeclaredConstructor().newInstance();
@@ -76,14 +81,6 @@ public class Route {
     this.method = method;
   }
 
-  public boolean isJsonResponse() {
-    return jsonResponse;
-  }
-
-  public void setJsonResponse(boolean jsonResponse) {
-    this.jsonResponse = jsonResponse;
-  }
-
   public PathMethod getPathMethod() {
     return pathMethod;
   }
@@ -100,42 +97,67 @@ public class Route {
     this.bean = bean;
   }
 
-  public List<RequestHandlerParam> getParams() {
+  public List<RouteParam> getParams() {
     return params;
   }
 
-  public void setParams(List<RequestHandlerParam> params) {
+  public void setParams(List<RouteParam> params) {
     this.params = params;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    Route that = (Route) o;
-    return jsonResponse == that.jsonResponse &&
-            Objects.equals(url, that.url) &&
-            Objects.equals(clazz, that.clazz) &&
-            Objects.equals(method, that.method) &&
-            Objects.equals(bean, that.bean) &&
-            pathMethod == that.pathMethod &&
-            Objects.equals(params, that.params);
+  public Object[] getParamValues() {
+    return paramValues;
   }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(url, clazz, method, bean, jsonResponse, pathMethod, params);
+  public void setParamValues(Object[] paramValues) {
+    this.paramValues = paramValues;
+  }
+
+  public Class<?>[] getParamTypes() {
+    return paramTypes;
+  }
+
+  public void setParamTypes(Class<?>[] paramTypes) {
+    this.paramTypes = paramTypes;
+  }
+
+  public Object getInvokeResult() {
+    return invokeResult;
+  }
+
+  public void setInvokeResult(Object invokeResult) {
+    this.invokeResult = invokeResult;
+  }
+
+  public ViewType getViewType() {
+    return viewType;
+  }
+
+  public void setViewType(ViewType viewType) {
+    this.viewType = viewType;
+  }
+
+  public HTMLView getHtmlView() {
+    return htmlView;
+  }
+
+  public void setHtmlView(HTMLView htmlView) {
+    this.htmlView = htmlView;
   }
 
   @Override
   public String toString() {
-    return "RequestHandler{" +
+    return "Route{" +
             "url='" + url + '\'' +
             ", clazz=" + clazz +
-            ", method=" + method +
+            ", method='" + method + '\'' +
             ", bean=" + bean +
-            ", jsonResponse=" + jsonResponse +
-            ", requestMethod=" + pathMethod +
+            ", pathMethod=" + pathMethod +
+            ", paramValues=" + Arrays.toString(paramValues) +
+            ", paramTypes=" + Arrays.toString(paramTypes) +
+            ", invokeResult=" + invokeResult +
+            ", viewType=" + viewType +
+            ", htmlView=" + htmlView +
             ", params=" + params +
             '}';
   }

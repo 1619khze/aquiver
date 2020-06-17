@@ -23,7 +23,7 @@
  */
 package org.aquiver.mvc;
 
-public enum RequestParamType {
+public enum RouteParamType {
 
   /**
    * Request Url 参数

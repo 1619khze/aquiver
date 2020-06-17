@@ -21,12 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc;
+package org.aquiver.mvc.resolver;
+
+import org.aquiver.annotation.bind.Header;
+import org.aquiver.mvc.ParamResolver;
+import org.aquiver.mvc.RouteParam;
+import org.aquiver.mvc.RouteParamType;
 
 import java.lang.reflect.Parameter;
 
-public interface ArgsResolver {
-  boolean support(Parameter parameter);
+public class RequestHeadersParamResolver implements ParamResolver {
 
-  RequestHandlerParam resolve(Parameter parameter, String paramName);
+  @Override
+  public boolean support(Parameter parameter) {
+    return parameter.isAnnotationPresent(Header.class);
+  }
+
+  @Override
+  public RouteParam resolve(Parameter parameter, String paramName) {
+    RouteParam handlerParam = new RouteParam();
+    Header header = parameter.getAnnotation(Header.class);
+    handlerParam.setDataType(parameter.getType());
+    handlerParam.setName("".equals(header.value()) ? paramName : header.value());
+    handlerParam.setRequired(true);
+    handlerParam.setType(RouteParamType.REQUEST_HEADER);
+    return handlerParam;
+  }
 }

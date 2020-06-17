@@ -46,7 +46,7 @@ public interface MediaType {
   String MULTIPART_MIXED_VALUE = "multipart/mixed";
   String MULTIPART_RELATED_VALUE = "multipart/related";
   String TEXT_EVENT_STREAM_VALUE = "text/event-stream";
-  String TEXT_HTML_VALUE = "text/html";
+  String TEXT_HTML_VALUE = "text/html; charset=UTF-8";
   String TEXT_MARKDOWN_VALUE = "text/markdown";
   String TEXT_PLAIN_VALUE = "text/plain";
   String TEXT_XML_VALUE = "text/xml";
