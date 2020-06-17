@@ -95,7 +95,7 @@ public class NettyServer implements Server {
     this.aquiver = aquiver;
     this.environment = aquiver.environment();
     this.routeFinder = new PathRouteFinder();
-    this.routeContext = new RouteContext();
+    this.routeContext = new RouteContext(aquiver);
     this.printBanner();
 
     final String bootClsName = aquiver.bootClsName();

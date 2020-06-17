@@ -23,14 +23,12 @@
  */
 package org.aquiver;
 
-import org.aquiver.mvc.MediaType;
-
 import java.util.Objects;
 
 public class Response {
   private Object result;
   private boolean jsonResponse;
-  private MediaType mediaType;
+  private String mediaType;
 
   public Response(Object result, boolean jsonResponse) {
     this.result = result;
@@ -53,11 +51,11 @@ public class Response {
     this.jsonResponse = jsonResponse;
   }
 
-  public MediaType getMediaType() {
+  public String getMediaType() {
     return mediaType;
   }
 
-  public void setMediaType(MediaType mediaType) {
+  public void setMediaType(String mediaType) {
     this.mediaType = mediaType;
   }
 
@@ -66,7 +64,7 @@ public class Response {
     return "Response{" +
             "result=" + result +
             ", jsonResponse=" + jsonResponse +
-            ", mediaType=" + mediaType +
+            ", mediaType='" + mediaType + '\'' +
             '}';
   }
 

@@ -23,12 +23,12 @@
  */
 package org.aquiver;
 
-import org.aquiver.annotation.JSON;
-import org.aquiver.annotation.Path;
-import org.aquiver.annotation.PathMethod;
-import org.aquiver.mvc.ArgsResolver;
-import org.aquiver.mvc.RequestHandlerParam;
+import org.aquiver.annotation.*;
+import org.aquiver.mvc.ParamResolver;
+import org.aquiver.mvc.RouteParam;
 import org.aquiver.mvc.Route;
+import org.aquiver.mvc.view.PebbleHTMLView;
+import org.aquiver.mvc.view.ViewType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,13 +47,18 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public final class RouteContext {
   private static final Logger log = LoggerFactory.getLogger(RouteContext.class);
 
+  private final Aquiver aquiver;
   private final Map<String, Route> routes = new ConcurrentHashMap<>(64);
   private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-  private final List<ArgsResolver> argsResolvers = new ArrayList<>();
+  private final List<ParamResolver> paramResolvers = new ArrayList<>();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
 
-  public List<ArgsResolver> getArgsResolvers() {
-    return argsResolvers;
+  public RouteContext(Aquiver aquiver) {
+    this.aquiver = aquiver;
+  }
+
+  public List<ParamResolver> getParamResolvers() {
+    return paramResolvers;
   }
 
   protected ReentrantReadWriteLock.ReadLock readLock() {
@@ -69,10 +74,10 @@ public final class RouteContext {
   }
 
   public void loadArgsResolver() throws Exception {
-    ServiceLoader<ArgsResolver> argsResolverLoad = ServiceLoader.load(ArgsResolver.class);
-    for (ArgsResolver ser : argsResolverLoad) {
-      ArgsResolver argsResolver = ser.getClass().getDeclaredConstructor().newInstance();
-      getArgsResolvers().add(argsResolver);
+    ServiceLoader<ParamResolver> argsResolverLoad = ServiceLoader.load(ParamResolver.class);
+    for (ParamResolver ser : argsResolverLoad) {
+      ParamResolver paramResolver = ser.getClass().getDeclaredConstructor().newInstance();
+      getParamResolvers().add(paramResolver);
     }
   }
 
@@ -83,11 +88,11 @@ public final class RouteContext {
         return;
       }
       for (Class<?> interfaceCls : interfaces) {
-        if (!interfaceCls.equals(ArgsResolver.class)) {
+        if (!interfaceCls.equals(ParamResolver.class)) {
           continue;
         }
-        ArgsResolver argsResolver = (ArgsResolver) cls.getDeclaredConstructor().newInstance();
-        getArgsResolvers().add(argsResolver);
+        ParamResolver paramResolver = (ParamResolver) cls.getDeclaredConstructor().newInstance();
+        getParamResolvers().add(paramResolver);
       }
     }
   }
@@ -143,7 +148,8 @@ public final class RouteContext {
         String routeUrl = "/";
         Class<? extends Annotation> annotationType = annotation.annotationType();
         Path path = annotationType.getAnnotation(Path.class);
-        if (Objects.isNull(path)) {
+        RestPath restPath = annotationType.getAnnotation(RestPath.class);
+        if (Objects.isNull(path) && Objects.isNull(restPath)) {
           continue;
         }
         PathMethod pathMethod = path.method();
@@ -171,9 +177,7 @@ public final class RouteContext {
     if (completeUrl.trim().isEmpty()) {
       return;
     }
-
-    boolean isJsonResponse = !Objects.isNull(method.getAnnotation(JSON.class));
-    Route route = new Route(completeUrl, clazz, method.getName(), isJsonResponse, pathMethod);
+    Route route = builderRoute(clazz, method, pathMethod, completeUrl);
 
     Parameter[] parameters = method.getParameters();
     String[] paramNames = this.getMethodParamName(method);
@@ -187,6 +191,26 @@ public final class RouteContext {
     } else {
       this.addRoute(completeUrl, route);
     }
+  }
+
+  private Route builderRoute(Class<?> clazz, Method method, PathMethod pathMethod, String completeUrl) {
+    Route route = new Route(completeUrl, clazz, method.getName(), pathMethod);
+
+    boolean isAllJsonResponse = Objects.isNull(clazz.getAnnotation(RestPath.class));
+    boolean isJsonResponse = Objects.isNull(method.getAnnotation(JSON.class));
+    boolean isViewResponse = Objects.isNull(method.getAnnotation(View.class));
+
+    if (isJsonResponse || (isAllJsonResponse && isViewResponse)) {
+      route.setViewType(ViewType.JSON);
+    }
+    if (!isViewResponse) {
+      route.setViewType(ViewType.HTML);
+      route.setHtmlView(new PebbleHTMLView());
+    }
+    if (!isAllJsonResponse && !isJsonResponse && !isViewResponse) {
+      route.setViewType(ViewType.TEXT);
+    }
+    return route;
   }
 
   /**
@@ -206,19 +230,19 @@ public final class RouteContext {
 
   private void execuArgsResolver(Route route, Parameter[] ps, String[] paramNames) {
     for (int i = 0; i < ps.length; i++) {
-      List<ArgsResolver> argsResolvers = getArgsResolvers();
-      if (argsResolvers.isEmpty()) {
+      List<ParamResolver> paramResolvers = getParamResolvers();
+      if (paramResolvers.isEmpty()) {
         break;
       }
-      this.execuArgsResolver(route, ps[i], paramNames[i], argsResolvers);
+      this.execuArgsResolver(route, ps[i], paramNames[i], paramResolvers);
     }
   }
 
   private void execuArgsResolver(Route route, Parameter parameter,
-                                 String paramName, List<ArgsResolver> argsResolvers) {
-    for (ArgsResolver argsResolver : argsResolvers) {
-      if (!argsResolver.support(parameter)) continue;
-      RequestHandlerParam param = argsResolver.resolve(parameter, paramName);
+                                 String paramName, List<ParamResolver> paramResolvers) {
+    for (ParamResolver paramResolver : paramResolvers) {
+      if (!paramResolver.support(parameter)) continue;
+      RouteParam param = paramResolver.resolve(parameter, paramName);
       if (param != null) {
         route.getParams().add(param);
       }
@@ -249,5 +273,9 @@ public final class RouteContext {
       nameList.add(name);
     }
     return nameList.toArray(value -> new String[0]);
+  }
+
+  public Aquiver getAquiver() {
+    return aquiver;
   }
 }

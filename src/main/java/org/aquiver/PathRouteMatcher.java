@@ -26,10 +26,9 @@ package org.aquiver;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.aquiver.handler.HttpExceptionHandler;
-import org.aquiver.mvc.ParameterDispenser;
-import org.aquiver.mvc.RequestHandlerParam;
+import org.aquiver.mvc.ParamDispen;
+import org.aquiver.mvc.RouteParam;
 import org.aquiver.mvc.Route;
-import org.aquiver.mvc.RouteInvokeWrapper;
 import org.aquiver.server.StaticFileServerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,54 +62,53 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     CompletableFuture<RequestContext> lookUpaFuture =
             CompletableFuture.completedFuture(context);
 
-    CompletableFuture<Response> resultFuture = lookUpaFuture
+    CompletableFuture<Route> resultFuture = lookUpaFuture
             .thenApply(this::lookupRoute)
             .thenApply(this::invokeParam)
             .thenApply(this::invokeMethod);
 
-    Response response = Objects.requireNonNullElse(
-            Async.getIfReady(resultFuture), new Response(Const.SPACE, false));
-
-    context.setResponse(response);
-    resultFuture.complete(response);
+    Route route = Async.getIfReady(resultFuture);
+    context.setRoute(route);
+    resultFuture.complete(route);
     return context;
   }
 
-  private RouteInvokeWrapper invokeParam(RequestContext context) {
+  private Route invokeParam(RequestContext context) {
     Route route = context.getRoute();
-    List<RequestHandlerParam> params = route.getParams();
+    List<RouteParam> params = route.getParams();
 
     Object[] paramValues = new Object[params.size()];
     Class<?>[] paramTypes = new Class[params.size()];
 
     for (int i = 0; i < paramValues.length; i++) {
-      RequestHandlerParam handlerParam = route.getParams().get(i);
+      RouteParam handlerParam = route.getParams().get(i);
       paramTypes[i] = handlerParam.getDataType();
-      paramValues[i] = ParameterDispenser.dispen(
+      paramValues[i] = ParamDispen.dispen(
               handlerParam, context, route.getUrl()
       );
     }
-    return RouteInvokeWrapper.of(route, paramValues, paramTypes);
+    route.setParamValues(paramValues);
+    route.setParamTypes(paramTypes);
+    return route;
   }
 
-  private Response invokeMethod(RouteInvokeWrapper wrapper) {
+  private Route invokeMethod(Route route) {
     MethodHandles.Lookup lookup = MethodHandles.lookup();
     try {
-      Route route = wrapper.getRoute();
-      Method method = this.getInvokeMethod(wrapper, route);
-
+      Method method = this.getInvokeMethod(route);
       Object result = lookup.unreflect(method).bindTo(route.getBean())
-              .invokeWithArguments(wrapper.getParamValues());
+              .invokeWithArguments(route.getParamValues());
 
-      return new Response(result, route.isJsonResponse());
+      route.setInvokeResult(result);
+      return route;
     } catch (Throwable throwable) {
       log.error("An exception occurred when calling the mapping method", throwable);
     }
     return null;
   }
 
-  private Method getInvokeMethod(RouteInvokeWrapper wrapper, Route route) throws NoSuchMethodException {
-    return route.getClazz().getMethod(route.getMethod(), wrapper.getParamTypes());
+  private Method getInvokeMethod(Route route) throws NoSuchMethodException {
+    return route.getClazz().getMethod(route.getMethod(), route.getParamTypes());
   }
 
   private Route loopLookUp(String lookupPath) {
@@ -131,24 +129,23 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     return null;
   }
 
-  private RequestContext lookupRoute(RequestContext context) throws NoRouteFoundException {
-    String lookupPath = context.getUri().endsWith("/")
-            ? context.getUri().substring(0, context.getUri().length() - 1)
-            : context.getUri();
+  private RequestContext lookupRoute(RequestContext context) {
+    String lookupPath = getLookupPath(context.getUri());
     int paramStartIndex = lookupPath.indexOf("?");
     if (paramStartIndex > 0) {
       lookupPath = lookupPath.substring(0, paramStartIndex);
     }
     Route route = loopLookUp(lookupPath);
-    if (routeMap == null || routeMap.isEmpty()) {
-      this.handlerNoRouteFoundException(context);
-      throw new NoRouteFoundException(context.getHttpMethod(), context.getUri());
-    }
     if (!Objects.isNull(route)) {
       context.setRoute(route);
       return context;
+    } else {
+      return lookupStaticFile(context);
     }
-    return lookupStaticFile(context);
+  }
+
+  private String getLookupPath(String uri) {
+    return uri.endsWith("/") ? uri.substring(0, uri.length() - 1) : uri;
   }
 
   private RequestContext lookupStaticFile(RequestContext context) {

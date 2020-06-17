@@ -41,6 +41,7 @@ public class RequestContext {
   private final ChannelHandlerContext context;
   private FullHttpResponse httpResponse;
 
+  private Aquiver aquiver;
   private Route route;
   private Response response;
   private Map<String, Object> cookies;
@@ -48,7 +49,7 @@ public class RequestContext {
   private Map<String, String> queryString;
   private Map<String, Object> formData;
   private Map<String, Object> jsonData;
-  private Map<String,FileUpload> fileUploads;
+  private Map<String, FileUpload> fileUploads;
   private String uri;
   private String httpMethod;
   private String version;
@@ -78,7 +79,7 @@ public class RequestContext {
 
   private void jsonData() {
     Object contentType = headers.get("Content-Type");
-    if(!Objects.isNull(contentType) && String.valueOf(contentType).equals(MediaType.APPLICATION_JSON_VALUE)){
+    if (!Objects.isNull(contentType) && String.valueOf(contentType).equals(MediaType.APPLICATION_JSON_VALUE)) {
       ByteBuf content = httpRequest.content();
       byte[] reqContent = new byte[content.readableBytes()];
       content.readBytes(reqContent);
@@ -107,7 +108,7 @@ public class RequestContext {
       }
       if (InterfaceHttpData.HttpDataType.FileUpload.equals(data.getHttpDataType())) {
         final FileUpload fileUpload = (FileUpload) data;
-        fileUploads.put(fileUpload.getName(),fileUpload);
+        fileUploads.put(fileUpload.getName(), fileUpload);
       }
     }
   }
@@ -253,5 +254,13 @@ public class RequestContext {
 
   public void setFileUploads(Map<String, FileUpload> fileUploads) {
     this.fileUploads = fileUploads;
+  }
+
+  public Aquiver getAquiver() {
+    return aquiver;
+  }
+
+  public void setAquiver(Aquiver aquiver) {
+    this.aquiver = aquiver;
   }
 }

@@ -23,33 +23,33 @@
  */
 package org.aquiver.server;
 
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpObject;
-import io.netty.util.concurrent.EventExecutor;
-import org.aquiver.*;
-import org.aquiver.mvc.render.JsonResponseRender;
+import org.aquiver.PathRouteMatcher;
+import org.aquiver.RequestContext;
+import org.aquiver.RouteContext;
+import org.aquiver.RouteMatcher;
+import org.aquiver.mvc.render.ResponseRenderMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ForkJoinPool;
 
 /**
  * @author WangYi
  * @since 2020/5/26
  */
+@ChannelHandler.Sharable
 public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
 
   private final static String FAVICON_PATH = "/favicon.ico";
   private final RouteMatcher<RequestContext> matcher;
-  private final ResponseRender responseRender;
+  private final ResponseRenderMatcher responseRenderMatcher;
 
   public NettyServerHandler(RouteContext routeContext) {
     this.matcher = new PathRouteMatcher(routeContext.getRoutes());
-    this.responseRender = new JsonResponseRender();
+    this.responseRenderMatcher = new ResponseRenderMatcher(routeContext.getAquiver());
   }
 
   @Override
@@ -73,14 +73,16 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
     if (FAVICON_PATH.equals(fullHttpRequest.uri())) {
       return;
     }
-
-    CompletableFuture<FullHttpRequest> future = CompletableFuture.completedFuture(fullHttpRequest);
-    EventExecutor executor = ctx.executor();
-
-    future.thenApply(request -> this.thenApplyRequestContext(request, ctx))
-            .thenApplyAsync(this.matcher::match, executor)
-            .thenAcceptAsync(this::writeResponse, executor);
-    future.complete(fullHttpRequest);
+//
+//    CompletableFuture<FullHttpRequest> future = CompletableFuture.completedFuture(fullHttpRequest);
+//    EventExecutor executor = ctx.executor();
+//
+//    future.thenApply(request -> this.thenApplyRequestContext(request, ctx))
+//            .thenApplyAsync(this.matcher::match, executor)
+//            .thenAcceptAsync(this.renderAdapter::adapter, executor);
+    RequestContext requestContext = this.thenApplyRequestContext(fullHttpRequest, ctx);
+    RequestContext match = this.matcher.match(requestContext);
+    writeResponse(match);
   }
 
   private RequestContext thenApplyRequestContext(FullHttpRequest request, ChannelHandlerContext ctx) {
@@ -88,6 +90,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   }
 
   private void writeResponse(RequestContext requestContext) {
-    this.responseRender.render(requestContext);
+    this.responseRenderMatcher.adapter(requestContext);
   }
 }
