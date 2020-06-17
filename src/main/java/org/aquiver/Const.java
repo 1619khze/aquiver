@@ -44,6 +44,7 @@ public interface Const {
   String CRISPY_FRAMEWORK = " :: Aquiver Framework :: ";
   String SPACE = " ";
   String SERVER_THREAD_NAME = "（'-'*)";
+  String SERVER_VIEW_SUFFIX = ".html";
   String PATH_SERVER_PORT = "server.port";
   String PATH_SERVER_SSL = "server.ssl";
   String PATH_SERVER_ADDRESS = "server.address";
@@ -56,6 +57,7 @@ public interface Const {
   String PATH_ENV_WATCHER = "server.env.watcher";
   String PATH_SCANNER_VERBOSE = "server.scanner.verbose";
   String PATH_SCANNER_LOGGING = "server.scanner.logging";
+  String PATH_SERVER_VIEW_SUFFIX = "server.view.suffix";
 
   // netty setting
   String PATH_SERVER_SSL_CERT = "server.ssl.cert-path";

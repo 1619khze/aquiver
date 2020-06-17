@@ -97,6 +97,8 @@ public final class Aquiver {
   private int maximumPoolSize = 200;
   private int keepAliveTime = 0;
 
+  private String viewSuffix;
+
   private Aquiver() {
   }
 
@@ -179,6 +181,19 @@ public final class Aquiver {
   public Aquiver bootConfName(String bootConfName) {
     requireState(this.bootConfName == null, "bootConfName was already set to %s", this.bootConfName);
     this.bootConfName = requireNonNull(bootConfName);
+    this.environment.add(PATH_CONFIG_PROPERTIES, bootConfName);
+    return this;
+  }
+
+  /**
+   * Set render view suffix
+   *
+   * @param viewSuffix view suffix
+   */
+  public Aquiver viewSuffix(String viewSuffix) {
+    requireState(this.viewSuffix == null, "viewSuffix was already set to %s", this.viewSuffix);
+    this.viewSuffix = viewSuffix;
+    this.environment.add(PATH_SERVER_VIEW_SUFFIX, viewSuffix);
     return this;
   }
 
@@ -382,6 +397,15 @@ public final class Aquiver {
   public Aquiver keepAliveTime(int keepAliveTime) {
     this.keepAliveTime = keepAliveTime;
     return this;
+  }
+
+  /**
+   * Get render view suffix
+   *
+   * @return view suffix
+   */
+  public String viewSuffix() {
+    return viewSuffix;
   }
 
   /**
