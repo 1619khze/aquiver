@@ -1,7 +1,0 @@
-org.aquiver.mvc.resolver.RequestParamArgsResolver
-org.aquiver.mvc.resolver.RequestCookiesArgsResolver
-org.aquiver.mvc.resolver.RequestHeadersArgsResolver
-org.aquiver.mvc.resolver.PathVariableArgsResolver
-org.aquiver.mvc.resolver.RequestBodyArgsResolver
-org.aquiver.mvc.resolver.FileUploadArgsResolver
-org.aquiver.mvc.resolver.MultiFileUploadArgsResolver
