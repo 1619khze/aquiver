@@ -21,13 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.mvc.view;
+
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author WangYi
- * @since 2020/6/10
+ * @since 2020/6/16
  */
-@FunctionalInterface
-public interface ResponseRender {
-  void render(RequestContext requestContext);
+public interface HTMLView {
+  /**
+   * Get the support view type.
+   *
+   * @return ViewType
+   */
+  ViewType viewType();
+
+  /**
+   * Get the content of the returned view
+   *
+   * @param htmlPath   html path
+   * @param viewParams view render params
+   * @return the content of the returned view
+   * @throws IOException io exception
+   */
+  String renderView(String htmlPath, Map<String, Object> viewParams) throws IOException;
 }
