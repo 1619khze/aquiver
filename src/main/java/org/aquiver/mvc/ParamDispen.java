@@ -43,9 +43,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class ParamDispen {
-  private static final Logger log = LoggerFactory.getLogger(ParamDispen.class);
-
-  public static Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
+  public static Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) throws Exception {
     switch (handlerParam.getType()) {
       case REQUEST_PARAM:
         return getQueryString(handlerParam, requestContext);
@@ -58,17 +56,9 @@ public final class ParamDispen {
       case REQUEST_BODY:
         return getRequestBody(handlerParam, requestContext);
       case UPLOAD_FILE:
-        try {
-          return getUploadFile(handlerParam, requestContext);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        return getUploadFile(handlerParam, requestContext);
       case UPLOAD_FILES:
-        try {
-          return getUploadFiles(handlerParam, requestContext);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        return getUploadFiles(handlerParam, requestContext);
       default:
         break;
     }
@@ -81,7 +71,7 @@ public final class ParamDispen {
     if (List.class.isAssignableFrom(handlerParam.getDataType())) {
       for (Map.Entry<String, FileUpload> entry : fileUploads.entrySet()) {
         FileUpload value = entry.getValue();
-        MultipartFile multipartFile = buildMultipartFile(handlerParam, value);
+        MultipartFile multipartFile = buildMultipartFile(value);
         multipartFiles.add(multipartFile);
       }
     }
@@ -93,13 +83,12 @@ public final class ParamDispen {
     if (MultipartFile.class.isAssignableFrom(handlerParam.getDataType()) &&
             fileUploads.containsKey(handlerParam.getName())) {
       FileUpload fileUpload = fileUploads.get(handlerParam.getName());
-      return buildMultipartFile(handlerParam, fileUpload);
+      return buildMultipartFile(fileUpload);
     }
     return null;
   }
 
-  private static MultipartFile buildMultipartFile(RouteParam handlerParam,
-                                                  FileUpload fileUpload) throws IOException {
+  private static MultipartFile buildMultipartFile(FileUpload fileUpload) throws IOException {
     MultipartFile multipartFile = new MultipartFile();
     multipartFile.setCharset(fileUpload.getCharset());
     multipartFile.setCharsetName(fileUpload.getCharset().name());

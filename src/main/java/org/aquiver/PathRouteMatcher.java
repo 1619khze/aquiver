@@ -80,12 +80,16 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     Object[] paramValues = new Object[params.size()];
     Class<?>[] paramTypes = new Class[params.size()];
 
-    for (int i = 0; i < paramValues.length; i++) {
-      RouteParam handlerParam = route.getParams().get(i);
-      paramTypes[i] = handlerParam.getDataType();
-      paramValues[i] = ParamDispen.dispen(
-              handlerParam, context, route.getUrl()
-      );
+    try {
+      for (int i = 0; i < paramValues.length; i++) {
+        RouteParam handlerParam = route.getParams().get(i);
+        paramTypes[i] = handlerParam.getDataType();
+        paramValues[i] = ParamDispen.dispen(
+                handlerParam, context, route.getUrl()
+        );
+      }
+    } catch (Exception e) {
+      log.error("An exception occurred when obtaining invoke param");
     }
     route.setParamValues(paramValues);
     route.setParamTypes(paramTypes);
