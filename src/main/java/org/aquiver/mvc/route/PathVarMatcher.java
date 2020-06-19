@@ -21,14 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.mvc.route;
 
 /**
  * @author WangYi
  * @since 2020/5/29
  */
 public class PathVarMatcher {
-  private PathVarMatcher() {}
+  private PathVarMatcher() {
+  }
 
   public static boolean checkMatch(String[] lookupPathSplit, String... mappingUrlSplit) {
     for (int i = 0; i < lookupPathSplit.length; i++) {

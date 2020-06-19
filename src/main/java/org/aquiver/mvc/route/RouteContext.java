@@ -21,12 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.mvc.route;
 
+import org.aquiver.Aquiver;
 import org.aquiver.annotation.*;
 import org.aquiver.mvc.ParamResolver;
-import org.aquiver.mvc.RouteParam;
-import org.aquiver.mvc.Route;
 import org.aquiver.mvc.view.PebbleHTMLView;
 import org.aquiver.mvc.view.ViewType;
 import org.slf4j.Logger;
@@ -272,7 +271,7 @@ public final class RouteContext {
       String name = param.getName();
       nameList.add(name);
     }
-    return nameList.toArray(value -> new String[0]);
+    return nameList.toArray(new String[0]);
   }
 
   public Aquiver getAquiver() {

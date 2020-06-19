@@ -42,29 +42,29 @@ import java.net.URL;
  * @since 2020/5/28
  */
 public class StaticFileServerHandler implements RequestHandler<Boolean> {
+  private static void send100Continue(ChannelHandlerContext ctx) {
+    FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE);
+    ctx.writeAndFlush(response);
+  }
+
   @Override
   public Boolean handle(RequestContext requestContext) throws Exception {
     FullHttpRequest request = requestContext.getHttpRequest();
     ChannelHandlerContext ctx = requestContext.getContext();
-    // 获取URI
     String uri = request.uri();
-    // 设置不支持favicon.ico文件
     if ("favicon.ico".equals(uri)) {
       return false;
     }
-    // 根据路径地址构建文件
     URL resource = this.getClass().getClassLoader().getResource(uri.replaceFirst("/", ""));
     URL notFoundUrl = this.getClass().getClassLoader().getResource("404.html");
 
     File html = new File(resource.toURI());
     File NOT_FOUND = new File(notFoundUrl.toURI());
 
-    // 状态为1xx的话，继续请求
     if (HttpUtil.is100ContinueExpected(request)) {
       send100Continue(ctx);
     }
 
-    // 当文件不存在的时候，将资源指向NOT_FOUND
     if (!html.exists()) {
       html = NOT_FOUND;
     }
@@ -72,12 +72,10 @@ public class StaticFileServerHandler implements RequestHandler<Boolean> {
     RandomAccessFile file = new RandomAccessFile(html, "r");
     HttpResponse response = new DefaultHttpResponse(request.protocolVersion(), HttpResponseStatus.OK);
 
-    // 文件没有发现设置状态为404
     if (html == NOT_FOUND) {
       response.setStatus(HttpResponseStatus.NOT_FOUND);
     }
 
-    // 设置文件格式内容
     if (uri.endsWith(".html")) {
       response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html; charset=UTF-8");
     } else if (uri.endsWith(".js")) {
@@ -99,7 +97,7 @@ public class StaticFileServerHandler implements RequestHandler<Boolean> {
     } else {
       ctx.write(new ChunkedNioFile(file.getChannel()));
     }
-    // 写入文件尾部
+
     ChannelFuture future = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
     if (!keepAlive) {
       future.addListener(ChannelFutureListener.CLOSE);
@@ -107,10 +105,5 @@ public class StaticFileServerHandler implements RequestHandler<Boolean> {
     file.close();
 
     return true;
-  }
-
-  private static void send100Continue(ChannelHandlerContext ctx) {
-    FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE);
-    ctx.writeAndFlush(response);
   }
 }

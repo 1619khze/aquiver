@@ -31,7 +31,7 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.multipart.*;
 import org.aquiver.mvc.MediaType;
-import org.aquiver.mvc.Route;
+import org.aquiver.mvc.route.Route;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;

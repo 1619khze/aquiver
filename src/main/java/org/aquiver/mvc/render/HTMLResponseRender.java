@@ -29,7 +29,7 @@ import org.aquiver.Aquiver;
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.MediaType;
 import org.aquiver.mvc.ModelAndView;
-import org.aquiver.mvc.Route;
+import org.aquiver.mvc.route.Route;
 import org.aquiver.mvc.view.ViewType;
 
 import java.io.IOException;

@@ -23,6 +23,7 @@
  */
 package org.aquiver;
 
+import org.aquiver.mvc.functions.RouteHandler;
 import org.aquiver.server.NettyServer;
 import org.aquiver.server.Server;
 import org.aquiver.server.banner.BannerFont;
@@ -464,31 +465,36 @@ public final class Aquiver {
             TimeUnit.MILLISECONDS, runnableQueue, aquiverThreadFactory, abortPolicy);
   }
 
-  /**
-   * Aquiver thread factory
-   */
-  static class AquiverThreadFactory implements ThreadFactory {
+  public Aquiver get(String routePath, RouteHandler routeHandler) {
+    return this;
+  }
 
-    private final String prefix;
-    private final LongAdder threadNumber = new LongAdder();
+  public Aquiver post(String routePath, RouteHandler routeHandler) {
+    return this;
+  }
 
-    public AquiverThreadFactory(String prefix) {
-      this.threadNumber.add(1);
-      this.prefix = prefix;
-    }
+  public Aquiver put(String routePath, RouteHandler routeHandler) {
+    return this;
+  }
 
-    /**
-     * Constructs a new {@code Thread}.  Implementations may also initialize
-     * priority, name, daemon status, {@code ThreadGroup}, etc.
-     *
-     * @param runnable a runnable to be executed by new thread instance
-     * @return constructed thread, or {@code null} if the request to
-     * create a thread is rejected
-     */
-    @Override
-    public Thread newThread(Runnable runnable) {
-      return new Thread(runnable, prefix + "thread-" + threadNumber.intValue());
-    }
+  public Aquiver delete(String routePath, RouteHandler routeHandler) {
+    return this;
+  }
+
+  public Aquiver options(String routePath, RouteHandler routeHandler) {
+    return this;
+  }
+
+  public Aquiver patch(String routePath, RouteHandler routeHandler) {
+    return this;
+  }
+
+  public Aquiver trace(String routePath, RouteHandler routeHandler) {
+    return this;
+  }
+
+  public Aquiver path(String routePath, RouteHandler routeHandler) {
+    return this;
   }
 
   /**
@@ -626,5 +632,32 @@ public final class Aquiver {
    */
   public void stop() {
     this.nettyServer.stop();
+  }
+
+  /**
+   * Aquiver thread factory
+   */
+  static class AquiverThreadFactory implements ThreadFactory {
+
+    private final String prefix;
+    private final LongAdder threadNumber = new LongAdder();
+
+    public AquiverThreadFactory(String prefix) {
+      this.threadNumber.add(1);
+      this.prefix = prefix;
+    }
+
+    /**
+     * Constructs a new {@code Thread}.  Implementations may also initialize
+     * priority, name, daemon status, {@code ThreadGroup}, etc.
+     *
+     * @param runnable a runnable to be executed by new thread instance
+     * @return constructed thread, or {@code null} if the request to
+     * create a thread is rejected
+     */
+    @Override
+    public Thread newThread(Runnable runnable) {
+      return new Thread(runnable, prefix + "thread-" + threadNumber.intValue());
+    }
   }
 }

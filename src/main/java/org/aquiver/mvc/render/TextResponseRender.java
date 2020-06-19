@@ -28,7 +28,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.Route;
+import org.aquiver.mvc.route.Route;
 import org.aquiver.mvc.view.ViewType;
 
 import java.nio.charset.StandardCharsets;

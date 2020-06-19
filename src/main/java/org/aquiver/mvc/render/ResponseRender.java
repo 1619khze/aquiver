@@ -24,7 +24,7 @@
 package org.aquiver.mvc.render;
 
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.Route;
+import org.aquiver.mvc.route.Route;
 import org.aquiver.mvc.view.ViewType;
 
 import java.io.IOException;

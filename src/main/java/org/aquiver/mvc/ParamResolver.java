@@ -23,6 +23,8 @@
  */
 package org.aquiver.mvc;
 
+import org.aquiver.mvc.route.RouteParam;
+
 import java.lang.reflect.Parameter;
 
 public interface ParamResolver {

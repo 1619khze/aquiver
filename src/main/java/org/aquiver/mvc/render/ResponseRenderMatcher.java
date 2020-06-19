@@ -25,7 +25,7 @@ package org.aquiver.mvc.render;
 
 import org.aquiver.Aquiver;
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.Route;
+import org.aquiver.mvc.route.Route;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

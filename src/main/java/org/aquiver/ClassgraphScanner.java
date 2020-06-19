@@ -26,7 +26,7 @@ package org.aquiver;
 import io.github.classgraph.ClassGraph;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -68,7 +68,7 @@ public class ClassgraphScanner implements Scanner {
    * @return
    */
   private ClassgraphScanner scanPackageName(Set<String> scanPackages, String scanPackageName) {
-    if (scanPackageName == null || Files.exists(Path.of(scanPackageName))) {
+    if (scanPackageName == null || Files.exists(Paths.get(scanPackageName))) {
       throw new IllegalArgumentException("scanPackageName cannot be empty and " +
               "needs to conform to the specification");
     }

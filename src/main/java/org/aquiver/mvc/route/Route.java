@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc;
+package org.aquiver.mvc.route;
 
 import org.aquiver.annotation.PathMethod;
 import org.aquiver.mvc.view.HTMLView;

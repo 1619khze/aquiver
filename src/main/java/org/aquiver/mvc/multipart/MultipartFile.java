@@ -27,7 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 /**
@@ -47,11 +46,7 @@ public class MultipartFile {
   private long length;
 
   public String readFileContent() throws IOException {
-    return this.readFileContent(StandardCharsets.UTF_8);
-  }
-
-  public String readFileContent(Charset charset) throws IOException {
-    return Files.readString(file.toPath(), charset);
+    return new String(Files.readAllBytes(file.toPath()));
   }
 
   public String getFileName() {

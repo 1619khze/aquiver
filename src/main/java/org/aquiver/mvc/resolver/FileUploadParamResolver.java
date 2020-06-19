@@ -25,8 +25,8 @@ package org.aquiver.mvc.resolver;
 
 import org.aquiver.annotation.bind.FileUpload;
 import org.aquiver.mvc.ParamResolver;
-import org.aquiver.mvc.RouteParam;
-import org.aquiver.mvc.RouteParamType;
+import org.aquiver.mvc.route.RouteParam;
+import org.aquiver.mvc.route.RouteParamType;
 
 import java.lang.reflect.Parameter;
 
