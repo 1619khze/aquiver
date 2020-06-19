@@ -31,7 +31,7 @@ import io.netty.util.concurrent.EventExecutor;
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.render.ResponseRenderMatcher;
 import org.aquiver.mvc.route.PathRouteMatcher;
-import org.aquiver.mvc.route.RouteContext;
+import org.aquiver.mvc.route.RouteManager;
 import org.aquiver.mvc.route.RouteMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +50,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   private final RouteMatcher<RequestContext> matcher;
   private final ResponseRenderMatcher responseRenderMatcher;
 
-  public NettyServerHandler(RouteContext routeContext) {
-    this.matcher = new PathRouteMatcher(routeContext.getRoutes());
-    this.responseRenderMatcher = new ResponseRenderMatcher(routeContext.getAquiver());
+  public NettyServerHandler(RouteManager routeManager) {
+    this.matcher = new PathRouteMatcher(routeManager.getRoutes());
+    this.responseRenderMatcher = new ResponseRenderMatcher(routeManager.getAquiver());
   }
 
   @Override

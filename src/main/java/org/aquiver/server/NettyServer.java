@@ -34,7 +34,7 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.ResourceLeakDetector;
 import org.aquiver.*;
 import org.aquiver.mvc.route.PathRouteFinder;
-import org.aquiver.mvc.route.RouteContext;
+import org.aquiver.mvc.route.RouteManager;
 import org.aquiver.mvc.route.RouteFinder;
 import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
@@ -80,7 +80,7 @@ public class NettyServer implements Server {
 
   /** request mapping resolver. */
   private RouteFinder routeFinder;
-  private RouteContext routeContext;
+  private RouteManager routeManager;
 
   /** Service startup status, using volatile to ensure threads are visible. */
   private volatile boolean stop = false;
@@ -98,7 +98,7 @@ public class NettyServer implements Server {
     this.aquiver = aquiver;
     this.environment = aquiver.environment();
     this.routeFinder = new PathRouteFinder();
-    this.routeContext = new RouteContext(aquiver);
+    this.routeManager = new RouteManager(aquiver);
     this.printBanner();
 
     final String bootClsName = aquiver.bootClsName();
@@ -153,10 +153,10 @@ public class NettyServer implements Server {
     final Set<Class<?>> classSet = scanner.scan(scanPath);
     try {
       Map<String, Class<?>> routeClsMap = routeFinder.finderRoute(classSet);
-      this.routeContext.findArgsResolver(classSet);
-      this.routeContext.loadArgsResolver();
+      this.routeManager.findArgsResolver(classSet);
+      this.routeManager.loadArgsResolver();
       for (Map.Entry<String, Class<?>> entry : routeClsMap.entrySet()) {
-        this.routeContext.addRoute(entry.getValue(), entry.getKey());
+        this.routeManager.addRoute(entry.getValue(), entry.getKey());
       }
     } catch (Throwable e) {
       log.error("An exception occurred while load route", e);
@@ -241,7 +241,7 @@ public class NettyServer implements Server {
 
     ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
 
-    this.serverBootstrap.childHandler(new NettyServerInitializer(sslContext, environment, routeContext));
+    this.serverBootstrap.childHandler(new NettyServerInitializer(sslContext, environment, routeManager));
 
     int acceptThreadCount = environment.getInteger(PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT, DEFAULT_ACCEPT_THREAD_COUNT);
     int ioThreadCount = environment.getInteger(PATH_SERVER_NETTY_IO_THREAD_COUNT, DEFAULT_IO_THREAD_COUNT);

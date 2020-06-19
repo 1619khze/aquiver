@@ -37,25 +37,25 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import org.aquiver.Const;
 import org.aquiver.Environment;
-import org.aquiver.mvc.route.RouteContext;
+import org.aquiver.mvc.route.RouteManager;
 
 /**
  * @author WangYi
  * @since 2019/6/5
  */
 public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
-  private final RouteContext routeContext;
+  private final RouteManager routeManager;
   private final SslContext sslCtx;
   private boolean cors;
   private boolean compressor;
   private CorsConfig corsConfig;
 
-  NettyServerInitializer(SslContext sslCtx, Environment environment, RouteContext routeContext) {
+  NettyServerInitializer(SslContext sslCtx, Environment environment, RouteManager routeManager) {
     this.sslCtx = sslCtx;
     final Boolean cors = environment.getBoolean(Const.PATH_SERVER_CORS, Const.SERVER_CORS);
     final Boolean gzip = environment.getBoolean(Const.PATH_SERVER_CONTENT_COMPRESSOR, Const.SERVER_CONTENT_COMPRESSOR);
     this.cors(cors).gzip(gzip);
-    this.routeContext = routeContext;
+    this.routeManager = routeManager;
   }
 
   private NettyServerInitializer cors(boolean cors) {
@@ -79,6 +79,6 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
     channelPipeline.addLast(new HttpResponseEncoder());
     channelPipeline.addLast(new HttpObjectAggregator(65536));
     channelPipeline.addLast(new ChunkedWriteHandler());
-    channelPipeline.addLast(new NettyServerHandler(routeContext));
+    channelPipeline.addLast(new NettyServerHandler(routeManager));
   }
 }
