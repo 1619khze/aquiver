@@ -34,19 +34,19 @@ final class Async {
   private Async() {}
 
   /** Returns if the future has successfully completed. */
-  static boolean isReady(CompletableFuture<?> future) {
+  public static boolean isReady(CompletableFuture<?> future) {
     return (future != null) && future.isDone()
             && !future.isCompletedExceptionally()
             && (future.join() != null);
   }
 
   /** Returns the current value or null if either not done or failed. */
-  static <V> V getIfReady(CompletableFuture<V> future) {
+  public static <V> V getIfReady(CompletableFuture<V> future) {
     return isReady(future) ? future.join() : null;
   }
 
   /** Returns the value when completed successfully or null if failed. */
-  static <V> V getWhenSuccessful(CompletableFuture<V> future) {
+  public static <V> V getWhenSuccessful(CompletableFuture<V> future) {
     try {
       return (future == null) ? null : future.get();
     } catch (InterruptedException e) {
