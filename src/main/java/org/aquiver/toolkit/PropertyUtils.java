@@ -24,10 +24,13 @@
 package org.aquiver.toolkit;
 
 import org.aquiver.Const;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +43,10 @@ import static io.netty.util.internal.PlatformDependent.isWindows;
  * @since 2019/6/10
  */
 public final class PropertyUtils {
-  private PropertyUtils() {}
+  private static final Logger log = LoggerFactory.getLogger(PropertyUtils.class);
+
+  private PropertyUtils() {
+  }
 
   public static String toProperties(TreeMap<String, Map<String, Object>> config) {
     StringBuilder sb = new StringBuilder();
@@ -115,13 +121,21 @@ public final class PropertyUtils {
     } else {
       path = url.getPath();
     }
-    if (isWindows()) {
-      return decode(path.replaceFirst("^/(.:/)", "$1"));
+
+    String decode = "/";
+    try {
+      if (isWindows()) {
+        decode = decode(path.replaceFirst("^/(.:/)", "$1"));
+      } else {
+        decode = decode(path);
+      }
+    } catch (UnsupportedEncodingException e) {
+      log.error("The Character Encoding is not supported.", e);
     }
-    return decode(path);
+    return decode;
   }
 
-  private static String decode(String path) {
-    return java.net.URLDecoder.decode(path, StandardCharsets.UTF_8);
+  private static String decode(String path) throws UnsupportedEncodingException {
+    return java.net.URLDecoder.decode(path, StandardCharsets.UTF_8.name());
   }
 }
