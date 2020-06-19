@@ -23,7 +23,6 @@
  */
 package org.aquiver;
 
-import org.aquiver.mvc.functions.RouteHandler;
 import org.aquiver.server.NettyServer;
 import org.aquiver.server.Server;
 import org.aquiver.server.banner.BannerFont;
@@ -463,38 +462,6 @@ public final class Aquiver {
     final ThreadPoolExecutor.AbortPolicy abortPolicy = new ThreadPoolExecutor.AbortPolicy();
     this.reusableExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
             TimeUnit.MILLISECONDS, runnableQueue, aquiverThreadFactory, abortPolicy);
-  }
-
-  public Aquiver get(String routePath, RouteHandler routeHandler) {
-    return this;
-  }
-
-  public Aquiver post(String routePath, RouteHandler routeHandler) {
-    return this;
-  }
-
-  public Aquiver put(String routePath, RouteHandler routeHandler) {
-    return this;
-  }
-
-  public Aquiver delete(String routePath, RouteHandler routeHandler) {
-    return this;
-  }
-
-  public Aquiver options(String routePath, RouteHandler routeHandler) {
-    return this;
-  }
-
-  public Aquiver patch(String routePath, RouteHandler routeHandler) {
-    return this;
-  }
-
-  public Aquiver trace(String routePath, RouteHandler routeHandler) {
-    return this;
-  }
-
-  public Aquiver path(String routePath, RouteHandler routeHandler) {
-    return this;
   }
 
   /**
