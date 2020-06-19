@@ -30,7 +30,7 @@ import java.util.concurrent.ExecutionException;
  * @author WangYi
  * @since 2020/5/29
  */
-final class Async {
+public final class Async {
   private Async() {}
 
   /** Returns if the future has successfully completed. */
