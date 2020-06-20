@@ -496,7 +496,7 @@ public final class Aquiver {
       this.masterConfig = true;
     }
 
-    if (argsMap.get(PATH_SERVER_PROFILE) != null) {
+    if (Objects.nonNull(argsMap.get(PATH_SERVER_PROFILE))) {
       String envNameArg = argsMap.get(PATH_SERVER_PROFILE);
       this.envConfig(envNameArg);
       this.envName = envNameArg;
@@ -506,7 +506,7 @@ public final class Aquiver {
 
     if (!envConfig) {
       String profileName = this.environment.get(PATH_SERVER_PROFILE);
-      if (profileName != null && !"".equals(profileName)) {
+      if (Objects.nonNull(profileName) && !"".equals(profileName)) {
         envConfig(profileName);
         this.envName = profileName;
       }
@@ -516,8 +516,8 @@ public final class Aquiver {
   /**
    * load properties and yaml
    *
-   * @param bootConfEnv
-   * @param constField
+   * @param bootConfEnv Environment used when the server starts
+   * @param constField Constant attribute map
    */
   private void loadPropsOrYaml(Environment bootConfEnv, Map<String, String> constField) {
     /** Properties are configured by default, and the properties loaded
@@ -539,8 +539,8 @@ public final class Aquiver {
   /**
    * Load main function parameters, and override if main configuration exists
    *
-   * @param args
-   * @return
+   * @param args String parameter array of main method
+   * @return Write the parameters to the map and return
    */
   private Map<String, String> loadMainArgs(String[] args) {
     Map<String, String> argsMap = PropertyUtils.parseArgs(args);
@@ -559,7 +559,7 @@ public final class Aquiver {
    * configuration, it will be overwritten in the environment
    * configuration
    *
-   * @param envName
+   * @param envName Environment name
    */
   private void envConfig(String envName) {
     String envFileName = "application" + "-" + envName + ".properties";
