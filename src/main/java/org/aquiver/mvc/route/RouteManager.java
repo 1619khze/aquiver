@@ -23,6 +23,7 @@
  */
 package org.aquiver.mvc.route;
 
+import com.hankcs.algorithm.AhoCorasickDoubleArrayTrie;
 import org.aquiver.Aquiver;
 import org.aquiver.annotation.*;
 import org.aquiver.mvc.ParamResolver;

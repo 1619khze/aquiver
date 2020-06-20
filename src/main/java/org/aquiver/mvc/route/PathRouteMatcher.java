@@ -26,7 +26,6 @@ package org.aquiver.mvc.route;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.aquiver.Async;
-import org.aquiver.NoRouteFoundException;
 import org.aquiver.RequestContext;
 import org.aquiver.handler.HttpExceptionHandler;
 import org.aquiver.mvc.ParamDispen;
