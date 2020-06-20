@@ -83,7 +83,7 @@ public final class PropertyUtils {
 
   public static Map<String, String> parseArgs(String[] args) {
     Map<String, String> argsMap = new HashMap<>();
-    if (args == null || args.length == 0) {
+    if (Objects.isNull(args) || args.length == 0) {
       return argsMap;
     }
 
@@ -102,7 +102,7 @@ public final class PropertyUtils {
       location = "/" + location;
     }
     InputStream resourceAsStream = PropertyUtils.class.getResourceAsStream(location);
-    if (resourceAsStream == null) {
+    if (Objects.isNull(resourceAsStream)) {
       return null;
     }
     return yaml().loadAs(resourceAsStream, TreeMap.class);
@@ -115,7 +115,7 @@ public final class PropertyUtils {
   public static String getCurrentClassPath() {
     URL url = PropertyUtils.class.getResource("/");
     String path;
-    if (null == url) {
+    if (Objects.isNull(url)) {
       File f = new File(PropertyUtils.class.getProtectionDomain().getCodeSource().getLocation().getPath());
       path = f.getPath();
     } else {
