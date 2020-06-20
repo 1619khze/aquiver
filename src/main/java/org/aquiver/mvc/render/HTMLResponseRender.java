@@ -80,7 +80,10 @@ public class HTMLResponseRender implements ResponseRender {
     if (!fullHtmlPath.endsWith(viewSuffix) && fullHtmlPath.contains(".")) {
       String[] split = fullHtmlPath.split("\\.");
       fullHtmlPath = (split[0] + viewSuffix);
+    }else if(!fullHtmlPath.endsWith(viewSuffix) && !fullHtmlPath.contains(".")){
+      fullHtmlPath = fullHtmlPath + viewSuffix;
     }
+
     fullHtmlPath = fullHtmlPath.replace("//", "/");
 
     final String renderView = route.getHtmlView().renderView(fullHtmlPath, params);
