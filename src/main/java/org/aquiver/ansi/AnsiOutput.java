@@ -24,6 +24,7 @@
 package org.aquiver.ansi;
 
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * @author WangYi
@@ -120,7 +121,7 @@ public abstract class AnsiOutput {
 
   private static void buildDisabled(StringBuilder sb, Object[] elements) {
     for (Object element : elements) {
-      if (!(element instanceof AnsiElement) && element != null) {
+      if (!(element instanceof AnsiElement) && Objects.nonNull(element)) {
         sb.append(element);
       }
     }

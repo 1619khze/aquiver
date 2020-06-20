@@ -26,6 +26,7 @@ package org.aquiver.server.watcher;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.nio.file.WatchEvent.Kind;
@@ -64,7 +65,7 @@ public class GlobalEnvTask implements Runnable {
   private void executeHistoryFiles() {
     try {
       Stream<Path> stream = Files.list(this.watchDirectory);
-      if (this.filenameFilter != null) {
+      if (Objects.nonNull(this.filenameFilter)) {
         stream = stream.filter(path -> {
           String fileName = path.getFileName().toString();
           return filenameFilter.accept(this.watchDirectory.toFile(), fileName);
@@ -90,7 +91,7 @@ public class GlobalEnvTask implements Runnable {
             return;
           }
           String fileName = event.context().toString();
-          if (this.filenameFilter != null && !this.filenameFilter
+          if (Objects.nonNull(this.filenameFilter) && !this.filenameFilter
                   .accept(this.watchDirectory.toFile(), fileName)) {
             return;
           }

@@ -128,7 +128,7 @@ public class RequestContext {
 
   private void cookies() {
     String cookieString = httpRequest.headers().get(HttpHeaderNames.COOKIE);
-    if (cookieString != null) {
+    if (Objects.nonNull(cookieString)) {
       Set<Cookie> cookies = ServerCookieDecoder.STRICT.decode(cookieString);
       if (cookies.isEmpty()) {
         return;

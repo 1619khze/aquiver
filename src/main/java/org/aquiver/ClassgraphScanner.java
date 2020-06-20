@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -51,7 +52,7 @@ public class ClassgraphScanner implements Scanner {
   @Override
   public Set<Class<?>> scan(String scanPackageName) {
     this.classGraph.enableAllInfo();
-    if (classgraphOptions != null) {
+    if (Objects.nonNull(classgraphOptions)) {
       this.scanPackageName(classgraphOptions.getScanPackages(), scanPackageName)
               .verbose(classgraphOptions.isVerbose())
               .enableRealtimeLogging(classgraphOptions.isEnableRealtimeLogging());
@@ -87,7 +88,7 @@ public class ClassgraphScanner implements Scanner {
    * @return
    */
   private ClassgraphScanner blackList(List<String> blackList) {
-    if (blackList != null && blackList.size() > 0) {
+    if (Objects.nonNull(blackList ) && blackList.size() > 0) {
       this.classGraph.blacklistPackages(blackList.toArray(new String[0]));
     }
     return this;

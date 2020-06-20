@@ -23,6 +23,7 @@
  */
 package org.aquiver;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -35,9 +36,9 @@ public final class Async {
 
   /** Returns if the future has successfully completed. */
   public static boolean isReady(CompletableFuture<?> future) {
-    return (future != null) && future.isDone()
+    return (Objects.nonNull(future)) && future.isDone()
             && !future.isCompletedExceptionally()
-            && (future.join() != null);
+            && (Objects.nonNull(future.join()));
   }
 
   /** Returns the current value or null if either not done or failed. */
@@ -48,7 +49,7 @@ public final class Async {
   /** Returns the value when completed successfully or null if failed. */
   public static <V> V getWhenSuccessful(CompletableFuture<V> future) {
     try {
-      return (future == null) ? null : future.get();
+      return (Objects.isNull(future.join())) ? null : future.get();
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       return null;

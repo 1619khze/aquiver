@@ -242,7 +242,7 @@ public final class RouteManager {
     for (ParamResolver paramResolver : paramResolvers) {
       if (!paramResolver.support(parameter)) continue;
       RouteParam param = paramResolver.resolve(parameter, paramName);
-      if (param != null) {
+      if (Objects.nonNull(param)) {
         route.getParams().add(param);
       }
     }
@@ -251,7 +251,7 @@ public final class RouteManager {
   protected String getMethodUrl(String baseUrl, String methodMappingUrl) {
     StringBuilder url = new StringBuilder(256);
     url.append((baseUrl == null || baseUrl.trim().isEmpty()) ? "" : baseUrl.trim());
-    if (methodMappingUrl != null && !methodMappingUrl.trim().isEmpty()) {
+    if (Objects.nonNull(methodMappingUrl) && !methodMappingUrl.trim().isEmpty()) {
       String methodMappingUrlTrim = methodMappingUrl.trim();
       if (!methodMappingUrlTrim.startsWith("/")) {
         methodMappingUrlTrim = "/" + methodMappingUrlTrim;

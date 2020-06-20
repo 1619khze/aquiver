@@ -39,6 +39,8 @@ import org.aquiver.Const;
 import org.aquiver.Environment;
 import org.aquiver.mvc.route.RouteManager;
 
+import java.util.Objects;
+
 /**
  * @author WangYi
  * @since 2019/6/5
@@ -72,7 +74,7 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
   @Override
   protected void initChannel(SocketChannel ch) {
     ChannelPipeline channelPipeline = ch.pipeline();
-    if (sslCtx != null) channelPipeline.addLast(sslCtx.newHandler(ch.alloc()));
+    if (Objects.nonNull(sslCtx)) channelPipeline.addLast(sslCtx.newHandler(ch.alloc()));
     if (cors) channelPipeline.addLast(new CorsHandler(corsConfig));
     if (compressor) channelPipeline.addLast(new HttpContentCompressor());
     channelPipeline.addLast(new HttpRequestDecoder());

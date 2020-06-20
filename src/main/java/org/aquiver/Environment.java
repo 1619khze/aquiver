@@ -142,7 +142,7 @@ public final class Environment {
 
   public void load(String location) {
     InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(location);
-    if (inputStream != null) {
+    if (Objects.nonNull(inputStream)) {
       load(inputStream);
     }
   }

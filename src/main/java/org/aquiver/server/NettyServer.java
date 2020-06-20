@@ -49,6 +49,7 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.security.cert.CertificateException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static org.aquiver.Const.*;
@@ -78,8 +79,7 @@ public class NettyServer implements Server {
   private Channel channel;
   private SslContext sslContext;
 
-  /** request mapping resolver. */
-  private RouteFinder routeFinder;
+  /** route manager. */
   private RouteManager routeManager;
 
   /** Service startup status, using volatile to ensure threads are visible. */
@@ -97,7 +97,6 @@ public class NettyServer implements Server {
 
     this.aquiver = aquiver;
     this.environment = aquiver.environment();
-    this.routeFinder = new PathRouteFinder();
     this.routeManager = new RouteManager(aquiver);
     this.printBanner();
 
@@ -144,6 +143,7 @@ public class NettyServer implements Server {
    */
   private void loadRoute() {
     final String scanPath = aquiver.bootCls().getPackage().getName();
+    final RouteFinder routeFinder = new PathRouteFinder();
 
     final ClassgraphOptions classgraphOptions = ClassgraphOptions.builder()
             .verbose(aquiver.verbose()).enableRealtimeLogging(aquiver.realtimeLogging())
@@ -287,10 +287,10 @@ public class NettyServer implements Server {
     }
     stop = true;
     try {
-      if (bossGroup != null) {
+      if (Objects.nonNull(bossGroup)) {
         this.bossGroup.shutdownGracefully();
       }
-      if (workerGroup != null) {
+      if (Objects.nonNull(workerGroup)) {
         this.workerGroup.shutdownGracefully();
       }
       log.info("The netty service is gracefully closed");
@@ -347,6 +347,6 @@ public class NettyServer implements Server {
    * @return keystore file
    */
   private File setKeyCertFileAndPriKey(String keyPath, File defaultFilePath) {
-    return keyPath != null ? Paths.get(keyPath).toFile() : defaultFilePath;
+    return Objects.nonNull(keyPath) ? Paths.get(keyPath).toFile() : defaultFilePath;
   }
 }
