@@ -136,7 +136,7 @@ public final class Aquiver {
    * @return Aquiver instants
    */
   public static Aquiver of() {
-    return AquiverHolder.ApexHolder.instance;
+    return AquiverHolder.instance();
   }
 
   /**
@@ -632,12 +632,13 @@ public final class Aquiver {
    * Aquiver object holder
    */
   private static class AquiverHolder{
+    private static final Aquiver instance = new Aquiver();
 
     /**
      * Get Singleton aquiver object
      */
-    private static class ApexHolder{
-      private static final Aquiver instance = new Aquiver();
+    public static Aquiver instance() {
+      return instance;
     }
   }
 }
