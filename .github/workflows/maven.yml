@@ -18,7 +18,7 @@ jobs:
       - name: Build with Maven
         run: |
           git clone https://github.com/AquiverV/aquiver.git
-          cd ./today-context
+          cd ./aquiver
           mvn install
           cd ../
           mvn package -DskipTests=true
