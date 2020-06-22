@@ -136,7 +136,7 @@ public final class Aquiver {
    * @return Aquiver instants
    */
   public static Aquiver of() {
-    return new Aquiver();
+    return AquiverHolder.ApexHolder.instance;
   }
 
   /**
@@ -625,6 +625,19 @@ public final class Aquiver {
     @Override
     public Thread newThread(Runnable runnable) {
       return new Thread(runnable, prefix + "thread-" + threadNumber.intValue());
+    }
+  }
+
+  /**
+   * Aquiver object holder
+   */
+  private static class AquiverHolder{
+
+    /**
+     * Get Singleton aquiver object
+     */
+    private static class ApexHolder{
+      private static final Aquiver instance = new Aquiver();
     }
   }
 }
