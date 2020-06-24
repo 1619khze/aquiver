@@ -44,10 +44,8 @@ public class ResponseRenderMatcher {
   private static final Logger log = LoggerFactory.getLogger(ResponseRenderMatcher.class);
 
   private final List<ResponseRender> responseRenders = new ArrayList<>();
-  private final Aquiver aquiver;
 
-  public ResponseRenderMatcher(Aquiver aquiver) {
-    this.aquiver = aquiver;
+  public ResponseRenderMatcher() {
     ServiceLoader<ResponseRender> renderServiceLoader = ServiceLoader.load(ResponseRender.class);
     try {
       for (ResponseRender render : renderServiceLoader) {
@@ -61,7 +59,6 @@ public class ResponseRenderMatcher {
 
   public void adapter(RequestContext requestContext) {
     requireNonNull(requestContext, "RequestContext cant't be null");
-    requestContext.setAquiver(aquiver);
 
     Route route = requestContext.getRoute();
 

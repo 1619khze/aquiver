@@ -46,15 +46,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public final class RouteManager {
   private static final Logger log = LoggerFactory.getLogger(RouteManager.class);
 
-  private final Aquiver aquiver;
   private final Map<String, Route> routes = new ConcurrentHashMap<>(64);
   private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
   private final List<ParamResolver> paramResolvers = new ArrayList<>();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-
-  public RouteManager(Aquiver aquiver) {
-    this.aquiver = aquiver;
-  }
 
   public List<ParamResolver> getParamResolvers() {
     return paramResolvers;
@@ -272,9 +267,5 @@ public final class RouteManager {
       nameList.add(name);
     }
     return nameList.toArray(new String[0]);
-  }
-
-  public Aquiver getAquiver() {
-    return aquiver;
   }
 }

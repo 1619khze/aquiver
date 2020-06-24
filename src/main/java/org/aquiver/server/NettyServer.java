@@ -34,8 +34,8 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.ResourceLeakDetector;
 import org.aquiver.*;
 import org.aquiver.mvc.route.PathRouteFinder;
-import org.aquiver.mvc.route.RouteManager;
 import org.aquiver.mvc.route.RouteFinder;
+import org.aquiver.mvc.route.RouteManager;
 import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvTask;
@@ -97,7 +97,7 @@ public class NettyServer implements Server {
 
     this.aquiver = aquiver;
     this.environment = aquiver.environment();
-    this.routeManager = new RouteManager(aquiver);
+    this.routeManager = new RouteManager();
     this.printBanner();
 
     final String bootClsName = aquiver.bootClsName();

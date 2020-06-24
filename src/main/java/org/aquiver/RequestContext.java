@@ -41,7 +41,6 @@ public class RequestContext {
   private final ChannelHandlerContext context;
   private FullHttpResponse httpResponse;
 
-  private Aquiver aquiver;
   private Route route;
   private Response response;
   private Map<String, Object> cookies;
@@ -254,13 +253,5 @@ public class RequestContext {
 
   public void setFileUploads(Map<String, FileUpload> fileUploads) {
     this.fileUploads = fileUploads;
-  }
-
-  public Aquiver getAquiver() {
-    return aquiver;
-  }
-
-  public void setAquiver(Aquiver aquiver) {
-    this.aquiver = aquiver;
   }
 }
