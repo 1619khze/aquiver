@@ -21,31 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.ansi;
+package org.aquiver.internal.logback;
 
-/**
- * @author WangYi
- * @version 1.0
- * @since 2019/1/16
- */
-public enum AnsiBackground implements AnsiElement {
-  BLACK_BACKGROUND("\u001B[40m"),
-  RED_BACKGROUND("\u001B[41m"),
-  GREEN_BACKGROUND("\u001B[42m"),
-  YELLOW_BACKGROUND("\u001B[43m"),
-  BLUE_BACKGROUND("\u001B[44m"),
-  PURPLE_BACKGROUND("\u001B[45m"),
-  CYAN_BACKGROUND("\u001B[46m"),
-  WHITE_BACKGROUND("\u001B[47m");
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.pattern.color.ANSIConstants;
+import ch.qos.logback.core.pattern.color.ForegroundCompositeConverterBase;
 
-  private final String code;
-
-  AnsiBackground(String code) {
-    this.code = code;
-  }
+public class LogBackAnsiConverter extends ForegroundCompositeConverterBase<ILoggingEvent> {
 
   @Override
-  public String toString() {
-    return this.code;
+  protected String getForegroundColorCode(ILoggingEvent iLoggingEvent) {
+    switch (iLoggingEvent.getLevel().toInt()) {
+      case Level.ERROR_INT:
+        return ANSIConstants.RED_FG;
+      case Level.WARN_INT:
+        return ANSIConstants.YELLOW_FG;
+      case Level.INFO_INT:
+        return ANSIConstants.GREEN_FG;
+      case Level.DEBUG_INT:
+        return ANSIConstants.MAGENTA_FG;
+      default:
+        return null;
+    }
   }
 }

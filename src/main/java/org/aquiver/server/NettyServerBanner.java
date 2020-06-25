@@ -25,8 +25,8 @@ package org.aquiver.server;
 
 import io.leego.banana.BananaUtils;
 import org.aquiver.Const;
-import org.aquiver.ansi.AnsiColor;
-import org.aquiver.ansi.AnsiOutput;
+import org.aquiver.internal.ansi.AnsiColor;
+import org.aquiver.internal.ansi.AnsiOutput;
 import org.aquiver.server.banner.BannerTemplate;
 
 import java.io.PrintStream;

@@ -21,16 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.ansi.logback;
+package org.aquiver.internal.ansi;
 
-import ch.qos.logback.classic.pattern.ClassicConverter;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import org.aquiver.toolkit.SystemUtils;
-
-public class ProcessIdClassicConverter extends ClassicConverter {
+/**
+ * @author WangYi
+ * @version 1.0
+ * @since 2019/1/16
+ */
+public interface AnsiElement {
 
   @Override
-  public String convert(ILoggingEvent iLoggingEvent) {
-    return SystemUtils.getPid();
-  }
+  String toString();
 }
