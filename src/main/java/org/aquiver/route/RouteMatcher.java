@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.application;
+package org.aquiver.route;
 
-import org.aquiver.Aquiver;
+import org.aquiver.RequestContext;
 
-public class Application {
-  public static void main(String[] args) {
-    Aquiver.of().bind(9900)
-            .bannerText("aaa")
-            .start(Application.class, args);
-//    Aquiver.run(Application.class, args);
-  }
+/**
+ * @author WangYi
+ * @since 2020/5/26
+ */
+public interface RouteMatcher<R> {
+  R match(RequestContext context);
 }

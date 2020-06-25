@@ -21,15 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.application;
+package org.aquiver.route.views;
 
-import org.aquiver.Aquiver;
+import java.io.IOException;
+import java.util.Map;
 
-public class Application {
-  public static void main(String[] args) {
-    Aquiver.of().bind(9900)
-            .bannerText("aaa")
-            .start(Application.class, args);
-//    Aquiver.run(Application.class, args);
-  }
+/**
+ * @author WangYi
+ * @since 2020/6/16
+ */
+public interface HTMLView {
+  /**
+   * Get the support view type.
+   *
+   * @return ViewType
+   */
+  ViewType viewType();
+
+  /**
+   * Get the content of the returned view
+   *
+   * @param htmlPath   html path
+   * @param viewParams view render params
+   * @return the content of the returned view
+   * @throws IOException io exception
+   */
+  String renderView(String htmlPath, Map<String, Object> viewParams) throws IOException;
 }

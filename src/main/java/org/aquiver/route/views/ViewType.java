@@ -21,15 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.application;
+package org.aquiver.route.views;
 
-import org.aquiver.Aquiver;
-
-public class Application {
-  public static void main(String[] args) {
-    Aquiver.of().bind(9900)
-            .bannerText("aaa")
-            .start(Application.class, args);
-//    Aquiver.run(Application.class, args);
-  }
+/**
+ * @author WangYi
+ * @since 2020/6/17
+ */
+public enum ViewType {
+  JSON, TEXT, HTML
 }

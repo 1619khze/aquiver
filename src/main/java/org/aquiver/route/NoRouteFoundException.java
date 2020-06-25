@@ -21,15 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.application;
+package org.aquiver.route;
 
-import org.aquiver.Aquiver;
-
-public class Application {
-  public static void main(String[] args) {
-    Aquiver.of().bind(9900)
-            .bannerText("aaa")
-            .start(Application.class, args);
-//    Aquiver.run(Application.class, args);
+/**
+ * @author WangYi
+ * @since 2020/5/29
+ */
+public class NoRouteFoundException extends RuntimeException {
+  /**
+   * Constructor for NoRouteFoundException.
+   *
+   * @param httpMethod the HTTP method
+   * @param requestURL the HTTP request URL
+   */
+  public NoRouteFoundException(String httpMethod, String requestURL) {
+    super(String.format("No handler found for %s %s", httpMethod, requestURL));
   }
 }

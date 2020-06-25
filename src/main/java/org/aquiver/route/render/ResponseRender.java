@@ -21,15 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.application;
+package org.aquiver.route.render;
 
-import org.aquiver.Aquiver;
+import org.aquiver.RequestContext;
+import org.aquiver.route.Route;
+import org.aquiver.route.views.ViewType;
 
-public class Application {
-  public static void main(String[] args) {
-    Aquiver.of().bind(9900)
-            .bannerText("aaa")
-            .start(Application.class, args);
-//    Aquiver.run(Application.class, args);
-  }
+import java.io.IOException;
+
+/**
+ * @author WangYi
+ * @since 2020/6/17
+ */
+public interface ResponseRender {
+  boolean support(ViewType viewType);
+
+  void render(Route route, RequestContext requestContext) throws IOException;
 }

@@ -1,3 +1,0 @@
-org.aquiver.mvc.render.HTMLResponseRender
-org.aquiver.mvc.render.JSONResponseRender
-org.aquiver.mvc.render.TextResponseRender

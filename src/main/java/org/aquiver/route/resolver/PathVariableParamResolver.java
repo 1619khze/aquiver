@@ -21,15 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.application;
+package org.aquiver.route.resolver;
 
-import org.aquiver.Aquiver;
+import org.aquiver.ParamResolver;
+import org.aquiver.annotation.bind.PathVar;
+import org.aquiver.route.RouteParam;
+import org.aquiver.route.RouteParamType;
 
-public class Application {
-  public static void main(String[] args) {
-    Aquiver.of().bind(9900)
-            .bannerText("aaa")
-            .start(Application.class, args);
-//    Aquiver.run(Application.class, args);
+import java.lang.reflect.Parameter;
+
+public class PathVariableParamResolver implements ParamResolver {
+
+  @Override
+  public boolean support(Parameter parameter) {
+    return parameter.isAnnotationPresent(PathVar.class);
+  }
+
+  @Override
+  public RouteParam resolve(Parameter parameter, String paramName) {
+    RouteParam handlerParam = new RouteParam();
+    PathVar pathVar = parameter.getAnnotation(PathVar.class);
+    handlerParam.setDataType(parameter.getType());
+    handlerParam.setName((!"".equals(pathVar.value()) && !pathVar.value().trim().isEmpty()) ?
+            pathVar.value().trim() : paramName);
+    handlerParam.setRequired(true);
+    handlerParam.setType(RouteParamType.PATH_VARIABLE);
+    return handlerParam;
   }
 }

@@ -29,10 +29,10 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.util.concurrent.EventExecutor;
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.render.ResponseRenderMatcher;
-import org.aquiver.mvc.route.PathRouteMatcher;
-import org.aquiver.mvc.route.RouteManager;
-import org.aquiver.mvc.route.RouteMatcher;
+import org.aquiver.route.render.ResponseRenderMatcher;
+import org.aquiver.route.PathRouteMatcher;
+import org.aquiver.route.RouteManager;
+import org.aquiver.route.RouteMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

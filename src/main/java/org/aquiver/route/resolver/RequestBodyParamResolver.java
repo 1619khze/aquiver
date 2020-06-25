@@ -21,15 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.application;
+package org.aquiver.route.resolver;
 
-import org.aquiver.Aquiver;
+import org.aquiver.ParamResolver;
+import org.aquiver.annotation.bind.Body;
+import org.aquiver.route.RouteParam;
+import org.aquiver.route.RouteParamType;
 
-public class Application {
-  public static void main(String[] args) {
-    Aquiver.of().bind(9900)
-            .bannerText("aaa")
-            .start(Application.class, args);
-//    Aquiver.run(Application.class, args);
+import java.lang.reflect.Parameter;
+
+/**
+ * @author WangYi
+ * @since 2020/5/28
+ */
+public class RequestBodyParamResolver implements ParamResolver {
+  @Override
+  public boolean support(Parameter parameter) {
+    return parameter.isAnnotationPresent(Body.class);
+  }
+
+  @Override
+  public RouteParam resolve(Parameter parameter, String paramName) {
+    RouteParam handlerParam = new RouteParam();
+    Body body = parameter.getAnnotation(Body.class);
+    handlerParam.setDataType(parameter.getType());
+    handlerParam.setName("".equals(body.value()) ? paramName : body.value());
+    handlerParam.setRequired(true);
+    handlerParam.setType(RouteParamType.REQUEST_BODY);
+    return handlerParam;
   }
 }

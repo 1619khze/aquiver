@@ -21,68 +21,71 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
-
-import io.netty.handler.codec.http.FullHttpResponse;
+package org.aquiver.route;
 
 import java.util.Objects;
 
-public class Response {
-  private FullHttpResponse httpResponse;
-  private Object result;
-  private boolean jsonResponse;
-  private String mediaType;
+public class RouteParam {
+  private String name;
+  private Class<?> dataType;
+  private RouteParamType type;
+  private boolean required = true;
 
-  public Response(Object result, boolean jsonResponse) {
-    this.result = result;
-    this.jsonResponse = jsonResponse;
+  public String getName() {
+    return name;
   }
 
-  public Object getResult() {
-    return result;
+  public void setName(String name) {
+    this.name = name;
   }
 
-  public void setResult(Object result) {
-    this.result = result;
+  public Class<?> getDataType() {
+    return dataType;
   }
 
-  public boolean isJsonResponse() {
-    return jsonResponse;
+  public void setDataType(Class<?> dataType) {
+    this.dataType = dataType;
   }
 
-  public void setJsonResponse(boolean jsonResponse) {
-    this.jsonResponse = jsonResponse;
+  public RouteParamType getType() {
+    return type;
   }
 
-  public String getMediaType() {
-    return mediaType;
+  public void setType(RouteParamType type) {
+    this.type = type;
   }
 
-  public void setMediaType(String mediaType) {
-    this.mediaType = mediaType;
+  public boolean isRequired() {
+    return required;
   }
 
-  @Override
-  public String toString() {
-    return "Response{" +
-            "result=" + result +
-            ", jsonResponse=" + jsonResponse +
-            ", mediaType='" + mediaType + '\'' +
-            '}';
+  public void setRequired(boolean required) {
+    this.required = required;
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    Response response = (Response) o;
-    return jsonResponse == response.jsonResponse &&
-            Objects.equals(result, response.result) &&
-            Objects.equals(mediaType, response.mediaType);
+    RouteParam that = (RouteParam) o;
+    return required == that.required &&
+            Objects.equals(name, that.name) &&
+            Objects.equals(dataType, that.dataType) &&
+            type == that.type;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(result, jsonResponse, mediaType);
+    return Objects.hash(name, dataType, type, required);
+  }
+
+  @Override
+  public String toString() {
+    return "RequestHandlerParam{" +
+            "name='" + name + '\'' +
+            ", dataType=" + dataType +
+            ", type=" + type +
+            ", required=" + required +
+            '}';
   }
 }

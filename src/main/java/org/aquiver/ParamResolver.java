@@ -21,15 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.application;
+package org.aquiver;
 
-import org.aquiver.Aquiver;
+import org.aquiver.route.RouteParam;
 
-public class Application {
-  public static void main(String[] args) {
-    Aquiver.of().bind(9900)
-            .bannerText("aaa")
-            .start(Application.class, args);
-//    Aquiver.run(Application.class, args);
-  }
+import java.lang.reflect.Parameter;
+
+public interface ParamResolver {
+  boolean support(Parameter parameter);
+
+  RouteParam resolve(Parameter parameter, String paramName);
 }
