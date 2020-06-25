@@ -25,11 +25,29 @@ package org.aquiver.server;
 
 import org.aquiver.Aquiver;
 
+/**
+ * Abstract the common methods of the server in
+ * order to implement different http servers.
+ *
+ * @author WangYi
+ * @since 2020/6/25
+ */
 public interface Server {
-
+  /**
+   * start server and init setting
+   *
+   * @param aquiver Aquiver
+   * @throws Exception Common Exception
+   */
   void start(Aquiver aquiver) throws Exception;
 
+  /**
+   * stop http server
+   */
   void stop();
 
+  /**
+   * join http server
+   */
   void join();
 }
