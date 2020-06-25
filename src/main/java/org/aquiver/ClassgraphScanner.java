@@ -73,7 +73,7 @@ public class ClassgraphScanner implements Scanner {
       throw new IllegalArgumentException("scanPackageName cannot be empty and " +
               "needs to conform to the specification");
     }
-    if (scanPackages == null) {
+    if (Objects.isNull(scanPackages)) {
       scanPackages = new LinkedHashSet<>();
     }
     scanPackages.add(scanPackageName);
@@ -88,7 +88,7 @@ public class ClassgraphScanner implements Scanner {
    * @return
    */
   private ClassgraphScanner blackList(List<String> blackList) {
-    if (Objects.nonNull(blackList ) && blackList.size() > 0) {
+    if (Objects.nonNull(blackList) && blackList.size() > 0) {
       this.classGraph.blacklistPackages(blackList.toArray(new String[0]));
     }
     return this;
