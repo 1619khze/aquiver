@@ -26,9 +26,9 @@ package org.aquiver.route;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.aquiver.Async;
+import org.aquiver.ParamDispen;
 import org.aquiver.RequestContext;
 import org.aquiver.handler.HttpExceptionHandler;
-import org.aquiver.ParamDispen;
 import org.aquiver.server.StaticFileServerHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ import java.util.concurrent.CompletableFuture;
  * @since 2020/5/29
  */
 public class PathRouteMatcher implements RouteMatcher<RequestContext> {
-  private static final Logger log = LoggerFactory.getLogger(RouteMatcher.class);
+  private static final Logger log = LoggerFactory.getLogger(PathRouteMatcher.class);
 
   private final Map<String, Route> routeMap;
   private final HttpExceptionHandler exceptionHandler;
@@ -154,7 +154,7 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
 
   private RequestContext lookupStaticFile(RequestContext context) {
     try {
-      Boolean result = this.fileServerHandler.handle(context);
+      final boolean result = this.fileServerHandler.handle(context);
       if (!result) {
         this.handlerNoRouteFoundException(context);
         throw new NoRouteFoundException(context.getHttpMethod(), context.getUri());

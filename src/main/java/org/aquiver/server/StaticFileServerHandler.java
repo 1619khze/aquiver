@@ -68,41 +68,40 @@ public class StaticFileServerHandler implements RequestHandler<Boolean> {
     if (!html.exists()) {
       html = NOT_FOUND;
     }
+    try (RandomAccessFile file = new RandomAccessFile(html, "r")) {
+      HttpResponse response = new DefaultHttpResponse(request.protocolVersion(), HttpResponseStatus.OK);
 
-    RandomAccessFile file = new RandomAccessFile(html, "r");
-    HttpResponse response = new DefaultHttpResponse(request.protocolVersion(), HttpResponseStatus.OK);
+      if (html == NOT_FOUND) {
+        response.setStatus(HttpResponseStatus.NOT_FOUND);
+      }
 
-    if (html == NOT_FOUND) {
-      response.setStatus(HttpResponseStatus.NOT_FOUND);
+      if (uri.endsWith(".html")) {
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html; charset=UTF-8");
+      } else if (uri.endsWith(".js")) {
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/x-javascript");
+      } else if (uri.endsWith(".css")) {
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/css; charset=UTF-8");
+      }
+
+      boolean keepAlive = HttpUtil.isKeepAlive(request);
+
+      if (keepAlive) {
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, file.length());
+        response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+      }
+      ctx.write(response);
+
+      if (ctx.pipeline().get(SslHandler.class) == null) {
+        ctx.write(new DefaultFileRegion(file.getChannel(), 0, file.length()));
+      } else {
+        ctx.write(new ChunkedNioFile(file.getChannel()));
+      }
+
+      ChannelFuture future = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+      if (!keepAlive) {
+        future.addListener(ChannelFutureListener.CLOSE);
+      }
     }
-
-    if (uri.endsWith(".html")) {
-      response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html; charset=UTF-8");
-    } else if (uri.endsWith(".js")) {
-      response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/x-javascript");
-    } else if (uri.endsWith(".css")) {
-      response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/css; charset=UTF-8");
-    }
-
-    boolean keepAlive = HttpUtil.isKeepAlive(request);
-
-    if (keepAlive) {
-      response.headers().set(HttpHeaderNames.CONTENT_LENGTH, file.length());
-      response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-    }
-    ctx.write(response);
-
-    if (ctx.pipeline().get(SslHandler.class) == null) {
-      ctx.write(new DefaultFileRegion(file.getChannel(), 0, file.length()));
-    } else {
-      ctx.write(new ChunkedNioFile(file.getChannel()));
-    }
-
-    ChannelFuture future = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
-    if (!keepAlive) {
-      future.addListener(ChannelFutureListener.CLOSE);
-    }
-    file.close();
 
     return true;
   }
