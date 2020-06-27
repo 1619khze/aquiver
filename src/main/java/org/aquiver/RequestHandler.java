@@ -27,12 +27,11 @@ package org.aquiver;
  * @author WangYi
  * @since 2020/6/12
  */
-public interface RequestHandler<R> {
+public interface RequestHandler {
   /**
    * Handling routing
    * @param context Request context
-   * @return R Generic parameter
    * @throws Exception Exceptions that may be thrown
    */
-  R handle(RequestContext context) throws Exception;
+  void handle(RequestContext context) throws Exception;
 }
