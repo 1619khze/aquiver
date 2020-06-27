@@ -517,7 +517,7 @@ public final class Aquiver {
    * load properties and yaml
    *
    * @param bootConfEnv Environment used when the server starts
-   * @param constField Constant attribute map
+   * @param constField  Constant attribute map
    */
   private void loadPropsOrYaml(Environment bootConfEnv, Map<String, String> constField) {
     /** Properties are configured by default, and the properties loaded
@@ -631,7 +631,7 @@ public final class Aquiver {
   /**
    * Aquiver object holder
    */
-  private static class AquiverHolder{
+  private static class AquiverHolder {
     private static final Aquiver instance = new Aquiver();
 
     /**
