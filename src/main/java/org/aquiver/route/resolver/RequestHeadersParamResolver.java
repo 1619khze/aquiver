@@ -23,6 +23,7 @@
  */
 package org.aquiver.route.resolver;
 
+import org.aquiver.RequestContext;
 import org.aquiver.annotation.bind.Header;
 import org.aquiver.ParamResolver;
 import org.aquiver.route.RouteParam;
@@ -30,7 +31,7 @@ import org.aquiver.route.RouteParamType;
 
 import java.lang.reflect.Parameter;
 
-public class RequestHeadersParamResolver implements ParamResolver {
+public class RequestHeadersParamResolver extends AbstractParamResolver implements ParamResolver {
 
   @Override
   public boolean support(Parameter parameter) {
@@ -46,5 +47,18 @@ public class RequestHeadersParamResolver implements ParamResolver {
     handlerParam.setRequired(true);
     handlerParam.setType(RouteParamType.REQUEST_HEADER);
     return handlerParam;
+  }
+
+  @Override
+  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
+    if (isMap(handlerParam.getDataType())) {
+      return requestContext.getHeaders();
+    }
+    return handlerParam.getDataType().cast(requestContext.getHeaders().get(handlerParam.getName()));
+  }
+
+  @Override
+  public RouteParamType dispenType() {
+    return RouteParamType.REQUEST_HEADER;
   }
 }

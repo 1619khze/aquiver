@@ -26,7 +26,6 @@ package org.aquiver.route;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.aquiver.Async;
-import org.aquiver.ParamDispen;
 import org.aquiver.RequestContext;
 import org.aquiver.handler.HttpExceptionHandler;
 import org.aquiver.server.StaticFileServerHandler;
@@ -50,9 +49,11 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
   private final Map<String, Route> routeMap;
   private final HttpExceptionHandler exceptionHandler;
   private final StaticFileServerHandler fileServerHandler;
+  private final RouteManager routeManager;
 
-  public PathRouteMatcher(Map<String, Route> routeMap) {
-    this.routeMap = routeMap;
+  public PathRouteMatcher(RouteManager manager) {
+    this.routeManager = manager;
+    this.routeMap = manager.getRoutes();
     this.exceptionHandler = new HttpExceptionHandler();
     this.fileServerHandler = new StaticFileServerHandler();
   }
@@ -84,7 +85,7 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
       for (int i = 0; i < paramValues.length; i++) {
         RouteParam handlerParam = route.getParams().get(i);
         paramTypes[i] = handlerParam.getDataType();
-        paramValues[i] = ParamDispen.dispen(
+        paramValues[i] = this.routeManager.dispen(
                 handlerParam, context, route.getUrl()
         );
       }
@@ -134,7 +135,7 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
   }
 
   private RequestContext lookupRoute(RequestContext context) {
-    String lookupPath = getLookupPath(context.getUri());
+    String lookupPath = lookupPath(context.getUri());
     int paramStartIndex = lookupPath.indexOf("?");
     if (paramStartIndex > 0) {
       lookupPath = lookupPath.substring(0, paramStartIndex);
@@ -148,7 +149,7 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     }
   }
 
-  private String getLookupPath(String uri) {
+  private String lookupPath(String uri) {
     return uri.endsWith("/") ? uri.substring(0, uri.length() - 1) : uri;
   }
 

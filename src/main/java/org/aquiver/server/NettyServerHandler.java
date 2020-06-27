@@ -51,7 +51,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   private final ResponseRenderMatcher responseRenderMatcher;
 
   public NettyServerHandler(RouteManager routeManager) {
-    this.matcher = new PathRouteMatcher(routeManager.getRoutes());
+    this.matcher = new PathRouteMatcher(routeManager);
     this.responseRenderMatcher = new ResponseRenderMatcher();
   }
 

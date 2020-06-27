@@ -23,14 +23,15 @@
  */
 package org.aquiver.route.resolver;
 
-import org.aquiver.annotation.bind.Cookies;
 import org.aquiver.ParamResolver;
+import org.aquiver.RequestContext;
+import org.aquiver.annotation.bind.Cookies;
 import org.aquiver.route.RouteParam;
 import org.aquiver.route.RouteParamType;
 
 import java.lang.reflect.Parameter;
 
-public class RequestCookiesParamResolver implements ParamResolver {
+public class RequestCookiesParamResolver extends AbstractParamResolver implements ParamResolver {
 
   @Override
   public boolean support(Parameter parameter) {
@@ -46,5 +47,18 @@ public class RequestCookiesParamResolver implements ParamResolver {
     handlerParam.setRequired(true);
     handlerParam.setType(RouteParamType.REQUEST_COOKIES);
     return handlerParam;
+  }
+
+  @Override
+  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
+    if (isMap(handlerParam.getDataType())) {
+      return requestContext.getCookies();
+    }
+    return handlerParam.getDataType().cast(requestContext.getCookies().get(handlerParam.getName()));
+  }
+
+  @Override
+  public RouteParamType dispenType() {
+    return RouteParamType.REQUEST_COOKIES;
   }
 }

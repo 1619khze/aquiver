@@ -24,13 +24,14 @@
 package org.aquiver.route.resolver;
 
 import org.aquiver.ParamResolver;
+import org.aquiver.RequestContext;
 import org.aquiver.annotation.bind.Param;
 import org.aquiver.route.RouteParam;
 import org.aquiver.route.RouteParamType;
 
 import java.lang.reflect.Parameter;
 
-public class RequestParamParamResolver implements ParamResolver {
+public class RequestParamParamResolver extends AbstractParamResolver implements ParamResolver {
 
   @Override
   public boolean support(Parameter parameter) {
@@ -46,5 +47,18 @@ public class RequestParamParamResolver implements ParamResolver {
     handlerParam.setRequired(param.required());
     handlerParam.setType(RouteParamType.REQUEST_PARAM);
     return handlerParam;
+  }
+
+  @Override
+  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
+    if (isMap(handlerParam.getDataType())) {
+      return requestContext.getQueryString();
+    }
+    return handlerParam.getDataType().cast(requestContext.getQueryString().get(handlerParam.getName()));
+  }
+
+  @Override
+  public RouteParamType dispenType() {
+    return RouteParamType.REQUEST_PARAM;
   }
 }

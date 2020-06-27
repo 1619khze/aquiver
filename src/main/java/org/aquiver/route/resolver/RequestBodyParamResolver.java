@@ -23,18 +23,23 @@
  */
 package org.aquiver.route.resolver;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.aquiver.ParamResolver;
+import org.aquiver.RequestContext;
 import org.aquiver.annotation.bind.Body;
 import org.aquiver.route.RouteParam;
 import org.aquiver.route.RouteParamType;
 
 import java.lang.reflect.Parameter;
+import java.util.Map;
 
 /**
  * @author WangYi
  * @since 2020/5/28
  */
-public class RequestBodyParamResolver implements ParamResolver {
+public class RequestBodyParamResolver extends AbstractParamResolver implements ParamResolver {
+
   @Override
   public boolean support(Parameter parameter) {
     return parameter.isAnnotationPresent(Body.class);
@@ -49,5 +54,20 @@ public class RequestBodyParamResolver implements ParamResolver {
     handlerParam.setRequired(true);
     handlerParam.setType(RouteParamType.REQUEST_BODY);
     return handlerParam;
+  }
+
+  @Override
+  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
+    Map<String, Object> jsonData = requestContext.getFormData();
+    String jsonString = JSON.toJSONString(jsonData);
+    if (jsonData.isEmpty() || !JSONObject.isValid(jsonString)) {
+      return null;
+    }
+    return JSONObject.parseObject(jsonString, handlerParam.getDataType());
+  }
+
+  @Override
+  public RouteParamType dispenType() {
+    return RouteParamType.REQUEST_BODY;
   }
 }

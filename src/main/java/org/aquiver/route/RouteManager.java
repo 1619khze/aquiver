@@ -24,12 +24,14 @@
 package org.aquiver.route;
 
 import org.aquiver.ParamResolver;
+import org.aquiver.RequestContext;
 import org.aquiver.annotation.*;
 import org.aquiver.route.views.PebbleHTMLView;
 import org.aquiver.route.views.ViewType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
@@ -219,6 +221,17 @@ public final class RouteManager {
     } finally {
       this.readWriteLock.writeLock().unlock();
     }
+  }
+
+  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) throws IOException {
+    Object dispen = null;
+    for (ParamResolver paramResolver : paramResolvers) {
+      if (!paramResolver.dispenType().equals(handlerParam.getType())) {
+        continue;
+      }
+      dispen = paramResolver.dispen(handlerParam, requestContext, url);
+    }
+    return dispen;
   }
 
   private void execuArgsResolver(Route route, Parameter[] ps, String[] paramNames) {

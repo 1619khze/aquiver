@@ -24,17 +24,22 @@
 package org.aquiver.route.resolver;
 
 import org.aquiver.ParamResolver;
+import org.aquiver.RequestContext;
 import org.aquiver.annotation.bind.FileUpload;
 import org.aquiver.route.RouteParam;
 import org.aquiver.route.RouteParamType;
+import org.aquiver.route.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.lang.reflect.Parameter;
+import java.util.Map;
 
 /**
  * @author WangYi
  * @since 2020/6/14
  */
-public class FileUploadParamResolver implements ParamResolver {
+public class FileUploadParamResolver extends AbstractParamResolver implements ParamResolver {
+
   @Override
   public boolean support(Parameter parameter) {
     return parameter.isAnnotationPresent(FileUpload.class);
@@ -48,5 +53,21 @@ public class FileUploadParamResolver implements ParamResolver {
     handlerParam.setName("".equals(param.value()) ? paramName : param.value());
     handlerParam.setType(RouteParamType.UPLOAD_FILE);
     return handlerParam;
+  }
+
+  @Override
+  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) throws IOException {
+    Map<String, io.netty.handler.codec.http.multipart.FileUpload> fileUploads = requestContext.getFileUploads();
+    if (MultipartFile.class.isAssignableFrom(handlerParam.getDataType()) &&
+            fileUploads.containsKey(handlerParam.getName())) {
+      io.netty.handler.codec.http.multipart.FileUpload fileUpload = fileUploads.get(handlerParam.getName());
+      return buildMultipartFile(fileUpload);
+    }
+    return null;
+  }
+
+  @Override
+  public RouteParamType dispenType() {
+    return RouteParamType.UPLOAD_FILE;
   }
 }
