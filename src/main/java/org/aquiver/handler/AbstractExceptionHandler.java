@@ -61,7 +61,7 @@ public abstract class AbstractExceptionHandler implements ExceptionHandler, Http
   }
 
   public ChannelFuture writeResponse(RequestContext requestContext, FullHttpResponse fullHttpResponse) {
-    return requestContext.getContext().writeAndFlush(fullHttpResponse);
+    return requestContext.request().channelHandlerContext().writeAndFlush(fullHttpResponse);
   }
 
   public void closeFuture(ChannelFuture channelFuture) {
@@ -76,7 +76,7 @@ public abstract class AbstractExceptionHandler implements ExceptionHandler, Http
    */
   protected FullHttpResponse buildResponse(RequestContext requestContext,
                                            Throwable throwable, HttpResponseStatus status) {
-    HttpVersion httpVersion = requestContext.getHttpRequest().protocolVersion();
+    HttpVersion httpVersion = requestContext.request().protocolVersion();
     byte[] exceptionMessageByte = this.getExceptionMessageByte("Failure: " + throwable.getLocalizedMessage() + "\r\n");
     ByteBuf byteBuf = Unpooled.copiedBuffer(exceptionMessageByte);
     return new DefaultFullHttpResponse(httpVersion, status, byteBuf);

@@ -54,7 +54,7 @@ public class JSONResponseRender extends AbstractResponseRender implements Respon
 
   @Override
   public void render(Route route, RequestContext requestContext) {
-    FullHttpRequest httpRequest = requestContext.getHttpRequest();
+    FullHttpRequest httpRequest = requestContext.request().httpRequest();
     Object result = route.getInvokeResult();
     ByteBuf byteBuf = Unpooled.copiedBuffer(Objects.isNull(result) ? "".getBytes(CharsetUtil.UTF_8)
             : JSONObject.toJSONString(result).getBytes(StandardCharsets.UTF_8));
@@ -63,6 +63,6 @@ public class JSONResponseRender extends AbstractResponseRender implements Respon
     FullHttpResponse fullHttpResponse = buildRenderResponse(status, byteBuf);
 
     setHeader(fullHttpResponse, httpRequest, APPLICATION_JSON_VALUE);
-    requestContext.getContext().writeAndFlush(fullHttpResponse);
+    requestContext.request().channelHandlerContext().writeAndFlush(fullHttpResponse);
   }
 }

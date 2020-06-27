@@ -53,7 +53,7 @@ public class TextResponseRender extends AbstractResponseRender implements Respon
 
   @Override
   public void render(Route route, RequestContext requestContext) {
-    FullHttpRequest httpRequest = requestContext.getHttpRequest();
+    FullHttpRequest httpRequest = requestContext.request().httpRequest();
     Object result = route.getInvokeResult();
 
     ByteBuf byteBuf = Unpooled.copiedBuffer(Objects.isNull(result) ?
@@ -64,6 +64,6 @@ public class TextResponseRender extends AbstractResponseRender implements Respon
     FullHttpResponse response = buildRenderResponse(status, byteBuf);
 
     setHeader(response, httpRequest, TEXT_PLAIN_VALUE);
-    requestContext.getContext().writeAndFlush(response);
+    requestContext.request().channelHandlerContext().writeAndFlush(response);
   }
 }

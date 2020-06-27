@@ -52,9 +52,9 @@ public class RequestParamParamResolver extends AbstractParamResolver implements 
   @Override
   public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
     if (isMap(handlerParam.getDataType())) {
-      return requestContext.getQueryString();
+      return requestContext.request().queryStrings();
     }
-    return handlerParam.getDataType().cast(requestContext.getQueryString().get(handlerParam.getName()));
+    return handlerParam.getDataType().cast(requestContext.request().queryStrings().get(handlerParam.getName()));
   }
 
   @Override

@@ -3,6 +3,8 @@ package org.aquiver.route.render;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.*;
 import org.aquiver.Aquiver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
@@ -11,6 +13,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @since 2020/6/25
  */
 public abstract class AbstractResponseRender {
+  protected static final Logger log = LoggerFactory.getLogger(AbstractResponseRender.class);
   protected final Aquiver aquiver = Aquiver.of();
 
   protected FullHttpResponse buildRenderResponse(HttpResponseStatus status, ByteBuf byteBuf) {

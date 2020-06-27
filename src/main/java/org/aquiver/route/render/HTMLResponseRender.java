@@ -28,9 +28,9 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import org.aquiver.RequestContext;
 import org.aquiver.MediaType;
 import org.aquiver.ModelAndView;
+import org.aquiver.RequestContext;
 import org.aquiver.route.Route;
 import org.aquiver.route.views.ViewType;
 
@@ -57,7 +57,7 @@ public class HTMLResponseRender extends AbstractResponseRender implements Respon
   }
 
   @Override
-  public void render(Route route, RequestContext requestContext) throws IOException {
+  public void render(Route route, RequestContext requestContext) {
     Map<String, Object> params = new HashMap<>();
 
     final String viewSuffix = aquiver.environment().getString(PATH_SERVER_VIEW_SUFFIX, SERVER_VIEW_SUFFIX);
@@ -86,14 +86,17 @@ public class HTMLResponseRender extends AbstractResponseRender implements Respon
 
     fullHtmlPath = fullHtmlPath.replace("//", "/");
 
-    final String renderView = route.getHtmlView().renderView(fullHtmlPath, params);
+    try {
+      final String renderView = route.getHtmlView().renderView(fullHtmlPath, params);
+      FullHttpRequest httpRequest = requestContext.request().httpRequest();
+      HttpResponseStatus status = httpRequest.decoderResult().isSuccess() ? OK : BAD_REQUEST;
+      ByteBuf byteBuf = Unpooled.copiedBuffer(renderView.getBytes(StandardCharsets.UTF_8));
 
-    FullHttpRequest httpRequest = requestContext.getHttpRequest();
-    HttpResponseStatus status = httpRequest.decoderResult().isSuccess() ? OK : BAD_REQUEST;
-    ByteBuf byteBuf = Unpooled.copiedBuffer(renderView.getBytes(StandardCharsets.UTF_8));
-
-    FullHttpResponse fullHttpResponse = buildRenderResponse(status, byteBuf);
-    this.setHeader(fullHttpResponse, httpRequest, MediaType.TEXT_HTML_VALUE);
-    requestContext.getContext().writeAndFlush(fullHttpResponse);
+      FullHttpResponse fullHttpResponse = buildRenderResponse(status, byteBuf);
+      this.setHeader(fullHttpResponse, httpRequest, MediaType.TEXT_HTML_VALUE);
+      requestContext.request().channelHandlerContext().writeAndFlush(fullHttpResponse);
+    } catch (IOException e) {
+      log.error("Can't get view template:{}", fullHtmlPath, e);
+    }
   }
 }

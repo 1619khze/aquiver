@@ -52,9 +52,9 @@ public class RequestHeadersParamResolver extends AbstractParamResolver implement
   @Override
   public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
     if (isMap(handlerParam.getDataType())) {
-      return requestContext.getHeaders();
+      return requestContext.request().headers();
     }
-    return handlerParam.getDataType().cast(requestContext.getHeaders().get(handlerParam.getName()));
+    return handlerParam.getDataType().cast(requestContext.request().headers().get(handlerParam.getName()));
   }
 
   @Override

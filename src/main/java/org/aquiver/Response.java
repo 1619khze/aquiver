@@ -27,16 +27,17 @@ import io.netty.handler.codec.http.FullHttpResponse;
 
 import java.util.Objects;
 
+/**
+ * Response class based on Netty-based Full Http Response
+ *
+ * @author WangYi
+ * @since 2020/6/27
+ */
 public class Response {
   private FullHttpResponse httpResponse;
   private Object result;
   private boolean jsonResponse;
   private String mediaType;
-
-  public Response(Object result, boolean jsonResponse) {
-    this.result = result;
-    this.jsonResponse = jsonResponse;
-  }
 
   public Object getResult() {
     return result;

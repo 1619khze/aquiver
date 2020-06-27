@@ -28,7 +28,6 @@ import org.aquiver.route.Route;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -59,20 +58,16 @@ public class ResponseRenderMatcher {
   public void adapter(RequestContext requestContext) {
     requireNonNull(requestContext, "RequestContext cant't be null");
 
-    Route route = requestContext.getRoute();
+    Route route = requestContext.route();
 
     if (responseRenders.isEmpty()) {
       throw new RuntimeException("No available ResponseRender found");
     }
-    try {
-      for (ResponseRender responseRender : responseRenders) {
-        if (!responseRender.support(route.getViewType())) {
-          continue;
-        }
-        responseRender.render(route, requestContext);
+    for (ResponseRender responseRender : responseRenders) {
+      if (!responseRender.support(route.getViewType())) {
+        continue;
       }
-    } catch (IOException e) {
-      log.error("Render response exception:", e);
+      responseRender.render(route, requestContext);
     }
   }
 

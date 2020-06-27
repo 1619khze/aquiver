@@ -34,7 +34,19 @@ import java.io.IOException;
  * @since 2020/6/17
  */
 public interface ResponseRender {
+  /**
+   * Determine if View Type is supported
+   *
+   * @param viewType 需要支持的View Type
+   * @return Support
+   */
   boolean support(ViewType viewType);
 
-  void render(Route route, RequestContext requestContext) throws IOException;
+  /**
+   * Render view
+   *
+   * @param route Routing
+   * @param requestContext request context
+   */
+  void render(Route route, RequestContext requestContext);
 }

@@ -58,7 +58,7 @@ public class RequestBodyParamResolver extends AbstractParamResolver implements P
 
   @Override
   public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
-    Map<String, Object> jsonData = requestContext.getFormData();
+    Map<String, Object> jsonData = requestContext.request().formData();
     String jsonString = JSON.toJSONString(jsonData);
     if (jsonData.isEmpty() || !JSONObject.isValid(jsonString)) {
       return null;

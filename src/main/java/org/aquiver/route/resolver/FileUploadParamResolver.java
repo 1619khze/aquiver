@@ -57,7 +57,7 @@ public class FileUploadParamResolver extends AbstractParamResolver implements Pa
 
   @Override
   public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) throws IOException {
-    Map<String, io.netty.handler.codec.http.multipart.FileUpload> fileUploads = requestContext.getFileUploads();
+    Map<String, io.netty.handler.codec.http.multipart.FileUpload> fileUploads = requestContext.request().fileUpload();
     if (MultipartFile.class.isAssignableFrom(handlerParam.getDataType()) &&
             fileUploads.containsKey(handlerParam.getName())) {
       io.netty.handler.codec.http.multipart.FileUpload fileUpload = fileUploads.get(handlerParam.getName());

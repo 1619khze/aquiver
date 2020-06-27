@@ -61,7 +61,7 @@ public class MultiFileUploadParamResolver extends AbstractParamResolver implemen
 
   @Override
   public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) throws IOException {
-    Map<String, FileUpload> fileUploads = requestContext.getFileUploads();
+    Map<String, FileUpload> fileUploads = requestContext.request().fileUpload();
     List<MultipartFile> multipartFiles = new ArrayList<>();
     if (List.class.isAssignableFrom(handlerParam.getDataType())) {
       for (Map.Entry<String, FileUpload> entry : fileUploads.entrySet()) {

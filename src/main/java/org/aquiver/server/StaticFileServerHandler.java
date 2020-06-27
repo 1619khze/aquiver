@@ -49,8 +49,8 @@ public class StaticFileServerHandler implements RequestHandler<Boolean> {
 
   @Override
   public Boolean handle(RequestContext requestContext) throws Exception {
-    FullHttpRequest request = requestContext.getHttpRequest();
-    ChannelHandlerContext ctx = requestContext.getContext();
+    FullHttpRequest request = requestContext.request().httpRequest();
+    ChannelHandlerContext ctx = requestContext.request().channelHandlerContext();
     String uri = request.uri();
     if ("favicon.ico".equals(uri)) {
       return false;

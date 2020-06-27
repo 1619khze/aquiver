@@ -30,6 +30,7 @@ import org.aquiver.route.RouteParam;
 import org.aquiver.route.RouteParamType;
 
 import java.lang.reflect.Parameter;
+import java.util.Map;
 
 public class RequestCookiesParamResolver extends AbstractParamResolver implements ParamResolver {
 
@@ -51,10 +52,11 @@ public class RequestCookiesParamResolver extends AbstractParamResolver implement
 
   @Override
   public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
+    Map<String, Object> cookies = requestContext.request().cookies();
     if (isMap(handlerParam.getDataType())) {
-      return requestContext.getCookies();
+      return cookies;
     }
-    return handlerParam.getDataType().cast(requestContext.getCookies().get(handlerParam.getName()));
+    return handlerParam.getDataType().cast(cookies.get(handlerParam.getName()));
   }
 
   @Override

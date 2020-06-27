@@ -69,13 +69,13 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
             .thenApply(this::invokeMethod);
 
     Route route = Async.getIfReady(resultFuture);
-    context.setRoute(route);
+    context.route(route);
     resultFuture.complete(route);
     return context;
   }
 
   private Route invokeParam(RequestContext context) {
-    Route route = context.getRoute();
+    Route route = context.route();
     List<RouteParam> params = route.getParams();
 
     Object[] paramValues = new Object[params.size()];
@@ -135,14 +135,14 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
   }
 
   private RequestContext lookupRoute(RequestContext context) {
-    String lookupPath = lookupPath(context.getUri());
+    String lookupPath = lookupPath(context.request().uri());
     int paramStartIndex = lookupPath.indexOf("?");
     if (paramStartIndex > 0) {
       lookupPath = lookupPath.substring(0, paramStartIndex);
     }
     Route route = loopLookUp(lookupPath);
     if (!Objects.isNull(route)) {
-      context.setRoute(route);
+      context.route(route);
       return context;
     } else {
       return lookupStaticFile(context);
@@ -158,7 +158,7 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
       final boolean result = this.fileServerHandler.handle(context);
       if (!result) {
         this.handlerNoRouteFoundException(context);
-        throw new NoRouteFoundException(context.getHttpMethod(), context.getUri());
+        throw new NoRouteFoundException(context.request().httpMethodName(), context.request().uri());
       }
       return context;
     } catch (Exception e) {
@@ -168,7 +168,7 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
   }
 
   private void handlerNoRouteFoundException(RequestContext requestContext) {
-    FullHttpRequest httpRequest = requestContext.getHttpRequest();
+    FullHttpRequest httpRequest = requestContext.request().httpRequest();
     NoRouteFoundException noRouteFoundException =
             new NoRouteFoundException(httpRequest.method().name(), httpRequest.uri());
     this.exceptionHandler.handle(requestContext, noRouteFoundException,
