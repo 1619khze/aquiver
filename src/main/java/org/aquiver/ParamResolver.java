@@ -28,7 +28,31 @@ import org.aquiver.route.RouteParam;
 import java.lang.reflect.Parameter;
 
 public interface ParamResolver {
+  /**
+   * Determine whether the parameter type is supported
+   *
+   * @param parameter Information about method parameters.
+   * @return support
+   */
   boolean support(Parameter parameter);
 
+  /**
+   * Parse parameters into RouteParam
+   *
+   * @param parameter Information about method parameters
+   * @param paramName method parameter name
+   * @return route param
+   */
   RouteParam resolve(Parameter parameter, String paramName);
+
+  /**
+   * Assign parameters in advance according to the amount
+   * of methods called by reflection
+   *
+   * @param handlerParam   route param
+   * @param requestContext request context
+   * @param url            request url
+   * @return Assigned parameters
+   */
+  Object dispen(RouteParam handlerParam, RequestContext requestContext, String url);
 }
