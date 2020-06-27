@@ -31,7 +31,6 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedNioFile;
 import org.aquiver.RequestContext;
-import org.aquiver.RequestHandler;
 
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -41,13 +40,12 @@ import java.net.URL;
  * @author WangYi
  * @since 2020/5/28
  */
-public class StaticFileServerHandler implements RequestHandler<Boolean> {
+public class StaticFileServerHandler {
   private static void send100Continue(ChannelHandlerContext ctx) {
     FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE);
     ctx.writeAndFlush(response);
   }
 
-  @Override
   public Boolean handle(RequestContext requestContext) throws Exception {
     FullHttpRequest request = requestContext.request().httpRequest();
     ChannelHandlerContext ctx = requestContext.request().channelHandlerContext();
