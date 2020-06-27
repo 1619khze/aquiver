@@ -5,6 +5,8 @@ import io.netty.channel.Channel;
 import java.util.*;
 
 /**
+ * Used to save the session state between the client and the server
+ *
  * @author WangYi
  * @since 2020/6/19
  */
