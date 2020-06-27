@@ -155,7 +155,7 @@ public final class Aquiver {
   /** Set the listening port number. */
   public Aquiver bind(int port) {
     requireArgument(port > 0 && port <= 65533, "Port number must be available");
-    requireArgument(port >= 0, "port was already set to %s", this.port);
+    requireArgument(this.port >= 0, "port was already set to %s", this.port);
     this.port = port;
     this.environment.add(PATH_SERVER_PORT, port);
     return this;
