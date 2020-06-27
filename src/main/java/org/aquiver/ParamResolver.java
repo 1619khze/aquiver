@@ -24,7 +24,9 @@
 package org.aquiver;
 
 import org.aquiver.route.RouteParam;
+import org.aquiver.route.RouteParamType;
 
+import java.io.IOException;
 import java.lang.reflect.Parameter;
 
 public interface ParamResolver {
@@ -54,5 +56,12 @@ public interface ParamResolver {
    * @param url            request url
    * @return Assigned parameters
    */
-  Object dispen(RouteParam handlerParam, RequestContext requestContext, String url);
+  Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) throws IOException;
+
+  /**
+   * Get the parameter type to be assigned
+   *
+   * @return Routing parameter type
+   */
+  RouteParamType dispenType();
 }
