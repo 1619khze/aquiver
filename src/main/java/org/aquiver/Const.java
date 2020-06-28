@@ -32,10 +32,12 @@ import java.util.Objects;
 public interface Const {
 
   Integer SERVER_PORT = 8080;
+  Integer SERVER_SESSION_TIMEOUT = 1800;
   Boolean SERVER_SSL = false;
   Boolean SERVER_CORS = false;
   Boolean SERVER_WEBSOCKET = false;
   Boolean SERVER_CONTENT_COMPRESSOR = false;
+  Boolean SERVER_SESSION_ENABLE = true;
   Integer STRAP_LINE_SIZE = 42;
   String SERVER_WEBSOCKET_PATH = "/websocket";
   String SERVER_ADDRESS = "localhost";
@@ -45,6 +47,7 @@ public interface Const {
   String SPACE = " ";
   String SERVER_THREAD_NAME = "（'-'*)";
   String SERVER_VIEW_SUFFIX = ".html";
+  String SERVER_SESSION_KEY = "AQSESSION";
   String PATH_SERVER_PORT = "server.port";
   String PATH_SERVER_SSL = "server.ssl";
   String PATH_SERVER_ADDRESS = "server.address";
@@ -58,6 +61,9 @@ public interface Const {
   String PATH_SCANNER_VERBOSE = "server.scanner.verbose";
   String PATH_SCANNER_LOGGING = "server.scanner.logging";
   String PATH_SERVER_VIEW_SUFFIX = "server.view.suffix";
+  String PATH_SERVER_SESSION_KEY = "server.session.key";
+  String PATH_SERVER_SESSION_TIMEOUT = "server.session.timeout";
+  String PATH_SERVER_SESSION_ENABLE = "server.session.enable";
 
   // netty setting
   String PATH_SERVER_SSL_CERT = "server.ssl.cert-path";
