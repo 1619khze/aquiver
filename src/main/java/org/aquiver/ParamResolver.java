@@ -56,7 +56,7 @@ public interface ParamResolver {
    * @param url            request url
    * @return Assigned parameters
    */
-  Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) throws IOException;
+  Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) throws Exception;
 
   /**
    * Get the parameter type to be assigned
