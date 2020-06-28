@@ -189,7 +189,7 @@ public final class RouteManager {
   }
 
   private Route builderRoute(Class<?> clazz, Method method, PathMethod pathMethod, String completeUrl) {
-    Route route = new Route(completeUrl, clazz, method.getName(), pathMethod);
+    Route route = Route.of(completeUrl, clazz, method.getName(), pathMethod);
 
     boolean isAllJsonResponse = Objects.isNull(clazz.getAnnotation(RestPath.class));
     boolean isJsonResponse = Objects.isNull(method.getAnnotation(JSON.class));

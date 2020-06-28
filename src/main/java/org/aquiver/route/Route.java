@@ -26,12 +26,17 @@ package org.aquiver.route;
 import org.aquiver.annotation.PathMethod;
 import org.aquiver.route.views.HTMLView;
 import org.aquiver.route.views.ViewType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Route {
+  private static final Logger log = LoggerFactory.getLogger(Route.class);
+
   private String url;
   private Class<?> clazz;
   private String method;
@@ -45,16 +50,24 @@ public class Route {
 
   private List<RouteParam> params = new ArrayList<>();
 
-  public Route(String url, Class<?> clazz, String method, PathMethod pathMethod) {
+  private Route(String url, Class<?> clazz, String method, PathMethod pathMethod) {
     this.url = url;
     this.clazz = clazz;
     this.method = method;
     this.pathMethod = pathMethod;
     try {
-      this.bean = clazz.getDeclaredConstructor().newInstance();
+      this.bean = clazz.newInstance();
     } catch (ReflectiveOperationException e) {
-      e.printStackTrace();
+      log.error("An exception occurred during instantiation");
     }
+  }
+
+  public static Route of(String url, Class<?> clazz, String method, PathMethod pathMethod) {
+    Objects.requireNonNull(url, "url must not be null");
+    Objects.requireNonNull(clazz, "clazz must not be null");
+    Objects.requireNonNull(method, "method must not be null");
+    Objects.requireNonNull(pathMethod, "pathMethod must not be null");
+    return new Route(url, clazz, method, pathMethod);
   }
 
   public String getUrl() {
