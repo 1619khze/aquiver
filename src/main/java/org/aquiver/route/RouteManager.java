@@ -223,7 +223,7 @@ public final class RouteManager {
     }
   }
 
-  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) throws IOException {
+  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) throws Exception {
     Object dispen = null;
     for (ParamResolver paramResolver : paramResolvers) {
       if (!paramResolver.dispenType().equals(handlerParam.getType())) {
