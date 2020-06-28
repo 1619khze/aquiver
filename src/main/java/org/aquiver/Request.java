@@ -9,6 +9,7 @@ import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.multipart.*;
 import org.aquiver.route.session.HttpSession;
 import org.aquiver.route.session.Session;
+import org.aquiver.route.session.SessionManager;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -54,7 +55,7 @@ public class Request {
   /**
    * Used to save the session state between the client and the server
    */
-  private final HttpSession session;
+  private final SessionManager sessionManager = new SessionManager();
 
   private static final String mediaTypeKey = "Content-Type";
 
@@ -67,7 +68,8 @@ public class Request {
   public Request(FullHttpRequest fullHttpRequest, ChannelHandlerContext ctx) {
     this.httpRequest = fullHttpRequest;
     this.ctx = ctx;
-    this.session = new HttpSession(ctx.channel());
+    final HttpSession httpSession = new HttpSession(channelHandlerContext().channel());
+    sessionManager.addSession(httpSession);
   }
 
   public FullHttpRequest httpRequest() {
@@ -392,7 +394,7 @@ public class Request {
    * @return session attributes
    */
   public Object sessionAttribute(String key) {
-    return session.getAttribute(key);
+    return session().getAttribute(key);
   }
 
   /**
@@ -401,7 +403,7 @@ public class Request {
    * @return all session key
    */
   public List<String> attributeNames() {
-    return session.getAttributeNames();
+    return session().getAttributeNames();
   }
 
   /**
@@ -411,7 +413,7 @@ public class Request {
    * @param value session vaue
    */
   public void attribute(String key, Object value) {
-    session.setAttribute(key, value);
+    session().setAttribute(key, value);
   }
 
   /**
@@ -420,6 +422,6 @@ public class Request {
    * @return Request session
    */
   public Session session() {
-    return session;
+    return sessionManager.session(ctx.channel().id().asLongText());
   }
 }
