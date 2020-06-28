@@ -26,12 +26,12 @@ package org.aquiver.route;
 public enum RouteParamType {
 
   /**
-   * Request Url 参数
+   * Request Url Param
    */
   REQUEST_PARAM,
 
   /**
-   * 路径变量
+   * Path variable
    */
   PATH_VARIABLE,
 
@@ -61,17 +61,22 @@ public enum RouteParamType {
   REQUEST_COOKIES,
 
   /**
-   * Http Request Header参数
+   * Http Request Header Param
    */
   REQUEST_HEADER,
 
   /**
-   * 上传文件
+   * Upload file
    */
   UPLOAD_FILE,
 
   /**
-   * 多个上传文件
+   * Multiple upload files
    */
-  UPLOAD_FILES
+  UPLOAD_FILES,
+
+  /**
+   * Request Session
+   */
+  REQUEST_SESSION
 }
