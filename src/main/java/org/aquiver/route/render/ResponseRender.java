@@ -27,8 +27,6 @@ import org.aquiver.RequestContext;
 import org.aquiver.route.Route;
 import org.aquiver.route.views.ViewType;
 
-import java.io.IOException;
-
 /**
  * @author WangYi
  * @since 2020/6/17

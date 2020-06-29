@@ -26,7 +26,6 @@ package org.aquiver;
 import org.aquiver.route.RouteParam;
 import org.aquiver.route.RouteParamType;
 
-import java.io.IOException;
 import java.lang.reflect.Parameter;
 
 public interface ParamResolver {

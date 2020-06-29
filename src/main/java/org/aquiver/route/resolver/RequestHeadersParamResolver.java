@@ -23,9 +23,9 @@
  */
 package org.aquiver.route.resolver;
 
+import org.aquiver.ParamResolver;
 import org.aquiver.RequestContext;
 import org.aquiver.annotation.bind.Header;
-import org.aquiver.ParamResolver;
 import org.aquiver.route.RouteParam;
 import org.aquiver.route.RouteParamType;
 
