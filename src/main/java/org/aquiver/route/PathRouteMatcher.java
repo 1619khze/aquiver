@@ -66,12 +66,18 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     CompletableFuture<Route> resultFuture = lookUpaFuture
             .thenApply(this::lookupRoute)
             .thenApply(this::invokeParam)
-            .thenApply(this::invokeMethod);
+            .thenApply(this::invokeMethod)
+            .exceptionally(this::handlerException);
 
     Route route = Async.getIfReady(resultFuture);
     context.route(route);
     resultFuture.complete(route);
     return context;
+  }
+
+  private Route handlerException(Throwable throwable) {
+    throwable.printStackTrace();
+    return null;
   }
 
   private Route invokeParam(RequestContext context) {

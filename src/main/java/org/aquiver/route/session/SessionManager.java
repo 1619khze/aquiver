@@ -1,5 +1,7 @@
 package org.aquiver.route.session;
 
+import io.netty.channel.Channel;
+import org.aquiver.Aquiver;
 import org.aquiver.Request;
 
 import java.util.HashMap;
@@ -22,8 +24,11 @@ public final class SessionManager {
     Objects.requireNonNull(request, "request can't be null");
     Session httpSession = getSession(request);
     if (Objects.isNull(httpSession)) {
-      httpSession = new HttpSession(request.channelHandlerContext().channel());
-      sessionPool.put(httpSession.getId(), httpSession);
+      Channel channel = request.channelHandlerContext().channel();
+      long l = Aquiver.of().threadLocalRandom().nextLong();
+      httpSession = new HttpSession(channel,String.valueOf(l)
+              .replaceFirst("-",""));
+      this.sessionPool.put(httpSession.getId(), httpSession);
     }
   }
 

@@ -426,6 +426,6 @@ public class Request {
    * @return Request session
    */
   public Session session() {
-    return sessionManager.session(ctx.channel().id().asLongText());
+    return sessionManager.session(String.valueOf(cookies(sessionKey())));
   }
 }

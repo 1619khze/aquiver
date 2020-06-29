@@ -16,9 +16,11 @@ public final class HttpSession implements Session {
   private final Channel channel;
   private volatile long lastAccessedTime;
   private final long creationTime;
+  private final String id;
 
-  public HttpSession(Channel channel) {
+  public HttpSession(Channel channel, String id) {
     this.channel = channel;
+    this.id = id;
     this.creationTime = System.currentTimeMillis();
   }
 
@@ -29,7 +31,12 @@ public final class HttpSession implements Session {
 
   @Override
   public String getId() {
-    return channel.id().asLongText();
+    return id;
+  }
+
+  @Override
+  public String getIp() {
+    return channel.remoteAddress().toString();
   }
 
   @Override

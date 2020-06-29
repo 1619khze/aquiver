@@ -11,6 +11,8 @@ public interface Session {
 
   String getId();
 
+  String getIp();
+
   long getLastAccessedTime();
 
   Object getAttribute(String key);
