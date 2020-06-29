@@ -31,7 +31,7 @@ public class SessionParamResolver extends AbstractParamResolver implements Param
 
   @Override
   public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
-    return handlerParam.getDataType().cast( requestContext.request().session());
+    return handlerParam.getDataType().cast(requestContext.request().session());
   }
 
   @Override

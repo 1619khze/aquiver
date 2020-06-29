@@ -54,8 +54,8 @@ public class Request {
   /**
    * Used to save the session state between the client and the server
    */
-  private final SessionManager sessionManager = Aquiver.of().sessionManager();
   private final String sessionKey = Aquiver.of().sessionKey();
+  private Session session;
 
   /**
    * Constructor, pass in Full Http Request and Channel Handler Context for initialization
@@ -67,7 +67,7 @@ public class Request {
     this.httpRequest = fullHttpRequest;
     this.ctx = ctx;
     if (Aquiver.of().sessionEnable()) {
-      this.sessionManager.addSession(this);
+      this.session = Aquiver.of().sessionManager().createSession(this);
     }
   }
 
@@ -426,6 +426,6 @@ public class Request {
    * @return Request session
    */
   public Session session() {
-    return sessionManager.session(String.valueOf(cookies(sessionKey())));
+    return session;
   }
 }
