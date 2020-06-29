@@ -5,3 +5,4 @@ org.aquiver.route.resolver.PathVariableParamResolver
 org.aquiver.route.resolver.RequestBodyParamResolver
 org.aquiver.route.resolver.FileUploadParamResolver
 org.aquiver.route.resolver.MultiFileUploadParamResolver
+org.aquiver.route.resolver.SessionParamResolver
