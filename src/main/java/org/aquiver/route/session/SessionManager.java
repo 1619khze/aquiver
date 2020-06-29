@@ -1,5 +1,7 @@
 package org.aquiver.route.session;
 
+import org.aquiver.Request;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -16,12 +18,24 @@ public final class SessionManager {
     return this.sessionPool.get(sessionId);
   }
 
-  public void addSession(Session session) {
-    Objects.requireNonNull(session, "session can't be null");
-    this.sessionPool.put(session.getId(), session);
+  public void addSession(Request request) {
+    Objects.requireNonNull(request, "request can't be null");
+    Session httpSession = getSession(request);
+    if (Objects.isNull(httpSession)) {
+      httpSession = new HttpSession(request.channelHandlerContext().channel());
+      sessionPool.put(httpSession.getId(), httpSession);
+    }
   }
 
   public void clear() {
     this.sessionPool.clear();
+  }
+
+  private Session getSession(Request request) {
+    Object cookieHeader = request.cookies(request.sessionKey());
+    if (Objects.isNull(cookieHeader)) {
+      return null;
+    }
+    return session(String.valueOf(cookieHeader));
   }
 }

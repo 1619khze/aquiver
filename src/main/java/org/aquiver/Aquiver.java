@@ -23,6 +23,7 @@
  */
 package org.aquiver;
 
+import org.aquiver.route.session.SessionManager;
 import org.aquiver.server.NettyServer;
 import org.aquiver.server.Server;
 import org.aquiver.server.banner.BannerFont;
@@ -72,6 +73,7 @@ public final class Aquiver {
   private final Set<String> packages = new LinkedHashSet<>();
   private final List<Class<?>> eventPool = new LinkedList<>();
   private final CountDownLatch countDownLatch = new CountDownLatch(1);
+  private final SessionManager sessionManager = new SessionManager();
   private Environment environment = new Environment();
   private String bootConfName = PATH_CONFIG_PROPERTIES;
   private String envName = "default";
@@ -91,6 +93,8 @@ public final class Aquiver {
   private String bannerText;
   private String bannerFont;
   private ExecutorService reusableExecutor;
+  private String sessionKey;
+  private Integer sessionTimeout;
 
   /** Thread pool setting param */
   private int corePoolSize = 5;
@@ -192,9 +196,79 @@ public final class Aquiver {
    */
   public Aquiver viewSuffix(String viewSuffix) {
     requireState(this.viewSuffix == null, "viewSuffix was already set to %s", this.viewSuffix);
-    this.viewSuffix = viewSuffix;
+    this.viewSuffix = requireNonNull(viewSuffix);
     this.environment.add(PATH_SERVER_VIEW_SUFFIX, viewSuffix);
     return this;
+  }
+
+  /**
+   * Set server session key
+   *
+   * @param sessionKey session key
+   * @return this
+   */
+  public Aquiver sessionKey(String sessionKey) {
+    requireArgument(this.sessionKey == null, "sessionKey was already set to %s", this.sessionKey);
+    this.sessionKey = requireNonNull(sessionKey);
+    this.environment.add(PATH_SERVER_SESSION_KEY, sessionKey);
+    return this;
+  }
+
+  /**
+   * Get server session key
+   *
+   * @return session key
+   */
+  public String sessionKey() {
+    if (sessionKey == null) {
+      return this.environment.getString(PATH_SERVER_SESSION_KEY, SERVER_SESSION_KEY);
+    }
+    return sessionKey;
+  }
+
+  /**
+   * Session time out
+   *
+   * @param sessionTimeout time out
+   * @return this
+   */
+  public Aquiver sessionTimeout(Integer sessionTimeout) {
+    requireArgument(this.sessionTimeout == null, "sessionTimeout was already set to %s", this.sessionTimeout);
+    this.sessionTimeout = requireNonNull(sessionTimeout);
+    this.environment.add(PATH_SERVER_SESSION_TIMEOUT, sessionTimeout);
+    return this;
+  }
+
+  /**
+   * Get session time out
+   *
+   * @return
+   */
+  public Integer sessionTimeout() {
+    if (sessionTimeout == null) {
+      return this.environment.getInteger(PATH_SERVER_SESSION_TIMEOUT, SERVER_SESSION_TIMEOUT);
+    }
+    return sessionTimeout;
+  }
+
+  /**
+   * Set session open state, the default is open
+   *
+   * @param enable Whether to open the session
+   * @return this
+   */
+  public Aquiver sessionEnable(boolean enable) {
+    this.environment.add(PATH_SERVER_SESSION_ENABLE, enable);
+    return this;
+  }
+
+  /**
+   * Get session enable status
+   *
+   * @return session enable status
+   */
+  public boolean sessionEnable() {
+    return this.environment.getBoolean(PATH_SERVER_SESSION_ENABLE, SERVER_SESSION_ENABLE);
   }
 
   /**
@@ -214,6 +288,15 @@ public final class Aquiver {
    */
   public Environment environment() {
     return environment;
+  }
+
+  /**
+   * Get Session Manager
+   *
+   * @return Session manager
+   */
+  public SessionManager sessionManager() {
+    return sessionManager;
   }
 
   /**

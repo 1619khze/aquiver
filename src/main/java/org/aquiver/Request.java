@@ -7,7 +7,6 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.multipart.*;
-import org.aquiver.route.session.HttpSession;
 import org.aquiver.route.session.Session;
 import org.aquiver.route.session.SessionManager;
 
@@ -55,9 +54,8 @@ public class Request {
   /**
    * Used to save the session state between the client and the server
    */
-  private final SessionManager sessionManager = new SessionManager();
-
-  private static final String mediaTypeKey = "Content-Type";
+  private final SessionManager sessionManager = Aquiver.of().sessionManager();
+  private final String sessionKey = Aquiver.of().sessionKey();
 
   /**
    * Constructor, pass in Full Http Request and Channel Handler Context for initialization
@@ -68,8 +66,9 @@ public class Request {
   public Request(FullHttpRequest fullHttpRequest, ChannelHandlerContext ctx) {
     this.httpRequest = fullHttpRequest;
     this.ctx = ctx;
-    final HttpSession httpSession = new HttpSession(channelHandlerContext().channel());
-    sessionManager.addSession(httpSession);
+    if (Aquiver.of().sessionEnable()) {
+      this.sessionManager.addSession(this);
+    }
   }
 
   public FullHttpRequest httpRequest() {
@@ -78,6 +77,10 @@ public class Request {
 
   public ChannelHandlerContext channelHandlerContext() {
     return ctx;
+  }
+
+  public String sessionKey() {
+    return sessionKey;
   }
 
   /**
@@ -92,7 +95,7 @@ public class Request {
 
     initCookie.set(true);
 
-    String cookieString = httpRequest.headers()
+    String cookieString = headers()
             .get(HttpHeaderNames.COOKIE);
 
     if (Objects.nonNull(cookieString)) {
@@ -225,6 +228,7 @@ public class Request {
 
     initJsonData.set(true);
 
+    String mediaTypeKey = "Content-Type";
     Object contentType = headers().get(mediaTypeKey);
     if (!Objects.isNull(contentType) &&
             String.valueOf(contentType)
