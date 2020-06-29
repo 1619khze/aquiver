@@ -75,6 +75,7 @@ public final class Aquiver {
   private final CountDownLatch countDownLatch = new CountDownLatch(1);
   private final SessionManager sessionManager = new SessionManager();
   private Environment environment = new Environment();
+  private final ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
   private String bootConfName = PATH_CONFIG_PROPERTIES;
   private String envName = "default";
 
@@ -141,6 +142,15 @@ public final class Aquiver {
    */
   public static Aquiver of() {
     return AquiverHolder.instance();
+  }
+
+  /**
+   * Get a random number generator isolated to the current thread.
+   *
+   * @return random number generator
+   */
+  public ThreadLocalRandom threadLocalRandom() {
+    return threadLocalRandom;
   }
 
   /**
