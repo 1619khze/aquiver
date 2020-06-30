@@ -35,6 +35,7 @@ import org.aquiver.RequestContext;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.net.URL;
+import java.util.Objects;
 
 /**
  * @author WangYi
@@ -55,6 +56,10 @@ public class StaticFileServerHandler {
     }
     URL resource = this.getClass().getClassLoader().getResource(uri.replaceFirst("/", ""));
     URL notFoundUrl = this.getClass().getClassLoader().getResource("404.html");
+
+    if(Objects.isNull(resource)){
+      return false;
+    }
 
     File html = new File(resource.toURI());
     File NOT_FOUND = new File(notFoundUrl.toURI());
