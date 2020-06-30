@@ -25,9 +25,8 @@ package org.aquiver.route.render;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.aquiver.RequestContext;
 import org.aquiver.route.Route;
@@ -55,6 +54,24 @@ public class TextResponseRender extends AbstractResponseRender implements Respon
   public void render(Route route, RequestContext requestContext) {
     FullHttpRequest httpRequest = requestContext.request().httpRequest();
     Object result = route.getInvokeResult();
+
+    if (Objects.nonNull(result)){
+      String stringResult = String.valueOf(result);
+      if(stringResult.startsWith("redirect:/")){
+        String url = stringResult.replaceFirst("redirect:/", "");
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                HttpResponseStatus.PERMANENT_REDIRECT);
+        HttpHeaders headers = response.headers();
+        headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS, "x-requested-with,content-type");
+        headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS, "POST,GET");
+        headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+        headers.set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+        headers.set(HttpHeaderNames.LOCATION, url);
+        requestContext.request().channelHandlerContext().writeAndFlush(response)
+                .addListener(ChannelFutureListener.CLOSE);
+        return;
+      }
+    }
 
     ByteBuf byteBuf = Unpooled.copiedBuffer(Objects.isNull(result) ?
             "".getBytes(CharsetUtil.UTF_8) : String.valueOf(result)
