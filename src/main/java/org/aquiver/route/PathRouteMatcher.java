@@ -81,6 +81,9 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     Object[] paramValues = new Object[params.size()];
     Class<?>[] paramTypes = new Class[params.size()];
 
+    log.info("{} {} {}", context.request().ipAddress(),
+            context.request().httpMethodName(), context.route().getUrl());
+
     try {
       for (int i = 0; i < paramValues.length; i++) {
         RouteParam handlerParam = route.getParams().get(i);
