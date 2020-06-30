@@ -106,6 +106,10 @@ public class Request {
     return sessionKey;
   }
 
+  public String ipAddress(){
+    return channelHandlerContext().channel().remoteAddress().toString();
+  }
+
   /**
    * Get cookies map
    *
