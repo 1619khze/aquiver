@@ -89,7 +89,7 @@ public class ApplicationController {
 
   @POST(value = "/uploadFile")
   public String uploadFile(@FileUpload MultipartFile file) {
-    log.info("fileName:{}", file.getFileName());
+    log.info("fileName:{}", file.fileName());
     try {
       System.out.println(file.readFileContent());
     } catch (IOException e) {
@@ -102,7 +102,7 @@ public class ApplicationController {
   public String uploadFileS(@MultiFileUpload List<MultipartFile> files) {
     log.info("file size:{}", files.size());
     for (MultipartFile multipartFile : files) {
-      log.info("fileName:{}", multipartFile.getFileName());
+      log.info("fileName:{}", multipartFile.fileName());
       try {
         System.out.println(multipartFile.readFileContent());
       } catch (IOException e) {
