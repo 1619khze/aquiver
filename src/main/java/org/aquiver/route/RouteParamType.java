@@ -78,5 +78,10 @@ public enum RouteParamType {
   /**
    * Request Session
    */
-  REQUEST_SESSION
+  REQUEST_SESSION,
+
+  /**
+   * File operations
+   */
+  MULTIPART_FILE
 }

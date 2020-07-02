@@ -23,6 +23,7 @@
  */
 package org.aquiver.route.resolver;
 
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.multipart.FileUpload;
 import org.aquiver.route.multipart.MultipartFile;
 
@@ -49,13 +50,14 @@ public abstract class AbstractParamResolver {
    * @return MultipartFile
    * @throws IOException Thrown when there is a problem getting the file
    */
-  protected MultipartFile buildMultipartFile(FileUpload fileUpload) throws IOException {
+  protected MultipartFile buildMultipartFile(FileUpload fileUpload, ChannelHandlerContext ctx) throws IOException {
     final MultipartFile multipartFile = new MultipartFile();
-    multipartFile.setCharset(fileUpload.getCharset());
-    multipartFile.setCharsetName(fileUpload.getCharset().name());
-    multipartFile.setContentTransferEncoding(fileUpload.getContentTransferEncoding());
-    multipartFile.setContentType(fileUpload.getContentType());
-    multipartFile.setFileName(fileUpload.getFilename());
+    multipartFile.charset(fileUpload.getCharset());
+    multipartFile.charsetName(fileUpload.getCharset().name());
+    multipartFile.contentTransferEncoding(fileUpload.getContentTransferEncoding());
+    multipartFile.contentType(fileUpload.getContentType());
+    multipartFile.fileName(fileUpload.getFilename());
+    multipartFile.channelContext(ctx);
 
     Path tmpFile = Files.createTempFile(
             Paths.get(fileUpload.getFile().getParent()), "aquiver", "_upload");
@@ -63,10 +65,10 @@ public abstract class AbstractParamResolver {
     Path fileUploadPath = Paths.get(fileUpload.getFile().getPath());
     Files.move(fileUploadPath, tmpFile, StandardCopyOption.REPLACE_EXISTING);
 
-    multipartFile.setFile(tmpFile.toFile());
-    multipartFile.setInputStream(new FileInputStream(multipartFile.getFile()));
-    multipartFile.setPath(tmpFile.toFile().getPath());
-    multipartFile.setLength(fileUpload.length());
+    multipartFile.file(tmpFile.toFile());
+    multipartFile.inputStream(new FileInputStream(multipartFile.file()));
+    multipartFile.path(tmpFile.toFile().getPath());
+    multipartFile.length(fileUpload.length());
     return multipartFile;
   }
 

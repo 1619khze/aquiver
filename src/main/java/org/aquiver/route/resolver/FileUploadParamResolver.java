@@ -60,7 +60,7 @@ public class FileUploadParamResolver extends AbstractParamResolver implements Pa
     if (MultipartFile.class.isAssignableFrom(handlerParam.getDataType()) &&
             fileUploads.containsKey(handlerParam.getName())) {
       io.netty.handler.codec.http.multipart.FileUpload fileUpload = fileUploads.get(handlerParam.getName());
-      return buildMultipartFile(fileUpload);
+      return buildMultipartFile(fileUpload, requestContext.request().channelHandlerContext());
     }
     return null;
   }

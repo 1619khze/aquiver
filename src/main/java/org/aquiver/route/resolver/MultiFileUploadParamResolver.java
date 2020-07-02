@@ -65,7 +65,8 @@ public class MultiFileUploadParamResolver extends AbstractParamResolver implemen
     if (List.class.isAssignableFrom(handlerParam.getDataType())) {
       for (Map.Entry<String, FileUpload> entry : fileUploads.entrySet()) {
         FileUpload value = entry.getValue();
-        MultipartFile multipartFile = buildMultipartFile(value);
+        MultipartFile multipartFile = buildMultipartFile(
+                value, requestContext.request().channelHandlerContext());
         multipartFiles.add(multipartFile);
       }
     }

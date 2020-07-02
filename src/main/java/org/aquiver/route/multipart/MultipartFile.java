@@ -23,17 +23,26 @@
  */
 package org.aquiver.route.multipart;
 
+import io.netty.channel.*;
+import io.netty.handler.codec.http.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+
+import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
  * @author WangYi
  * @since 2020/6/14
  */
 public class MultipartFile {
+  private static final Logger log = LoggerFactory.getLogger(MultipartFile.class);
 
   private String fileName;
   private InputStream inputStream;
@@ -44,80 +53,125 @@ public class MultipartFile {
   private File file;
   private String path;
   private long length;
+  private ChannelHandlerContext context;
 
   public String readFileContent() throws IOException {
     return new String(Files.readAllBytes(file.toPath()));
   }
 
-  public String getFileName() {
+  public void download(String path) {
+    File file = new File(path);
+    try {
+      final RandomAccessFile raf = new RandomAccessFile(file, "r");
+      long fileLength = raf.length();
+      HttpResponse response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK);
+      response.headers().set(HttpHeaderNames.CONTENT_LENGTH, fileLength);
+      response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/octet-stream");
+      response.headers().add(HttpHeaderNames.CONTENT_DISPOSITION,
+              String.format("attachment; filename=\"%s\"", file.getName()));
+
+      this.context.write(response);
+
+      ChannelFuture sendFileFuture = context.write(new DefaultFileRegion(raf.getChannel(),
+              0, fileLength), context.newProgressivePromise());
+
+      sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
+        @Override
+        public void operationComplete(ChannelProgressiveFuture future)
+                throws Exception {
+          log.info("file {} transfer complete.", file.getName());
+          raf.close();
+        }
+
+        @Override
+        public void operationProgressed(ChannelProgressiveFuture future,
+                                        long progress, long total) {
+          if (total < 0) {
+            log.warn("file {} transfer progress: {}", file.getName(), progress);
+          } else {
+            log.debug("file {} transfer progress: {}/{}", file.getName(), progress, total);
+          }
+        }
+      });
+      this.context.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+    } catch (IOException e) {
+      log.warn("file {} not found", file.getPath());
+    }
+  }
+
+  public String fileName() {
     return fileName;
   }
 
-  public void setFileName(String fileName) {
+  public void fileName(String fileName) {
     this.fileName = fileName;
   }
 
-  public InputStream getInputStream() {
+  public InputStream inputStream() {
     return inputStream;
   }
 
-  public void setInputStream(InputStream inputStream) {
+  public void inputStream(InputStream inputStream) {
     this.inputStream = inputStream;
   }
 
-  public Charset getCharset() {
+  public Charset charset() {
     return charset;
   }
 
-  public void setCharset(Charset charset) {
+  public void charset(Charset charset) {
     this.charset = charset;
   }
 
-  public String getCharsetName() {
+  public String charsetName() {
     return charsetName;
   }
 
-  public void setCharsetName(String charsetName) {
+  public void charsetName(String charsetName) {
     this.charsetName = charsetName;
   }
 
-  public String getContentType() {
+  public String contentType() {
     return contentType;
   }
 
-  public void setContentType(String contentType) {
+  public void contentType(String contentType) {
     this.contentType = contentType;
   }
 
-  public String getContentTransferEncoding() {
+  public String contentTransferEncoding() {
     return contentTransferEncoding;
   }
 
-  public void setContentTransferEncoding(String contentTransferEncoding) {
+  public void contentTransferEncoding(String contentTransferEncoding) {
     this.contentTransferEncoding = contentTransferEncoding;
   }
 
-  public File getFile() {
+  public File file() {
     return file;
   }
 
-  public void setFile(File file) {
+  public void file(File file) {
     this.file = file;
   }
 
-  public String getPath() {
+  public String path() {
     return path;
   }
 
-  public void setPath(String path) {
+  public void path(String path) {
     this.path = path;
   }
 
-  public long getLength() {
+  public long length() {
     return length;
   }
 
-  public void setLength(long length) {
+  public void length(long length) {
     this.length = length;
+  }
+
+  public void channelContext(ChannelHandlerContext context) {
+    this.context = context;
   }
 }
