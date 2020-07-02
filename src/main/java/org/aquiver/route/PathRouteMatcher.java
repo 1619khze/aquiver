@@ -66,7 +66,7 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     CompletableFuture<Route> resultFuture = lookUpaFuture
             .thenApply(this::lookupRoute)
             .thenApply(this::invokeParam)
-            .thenApply(this::invokeMethod);
+            .thenApply(route -> invokeMethod(context, route));
 
     Route route = Async.getIfReady(resultFuture);
     context.route(route);
@@ -94,13 +94,18 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
       }
     } catch (Exception e) {
       log.error("An exception occurred when obtaining invoke param");
+      closeChannel(context);
     }
     route.setParamValues(paramValues);
     route.setParamTypes(paramTypes);
     return route;
   }
 
-  private Route invokeMethod(Route route) {
+  private void closeChannel(RequestContext context) {
+    context.request().channelHandlerContext().channel().close();
+  }
+
+  private Route invokeMethod(RequestContext context, Route route) {
     MethodHandles.Lookup lookup = MethodHandles.lookup();
     try {
       Method method = this.getInvokeMethod(route);
@@ -111,8 +116,9 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
       return route;
     } catch (Throwable throwable) {
       log.error("An exception occurred when calling the mapping method", throwable);
+      closeChannel(context);
+      return null;
     }
-    return null;
   }
 
   private Method getInvokeMethod(Route route) throws NoSuchMethodException {
@@ -144,11 +150,18 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
       lookupPath = lookupPath.substring(0, paramStartIndex);
     }
     Route route = loopLookUp(lookupPath);
-    if (!Objects.isNull(route)) {
-      context.route(route);
-      return context;
-    } else {
-      return lookupStaticFile(context);
+
+    try {
+      if (!Objects.isNull(route)) {
+        context.route(route);
+        return context;
+      } else {
+        return lookupStaticFile(context);
+      }
+    } catch (Exception e) {
+      log.error("An exception occurred when calling the lookup route", e);
+      closeChannel(context);
+      return null;
     }
   }
 
@@ -156,18 +169,13 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     return uri.endsWith("/") ? uri.substring(0, uri.length() - 1) : uri;
   }
 
-  private RequestContext lookupStaticFile(RequestContext context) {
-    try {
-      final boolean result = this.fileServerHandler.handle(context);
-      if (!result) {
-        this.handlerNoRouteFoundException(context);
-        throw new NoRouteFoundException(context.request().httpMethodName(), context.request().uri());
-      }
-      return context;
-    } catch (Exception e) {
-      log.error("An exception occurred while looking up the route", e);
-      return context;
+  private RequestContext lookupStaticFile(RequestContext context) throws Exception {
+    final boolean result = this.fileServerHandler.handle(context);
+    if (!result) {
+      this.handlerNoRouteFoundException(context);
+      throw new NoRouteFoundException(context.request().httpMethodName(), context.request().uri());
     }
+    return context;
   }
 
   private void handlerNoRouteFoundException(RequestContext requestContext) {
