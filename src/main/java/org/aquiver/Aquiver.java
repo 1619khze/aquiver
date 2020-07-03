@@ -23,6 +23,9 @@
  */
 package org.aquiver;
 
+import org.aquiver.exadvice.AdviceManager;
+import org.aquiver.resolver.ParamResolverManager;
+import org.aquiver.route.RouteManager;
 import org.aquiver.route.session.SessionManager;
 import org.aquiver.server.NettyServer;
 import org.aquiver.server.Server;
@@ -102,6 +105,23 @@ public final class Aquiver {
   private int keepAliveTime = 0;
 
   private String viewSuffix;
+
+  /** Web components that need to be initialized */
+  private final RouteManager routeManager = new RouteManager();
+  private final AdviceManager adviceManager = new AdviceManager();
+  private final ParamResolverManager resolverManager = new ParamResolverManager();
+
+  public RouteManager routeManager() {
+    return routeManager;
+  }
+
+  public AdviceManager adviceManager() {
+    return adviceManager;
+  }
+
+  public ParamResolverManager resolverManager() {
+    return resolverManager;
+  }
 
   private Aquiver() {
   }
