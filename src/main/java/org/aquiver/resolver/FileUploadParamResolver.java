@@ -21,53 +21,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.route.resolver;
+package org.aquiver.resolver;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import org.aquiver.ParamResolver;
 import org.aquiver.RequestContext;
-import org.aquiver.annotation.bind.Body;
+import org.aquiver.annotation.bind.FileUpload;
 import org.aquiver.route.RouteParam;
 import org.aquiver.route.RouteParamType;
+import org.aquiver.route.multipart.MultipartFile;
 
 import java.lang.reflect.Parameter;
 import java.util.Map;
 
 /**
  * @author WangYi
- * @since 2020/5/28
+ * @since 2020/6/14
  */
-public class RequestBodyParamResolver extends AbstractParamResolver implements ParamResolver {
+public class FileUploadParamResolver extends AbstractParamResolver implements ParamResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(Body.class);
+    return parameter.isAnnotationPresent(FileUpload.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
-    Body body = parameter.getAnnotation(Body.class);
+    FileUpload param = parameter.getAnnotation(FileUpload.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(body.value()) ? paramName : body.value());
-    handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.REQUEST_BODY);
+    handlerParam.setName("".equals(param.value()) ? paramName : param.value());
+    handlerParam.setType(RouteParamType.UPLOAD_FILE);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
-    Map<String, Object> jsonData = requestContext.request().formData();
-    String jsonString = JSON.toJSONString(jsonData);
-    if (jsonData.isEmpty() || !JSONObject.isValid(jsonString)) {
-      return null;
+  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) throws Exception {
+    Map<String, io.netty.handler.codec.http.multipart.FileUpload> fileUploads = requestContext.request().fileUpload();
+    if (MultipartFile.class.isAssignableFrom(paramType) &&
+            fileUploads.containsKey(paramName)) {
+      io.netty.handler.codec.http.multipart.FileUpload fileUpload = fileUploads.get(paramName);
+      return buildMultipartFile(fileUpload, requestContext.request().channelHandlerContext());
     }
-    return JSONObject.parseObject(jsonString, handlerParam.getDataType());
+    return null;
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.REQUEST_BODY;
+    return RouteParamType.UPLOAD_FILE;
   }
 }

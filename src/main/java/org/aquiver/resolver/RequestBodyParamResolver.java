@@ -21,60 +21,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.route.resolver;
+package org.aquiver.resolver;
 
-import io.netty.handler.codec.http.multipart.FileUpload;
-import org.aquiver.ParamResolver;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.aquiver.RequestContext;
-import org.aquiver.annotation.bind.MultiFileUpload;
+import org.aquiver.annotation.bind.Body;
 import org.aquiver.route.RouteParam;
 import org.aquiver.route.RouteParamType;
-import org.aquiver.route.multipart.MultipartFile;
 
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
  * @author WangYi
- * @since 2020/6/14
+ * @since 2020/5/28
  */
-public class MultiFileUploadParamResolver extends AbstractParamResolver implements ParamResolver {
+public class RequestBodyParamResolver extends AbstractParamResolver implements ParamResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(MultiFileUpload.class) &&
-            parameter.getType().isAssignableFrom(List.class);
+    return parameter.isAnnotationPresent(Body.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
-    MultiFileUpload param = parameter.getAnnotation(MultiFileUpload.class);
+    Body body = parameter.getAnnotation(Body.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(param.value()) ? paramName : param.value());
-    handlerParam.setType(RouteParamType.UPLOAD_FILES);
+    handlerParam.setName("".equals(body.value()) ? paramName : body.value());
+    handlerParam.setRequired(true);
+    handlerParam.setType(RouteParamType.REQUEST_BODY);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) throws Exception {
-    Map<String, FileUpload> fileUploads = requestContext.request().fileUpload();
-    List<MultipartFile> multipartFiles = new ArrayList<>();
-    if (List.class.isAssignableFrom(handlerParam.getDataType())) {
-      for (Map.Entry<String, FileUpload> entry : fileUploads.entrySet()) {
-        FileUpload value = entry.getValue();
-        MultipartFile multipartFile = buildMultipartFile(
-                value, requestContext.request().channelHandlerContext());
-        multipartFiles.add(multipartFile);
-      }
+  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) {
+    Map<String, Object> jsonData = requestContext.request().formData();
+    String jsonString = JSON.toJSONString(jsonData);
+    if (jsonData.isEmpty() || !JSONObject.isValid(jsonString)) {
+      return null;
     }
-    return multipartFiles;
+    return JSONObject.parseObject(jsonString, paramType);
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.UPLOAD_FILES;
+    return RouteParamType.REQUEST_BODY;
   }
 }

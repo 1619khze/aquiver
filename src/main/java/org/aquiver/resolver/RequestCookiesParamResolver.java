@@ -21,44 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.route.resolver;
+package org.aquiver.resolver;
 
-import org.aquiver.ParamResolver;
 import org.aquiver.RequestContext;
-import org.aquiver.annotation.bind.Header;
+import org.aquiver.annotation.bind.Cookies;
 import org.aquiver.route.RouteParam;
 import org.aquiver.route.RouteParamType;
 
 import java.lang.reflect.Parameter;
+import java.util.Map;
 
-public class RequestHeadersParamResolver extends AbstractParamResolver implements ParamResolver {
+public class RequestCookiesParamResolver extends AbstractParamResolver implements ParamResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(Header.class);
+    return parameter.isAnnotationPresent(Cookies.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
-    Header header = parameter.getAnnotation(Header.class);
+    Cookies cookies = parameter.getAnnotation(Cookies.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(header.value()) ? paramName : header.value());
+    handlerParam.setName("".equals(cookies.value()) ? paramName : cookies.value());
     handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.REQUEST_HEADER);
+    handlerParam.setType(RouteParamType.REQUEST_COOKIES);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
-    if (isMap(handlerParam.getDataType())) {
-      return requestContext.request().headers();
+  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) {
+    Map<String, Object> cookies = requestContext.request().cookies();
+    if (isMap(paramType)) {
+      return cookies;
     }
-    return handlerParam.getDataType().cast(requestContext.request().headers().get(handlerParam.getName()));
+    return paramType.cast(cookies.get(paramName));
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.REQUEST_HEADER;
+    return RouteParamType.REQUEST_COOKIES;
   }
 }

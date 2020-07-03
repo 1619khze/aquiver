@@ -1,0 +1,9 @@
+org.aquiver.resolver.RequestParamParamResolver
+org.aquiver.resolver.RequestCookiesParamResolver
+org.aquiver.resolver.RequestHeadersParamResolver
+org.aquiver.resolver.PathVariableParamResolver
+org.aquiver.resolver.RequestBodyParamResolver
+org.aquiver.resolver.FileUploadParamResolver
+org.aquiver.resolver.MultiFileUploadParamResolver
+org.aquiver.resolver.SessionParamResolver
+org.aquiver.resolver.MultipartFileParamResolver

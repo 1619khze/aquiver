@@ -21,44 +21,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.route.resolver;
+package org.aquiver.resolver;
 
-import org.aquiver.ParamResolver;
 import org.aquiver.RequestContext;
-import org.aquiver.annotation.bind.PathVar;
-import org.aquiver.route.PathVarMatcher;
 import org.aquiver.route.RouteParam;
 import org.aquiver.route.RouteParamType;
 
 import java.lang.reflect.Parameter;
 
-public class PathVariableParamResolver extends AbstractParamResolver implements ParamResolver {
+public interface ParamResolver {
+  /**
+   * Determine whether the parameter type is supported
+   *
+   * @param parameter Information about method parameters.
+   * @return support
+   */
+  boolean support(Parameter parameter);
 
-  @Override
-  public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(PathVar.class);
-  }
+  /**
+   * Parse parameters into RouteParam
+   *
+   * @param parameter Information about method parameters
+   * @param paramName method parameter name
+   * @return route param
+   */
+  RouteParam resolve(Parameter parameter, String paramName);
 
-  @Override
-  public RouteParam resolve(Parameter parameter, String paramName) {
-    RouteParam handlerParam = new RouteParam();
-    PathVar pathVar = parameter.getAnnotation(PathVar.class);
-    handlerParam.setDataType(parameter.getType());
-    handlerParam.setName((!"".equals(pathVar.value()) && !pathVar.value().trim().isEmpty()) ?
-            pathVar.value().trim() : paramName);
-    handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.PATH_VARIABLE);
-    return handlerParam;
-  }
+  /**
+   * Assign parameters in advance according to the amount
+   * of methods called by reflection
+   *
+   * @param paramType param type class
+   * @param paramName param name
+   * @param requestContext request context
+   * @return Assigned parameters
+   */
+  Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) throws Exception;
 
-  @Override
-  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
-    return handlerParam.getDataType().cast(
-            PathVarMatcher.getPathVariable(requestContext.request().uri(), url, handlerParam.getName()));
-  }
-
-  @Override
-  public RouteParamType dispenType() {
-    return RouteParamType.PATH_VARIABLE;
-  }
+  /**
+   * Get the parameter type to be assigned
+   *
+   * @return Routing parameter type
+   */
+  RouteParamType dispenType();
 }

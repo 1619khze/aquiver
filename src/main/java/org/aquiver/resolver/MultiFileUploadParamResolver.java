@@ -21,44 +21,59 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.route.resolver;
+package org.aquiver.resolver;
 
-import org.aquiver.ParamResolver;
+import io.netty.handler.codec.http.multipart.FileUpload;
 import org.aquiver.RequestContext;
-import org.aquiver.annotation.bind.Param;
+import org.aquiver.annotation.bind.MultiFileUpload;
 import org.aquiver.route.RouteParam;
 import org.aquiver.route.RouteParamType;
+import org.aquiver.route.multipart.MultipartFile;
 
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-public class RequestParamParamResolver extends AbstractParamResolver implements ParamResolver {
+/**
+ * @author WangYi
+ * @since 2020/6/14
+ */
+public class MultiFileUploadParamResolver extends AbstractParamResolver implements ParamResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(Param.class);
+    return parameter.isAnnotationPresent(MultiFileUpload.class) &&
+            parameter.getType().isAssignableFrom(List.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
-    Param param = parameter.getAnnotation(Param.class);
+    MultiFileUpload param = parameter.getAnnotation(MultiFileUpload.class);
     handlerParam.setDataType(parameter.getType());
     handlerParam.setName("".equals(param.value()) ? paramName : param.value());
-    handlerParam.setRequired(param.required());
-    handlerParam.setType(RouteParamType.REQUEST_PARAM);
+    handlerParam.setType(RouteParamType.UPLOAD_FILES);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
-    if (isMap(handlerParam.getDataType())) {
-      return requestContext.request().queryStrings();
+  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) throws Exception {
+    Map<String, FileUpload> fileUploads = requestContext.request().fileUpload();
+    List<MultipartFile> multipartFiles = new ArrayList<>();
+    if (List.class.isAssignableFrom(paramType)) {
+      for (Map.Entry<String, FileUpload> entry : fileUploads.entrySet()) {
+        FileUpload value = entry.getValue();
+        MultipartFile multipartFile = buildMultipartFile(
+                value, requestContext.request().channelHandlerContext());
+        multipartFiles.add(multipartFile);
+      }
     }
-    return handlerParam.getDataType().cast(requestContext.request().queryStrings().get(handlerParam.getName()));
+    return multipartFiles;
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.REQUEST_PARAM;
+    return RouteParamType.UPLOAD_FILES;
   }
 }

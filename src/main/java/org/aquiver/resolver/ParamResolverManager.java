@@ -21,46 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.route.resolver;
+package org.aquiver.resolver;
 
-import org.aquiver.ParamResolver;
+import org.aquiver.ParamAssignment;
 import org.aquiver.RequestContext;
-import org.aquiver.annotation.bind.Cookies;
 import org.aquiver.route.RouteParam;
-import org.aquiver.route.RouteParamType;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-public class RequestCookiesParamResolver extends AbstractParamResolver implements ParamResolver {
-
+/**
+ * @author WangYi
+ * @since 2020/7/3
+ */
+public class ParamResolverManager extends AbstractParamResolver implements ParamAssignment {
   @Override
-  public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(Cookies.class);
-  }
-
-  @Override
-  public RouteParam resolve(Parameter parameter, String paramName) {
-    RouteParam handlerParam = new RouteParam();
-    Cookies cookies = parameter.getAnnotation(Cookies.class);
-    handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(cookies.value()) ? paramName : cookies.value());
-    handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.REQUEST_COOKIES);
-    return handlerParam;
-  }
-
-  @Override
-  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
-    Map<String, Object> cookies = requestContext.request().cookies();
-    if (isMap(handlerParam.getDataType())) {
-      return cookies;
+  public Object assignment(RouteParam handlerParam, RequestContext requestContext) throws Exception {
+    Object dispen = null;
+    for (ParamResolver paramResolver : getParamResolvers()) {
+      if (!paramResolver.dispenType().equals(handlerParam.getType())) {
+        continue;
+      }
+      dispen = paramResolver.dispen(handlerParam.getDataType(),
+              handlerParam.getName(), requestContext);
     }
-    return handlerParam.getDataType().cast(cookies.get(handlerParam.getName()));
+    return dispen;
   }
 
-  @Override
-  public RouteParamType dispenType() {
-    return RouteParamType.REQUEST_COOKIES;
+  public String[] getMethodParamName(final Method method) {
+    Parameter[] parameters = method.getParameters();
+    List<String> nameList = new ArrayList<>();
+    for (Parameter param : parameters) {
+      String name = param.getName();
+      nameList.add(name);
+    }
+    return nameList.toArray(new String[0]);
   }
 }

@@ -21,44 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.route.resolver;
+package org.aquiver.resolver;
 
-import org.aquiver.ParamResolver;
 import org.aquiver.RequestContext;
+import org.aquiver.annotation.bind.PathVar;
+import org.aquiver.route.PathVarMatcher;
 import org.aquiver.route.RouteParam;
 import org.aquiver.route.RouteParamType;
-import org.aquiver.route.session.Session;
 
 import java.lang.reflect.Parameter;
 
-/**
- * @author WangYi
- * @since 2020/6/28
- */
-public class SessionParamResolver extends AbstractParamResolver implements ParamResolver {
+public class PathVariableParamResolver extends AbstractParamResolver implements ParamResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.getType().isAssignableFrom(Session.class);
+    return parameter.isAnnotationPresent(PathVar.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
+    PathVar pathVar = parameter.getAnnotation(PathVar.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("");
+    handlerParam.setName((!"".equals(pathVar.value()) && !pathVar.value().trim().isEmpty()) ?
+            pathVar.value().trim() : paramName);
     handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.REQUEST_SESSION);
+    handlerParam.setType(RouteParamType.PATH_VARIABLE);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) {
-    return handlerParam.getDataType().cast(requestContext.request().session());
+  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) {
+    return paramType.cast(
+            PathVarMatcher.getPathVariable(requestContext.request().uri(),
+                    requestContext.route().getUrl(), paramName));
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.REQUEST_SESSION;
+    return RouteParamType.PATH_VARIABLE;
   }
 }

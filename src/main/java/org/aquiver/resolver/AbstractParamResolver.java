@@ -21,26 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.route.resolver;
+package org.aquiver.resolver;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.multipart.FileUpload;
+import org.aquiver.route.RouteParam;
 import org.aquiver.route.multipart.MultipartFile;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.reflect.Parameter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author WangYi
  * @since 2020/6/27
  */
 public abstract class AbstractParamResolver {
+  private final List<ParamResolver> paramResolvers = new ArrayList<>();
 
   /**
    * Build Multipart File
@@ -90,5 +92,52 @@ public abstract class AbstractParamResolver {
    */
   protected boolean isMap(Class<?> cls) {
     return Map.class.isAssignableFrom(cls);
+  }
+
+  private void initialize() throws Exception {
+    ServiceLoader<ParamResolver> paramResolverLoad = ServiceLoader.load(ParamResolver.class);
+    for (ParamResolver ser : paramResolverLoad) {
+      ParamResolver paramResolver = ser.getClass().getDeclaredConstructor().newInstance();
+      getParamResolvers().add(paramResolver);
+    }
+  }
+
+  public void initialize(Set<Class<?>> classSet) throws Exception {
+    for (Class<?> cls : classSet) {
+      Class<?>[] interfaces = cls.getInterfaces();
+      if (interfaces.length == 0) {
+        continue;
+      }
+      for (Class<?> interfaceCls : interfaces) {
+        if (!interfaceCls.equals(ParamResolver.class)) {
+          continue;
+        }
+        ParamResolver paramResolver = (ParamResolver) cls.getDeclaredConstructor().newInstance();
+        getParamResolvers().add(paramResolver);
+      }
+    }
+    this.initialize();
+  }
+
+  public List<RouteParam> invokeParamResolver(Parameter[] ps, String[] paramNames) {
+    List<RouteParam> routeParams = new ArrayList<>();
+    for (int i = 0; i < ps.length; i++) {
+      List<ParamResolver> paramResolvers = getParamResolvers();
+      if (paramResolvers.isEmpty()) {
+        break;
+      }
+      for (ParamResolver paramResolver : paramResolvers) {
+        if (!paramResolver.support(ps[i])) continue;
+        RouteParam param = paramResolver.resolve(ps[i], paramNames[i]);
+        if (Objects.nonNull(param)) {
+          routeParams.add(param);
+        }
+      }
+    }
+    return routeParams;
+  }
+
+  public List<ParamResolver> getParamResolvers() {
+    return paramResolvers;
   }
 }
