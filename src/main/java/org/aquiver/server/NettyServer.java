@@ -33,6 +33,11 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.ResourceLeakDetector;
 import org.aquiver.*;
+import org.aquiver.annotation.advice.ExceptionHandler;
+import org.aquiver.annotation.advice.RouteAdvice;
+import org.aquiver.exadvice.Advice;
+import org.aquiver.exadvice.AdviceManager;
+import org.aquiver.resolver.ParamResolverManager;
 import org.aquiver.route.PathRouteFinder;
 import org.aquiver.route.RouteFinder;
 import org.aquiver.route.RouteManager;
@@ -40,12 +45,14 @@ import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvTask;
 import org.aquiver.server.websocket.WebSocketServerInitializer;
+import org.aquiver.toolkit.ReflectionUtils;
 import org.aquiver.toolkit.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.nio.file.Paths;
 import java.security.cert.CertificateException;
 import java.util.Map;
@@ -81,6 +88,8 @@ public class NettyServer implements Server {
 
   /** route manager. */
   private RouteManager routeManager;
+  private AdviceManager adviceManager;
+  private ParamResolverManager resolverManager;
 
   /** Service startup status, using volatile to ensure threads are visible. */
   private volatile boolean stop = false;
@@ -97,7 +106,9 @@ public class NettyServer implements Server {
 
     this.aquiver = aquiver;
     this.environment = aquiver.environment();
-    this.routeManager = new RouteManager();
+    this.routeManager = Aquiver.of().routeManager();
+    this.adviceManager = Aquiver.of().adviceManager();
+    this.resolverManager = Aquiver.of().resolverManager();
     this.printBanner();
 
     final String bootClsName = aquiver.bootClsName();
@@ -116,7 +127,7 @@ public class NettyServer implements Server {
 
     this.initSsl();
     this.initWebSocket();
-    this.loadRoute();
+    this.initComponent();
     this.startServer(startMs);
     this.watchEnv();
     this.shutdownHook();
@@ -141,9 +152,8 @@ public class NettyServer implements Server {
   /**
    * init ioc container
    */
-  private void loadRoute() {
+  private void initComponent() throws Exception {
     final String scanPath = aquiver.bootCls().getPackage().getName();
-    final RouteFinder routeFinder = new PathRouteFinder();
 
     final ClassgraphOptions classgraphOptions = ClassgraphOptions.builder()
             .verbose(aquiver.verbose()).enableRealtimeLogging(aquiver.realtimeLogging())
@@ -151,15 +161,48 @@ public class NettyServer implements Server {
 
     final Scanner scanner = new ClassgraphScanner(classgraphOptions);
     final Set<Class<?>> classSet = scanner.scan(scanPath);
+
+    if (classSet.isEmpty()) {
+      return;
+    }
+    this.resolverManager.initialize(classSet);
+    this.loadRoute(classSet);
+    this.loadAdvice(classSet);
+  }
+
+  public void loadRoute(Set<Class<?>> classSet) {
+    final RouteFinder routeFinder = new PathRouteFinder();
     try {
       Map<String, Class<?>> routeClsMap = routeFinder.finderRoute(classSet);
-      this.routeManager.findArgsResolver(classSet);
-      this.routeManager.loadArgsResolver();
       for (Map.Entry<String, Class<?>> entry : routeClsMap.entrySet()) {
         this.routeManager.addRoute(entry.getValue(), entry.getKey());
       }
     } catch (Throwable e) {
       log.error("An exception occurred while load route", e);
+    }
+  }
+
+  private void loadAdvice(Set<Class<?>> classSet) throws ReflectiveOperationException {
+    for (Class<?> cls : classSet) {
+      Method[] declaredMethods = cls.getDeclaredMethods();
+      if (!ReflectionUtils.isNormal(cls) ||
+              !cls.isAnnotationPresent(RouteAdvice.class) ||
+              declaredMethods.length == 0) {
+        continue;
+      }
+      for (Method method : declaredMethods) {
+        ExceptionHandler declaredAnnotation =
+                method.getDeclaredAnnotation(ExceptionHandler.class);
+        if (Objects.isNull(declaredAnnotation)) {
+          continue;
+        }
+        final Advice advice = new Advice();
+        advice.exception(declaredAnnotation.value());
+        advice.method(method);
+        advice.methodName(method.getName());
+        advice.target(cls.newInstance());
+        this.adviceManager.addAdvice(declaredAnnotation.value(), advice);
+      }
     }
   }
 
@@ -241,7 +284,7 @@ public class NettyServer implements Server {
 
     ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
 
-    this.serverBootstrap.childHandler(new NettyServerInitializer(sslContext, environment, routeManager));
+    this.serverBootstrap.childHandler(new NettyServerInitializer(sslContext));
 
     int acceptThreadCount = environment.getInteger(PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT, DEFAULT_ACCEPT_THREAD_COUNT);
     int ioThreadCount = environment.getInteger(PATH_SERVER_NETTY_IO_THREAD_COUNT, DEFAULT_IO_THREAD_COUNT);
