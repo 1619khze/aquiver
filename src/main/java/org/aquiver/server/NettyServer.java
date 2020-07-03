@@ -41,6 +41,7 @@ import org.aquiver.resolver.ParamResolverManager;
 import org.aquiver.route.PathRouteFinder;
 import org.aquiver.route.RouteFinder;
 import org.aquiver.route.RouteManager;
+import org.aquiver.route.RouteParam;
 import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvTask;
@@ -53,8 +54,10 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLException;
 import java.io.File;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.nio.file.Paths;
 import java.security.cert.CertificateException;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -196,11 +199,12 @@ public class NettyServer implements Server {
         if (Objects.isNull(declaredAnnotation)) {
           continue;
         }
-        final Advice advice = new Advice();
-        advice.exception(declaredAnnotation.value());
-        advice.method(method);
-        advice.methodName(method.getName());
-        advice.target(cls.newInstance());
+        Parameter[] parameters = method.getParameters();
+        String[] paramNames = resolverManager.getMethodParamName(method);
+        List<RouteParam> routeParams = this.resolverManager.invokeParamResolver(parameters, paramNames);
+
+        Advice advice = Advice.builder().clazz(cls).exception(declaredAnnotation.value())
+                .methodName(method.getName()).params(routeParams).target(cls.newInstance());
         this.adviceManager.addAdvice(declaredAnnotation.value(), advice);
       }
     }

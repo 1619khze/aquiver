@@ -28,11 +28,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.util.concurrent.EventExecutor;
+import org.aquiver.Aquiver;
 import org.aquiver.RequestContext;
-import org.aquiver.route.render.ResponseRenderMatcher;
+import org.aquiver.exadvice.AdviceManager;
+import org.aquiver.resolver.ParamResolverManager;
 import org.aquiver.route.PathRouteMatcher;
 import org.aquiver.route.RouteManager;
 import org.aquiver.route.RouteMatcher;
+import org.aquiver.route.render.ResponseRenderMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +53,12 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   private final RouteMatcher<RequestContext> matcher;
   private final ResponseRenderMatcher responseRenderMatcher;
 
-  public NettyServerHandler(RouteManager routeManager) {
-    this.matcher = new PathRouteMatcher(routeManager);
+  public NettyServerHandler() {
+    Aquiver aquiver = Aquiver.of();
+    RouteManager routeManager = aquiver.routeManager();
+    AdviceManager adviceManager = aquiver.adviceManager();
+    ParamResolverManager paramResolverManager = aquiver.resolverManager();
+    this.matcher = new PathRouteMatcher(routeManager.getRoutes(), adviceManager, paramResolverManager);
     this.responseRenderMatcher = new ResponseRenderMatcher();
   }
 
