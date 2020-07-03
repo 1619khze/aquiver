@@ -7,3 +7,4 @@ org.aquiver.resolver.FileUploadParamResolver
 org.aquiver.resolver.MultiFileUploadParamResolver
 org.aquiver.resolver.SessionParamResolver
 org.aquiver.resolver.MultipartFileParamResolver
+org.aquiver.resolver.ThrowableParamResolver
