@@ -23,9 +23,9 @@
  */
 package org.aquiver.route;
 
-import org.aquiver.ParamResolver;
-import org.aquiver.RequestContext;
+import org.aquiver.Aquiver;
 import org.aquiver.annotation.*;
+import org.aquiver.resolver.ParamResolverManager;
 import org.aquiver.route.views.PebbleHTMLView;
 import org.aquiver.route.views.ViewType;
 import org.slf4j.Logger;
@@ -35,7 +35,9 @@ import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -48,12 +50,7 @@ public final class RouteManager {
 
   private final Map<String, Route> routes = new ConcurrentHashMap<>(64);
   private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-  private final List<ParamResolver> paramResolvers = new ArrayList<>();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-
-  public List<ParamResolver> getParamResolvers() {
-    return paramResolvers;
-  }
 
   protected ReentrantReadWriteLock.ReadLock readLock() {
     return this.readWriteLock.readLock();
@@ -65,30 +62,6 @@ public final class RouteManager {
 
   protected boolean repeat(String url) {
     return this.routes.containsKey(url);
-  }
-
-  public void loadArgsResolver() throws Exception {
-    ServiceLoader<ParamResolver> argsResolverLoad = ServiceLoader.load(ParamResolver.class);
-    for (ParamResolver ser : argsResolverLoad) {
-      ParamResolver paramResolver = ser.getClass().getDeclaredConstructor().newInstance();
-      getParamResolvers().add(paramResolver);
-    }
-  }
-
-  public void findArgsResolver(Set<Class<?>> classSet) throws ReflectiveOperationException {
-    for (Class<?> cls : classSet) {
-      Class<?>[] interfaces = cls.getInterfaces();
-      if (interfaces.length == 0) {
-        return;
-      }
-      for (Class<?> interfaceCls : interfaces) {
-        if (!interfaceCls.equals(ParamResolver.class)) {
-          continue;
-        }
-        ParamResolver paramResolver = (ParamResolver) cls.getDeclaredConstructor().newInstance();
-        getParamResolvers().add(paramResolver);
-      }
-    }
   }
 
   public void removeRoute(String url) {
@@ -173,10 +146,13 @@ public final class RouteManager {
     }
     Route route = builderRoute(clazz, method, pathMethod, completeUrl);
 
+    ParamResolverManager resolverManager = Aquiver.of().resolverManager();
     Parameter[] parameters = method.getParameters();
-    String[] paramNames = this.getMethodParamName(method);
+    String[] paramNames = resolverManager.getMethodParamName(method);
 
-    this.execuArgsResolver(route, parameters, paramNames);
+    List<RouteParam> routeParams = resolverManager.invokeParamResolver(parameters, paramNames);
+    route.setParams(routeParams);
+
     if (this.repeat(completeUrl)) {
       if (log.isDebugEnabled()) {
         log.debug("Registered request processor URL is duplicated :{}", completeUrl);
@@ -222,38 +198,6 @@ public final class RouteManager {
     }
   }
 
-  public Object dispen(RouteParam handlerParam, RequestContext requestContext, String url) throws Exception {
-    Object dispen = null;
-    for (ParamResolver paramResolver : paramResolvers) {
-      if (!paramResolver.dispenType().equals(handlerParam.getType())) {
-        continue;
-      }
-      dispen = paramResolver.dispen(handlerParam, requestContext, url);
-    }
-    return dispen;
-  }
-
-  private void execuArgsResolver(Route route, Parameter[] ps, String[] paramNames) {
-    for (int i = 0; i < ps.length; i++) {
-      List<ParamResolver> paramResolvers = getParamResolvers();
-      if (paramResolvers.isEmpty()) {
-        break;
-      }
-      this.execuArgsResolver(route, ps[i], paramNames[i], paramResolvers);
-    }
-  }
-
-  private void execuArgsResolver(Route route, Parameter parameter,
-                                 String paramName, List<ParamResolver> paramResolvers) {
-    for (ParamResolver paramResolver : paramResolvers) {
-      if (!paramResolver.support(parameter)) continue;
-      RouteParam param = paramResolver.resolve(parameter, paramName);
-      if (Objects.nonNull(param)) {
-        route.getParams().add(param);
-      }
-    }
-  }
-
   protected String getMethodUrl(String baseUrl, String methodMappingUrl) {
     StringBuilder url = new StringBuilder(256);
     url.append((baseUrl == null || baseUrl.trim().isEmpty()) ? "" : baseUrl.trim());
@@ -268,15 +212,5 @@ public final class RouteManager {
       url.append(methodMappingUrlTrim);
     }
     return url.toString();
-  }
-
-  protected String[] getMethodParamName(final Method method) {
-    Parameter[] parameters = method.getParameters();
-    List<String> nameList = new ArrayList<>();
-    for (Parameter param : parameters) {
-      String name = param.getName();
-      nameList.add(name);
-    }
-    return nameList.toArray(new String[0]);
   }
 }

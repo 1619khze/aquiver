@@ -83,5 +83,10 @@ public enum RouteParamType {
   /**
    * File operations
    */
-  MULTIPART_FILE
+  MULTIPART_FILE,
+
+  /**
+   * Throwable
+   */
+  THROWABLE_CLASS
 }

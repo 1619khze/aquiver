@@ -27,8 +27,11 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.aquiver.Async;
 import org.aquiver.RequestContext;
+import org.aquiver.exadvice.AdviceManager;
 import org.aquiver.handler.HttpExceptionHandler;
+import org.aquiver.resolver.ParamResolverManager;
 import org.aquiver.server.StaticFileServerHandler;
+import org.aquiver.toolkit.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,13 +52,21 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
   private final Map<String, Route> routeMap;
   private final HttpExceptionHandler exceptionHandler;
   private final StaticFileServerHandler fileServerHandler;
-  private final RouteManager routeManager;
+  private final AdviceManager adviceManager;
+  private final MethodHandles.Lookup lookup = MethodHandles.lookup();
+  private final ParamResolverManager resolverManager;
 
-  public PathRouteMatcher(RouteManager manager) {
-    this.routeManager = manager;
-    this.routeMap = manager.getRoutes();
+  public PathRouteMatcher(Map<String, Route> routeMap, AdviceManager adviceManager,
+                          ParamResolverManager resolverManager) {
+    this.routeMap = routeMap;
     this.exceptionHandler = new HttpExceptionHandler();
     this.fileServerHandler = new StaticFileServerHandler();
+    this.adviceManager = adviceManager;
+    this.resolverManager = resolverManager;
+  }
+
+  private void closeChannel(RequestContext context) {
+    context.request().channelHandlerContext().channel().close();
   }
 
   @Override
@@ -81,17 +92,9 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     Object[] paramValues = new Object[params.size()];
     Class<?>[] paramTypes = new Class[params.size()];
 
-    log.info("{} {} {}", context.request().ipAddress(),
-            context.request().httpMethodName(), context.route().getUrl());
-
     try {
-      for (int i = 0; i < paramValues.length; i++) {
-        RouteParam handlerParam = route.getParams().get(i);
-        paramTypes[i] = handlerParam.getDataType();
-        paramValues[i] = this.routeManager.dispen(
-                handlerParam, context, route.getUrl()
-        );
-      }
+      ReflectionUtils.invokeParam(context, route.getParams(),
+              paramValues, paramTypes, resolverManager);
     } catch (Exception e) {
       log.error("An exception occurred when obtaining invoke param");
       closeChannel(context);
@@ -101,28 +104,29 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     return route;
   }
 
-  private void closeChannel(RequestContext context) {
-    context.request().channelHandlerContext().channel().close();
-  }
-
   private Route invokeMethod(RequestContext context, Route route) {
-    MethodHandles.Lookup lookup = MethodHandles.lookup();
     try {
-      Method method = this.getInvokeMethod(route);
+      Method method = ReflectionUtils.getInvokeMethod(route.getClazz(),
+              route.getMethod(), route.getParamTypes());
+
       Object result = lookup.unreflect(method).bindTo(route.getBean())
               .invokeWithArguments(route.getParamValues());
+
+      log.info("{} {} {}", context.request().ipAddress(),
+              context.request().httpMethodName(), context.route().getUrl());
 
       route.setInvokeResult(result);
       return route;
     } catch (Throwable throwable) {
       log.error("An exception occurred when calling the mapping method", throwable);
-      closeChannel(context);
-      return null;
+      context.throwable(throwable);
+      Object handlerExceptionResult = this.adviceManager
+              .handlerException(throwable, resolverManager, context);
+      if (Objects.nonNull(handlerExceptionResult)) {
+        route.setInvokeResult(handlerExceptionResult);
+      }
+      return route;
     }
-  }
-
-  private Method getInvokeMethod(Route route) throws NoSuchMethodException {
-    return route.getClazz().getMethod(route.getMethod(), route.getParamTypes());
   }
 
   private Route loopLookUp(String lookupPath) {

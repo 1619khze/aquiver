@@ -23,10 +23,17 @@
  */
 package org.aquiver.toolkit;
 
+import org.aquiver.RequestContext;
+import org.aquiver.resolver.ParamResolverManager;
+import org.aquiver.route.RouteParam;
+
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 
 public final class ReflectionUtils {
-  private ReflectionUtils() {}
+  private ReflectionUtils() {
+  }
 
   public static <T> boolean isInterface(Class<T> clazz) {
     return clazz.isInterface();
@@ -43,5 +50,21 @@ public final class ReflectionUtils {
 
   public static <T> boolean isNormal(Class<T> clazz) {
     return !isAbstract(clazz) && !isInterface(clazz) && !isEnum(clazz);
+  }
+
+  public static void invokeParam(RequestContext context, List<RouteParam> routeParams,
+                                 Object[] paramValues, Class<?>[] paramTypes,
+                                 ParamResolverManager resolverManager) throws Exception {
+    for (int i = 0; i < paramValues.length; i++) {
+      RouteParam handlerParam = routeParams.get(i);
+      paramTypes[i] = handlerParam.getDataType();
+      paramValues[i] = resolverManager.assignment(
+              handlerParam, context);
+    }
+  }
+
+  public static Method getInvokeMethod(Class<?> refClass, String method,
+                                       Class<?>[] paramTypes) throws NoSuchMethodException {
+    return refClass.getMethod(method, paramTypes);
   }
 }
