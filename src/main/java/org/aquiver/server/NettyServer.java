@@ -45,7 +45,7 @@ import org.aquiver.mvc.route.RouteParam;
 import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvTask;
-import org.aquiver.server.websocket.WebSocketServerInitializer;
+import org.aquiver.websocket.WebSocketServerInitializer;
 import org.aquiver.toolkit.ReflectionUtils;
 import org.aquiver.toolkit.SystemUtils;
 import org.slf4j.Logger;
