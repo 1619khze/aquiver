@@ -21,14 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.application;
+package org.application.mvc.route;
 
-import org.aquiver.Aquiver;
+import org.junit.Test;
 
-public class Application {
-  public static void main(String[] args) {
-    Aquiver.of().bind(9900)
-            .bannerText("aaa")
-            .start(Application.class, args);
+import java.util.Arrays;
+
+/**
+ * @author WangYi
+ * @since 2020/6/24
+ */
+public class RouteTrie {
+
+  @Test
+  public void test() {
+    String path = "/home/:name/path/:path";
+    String[] splitPath = path.split("/");
+    String[] parts = new String[splitPath.length];
+    for (int i = 0; i < splitPath.length; i++) {
+      if (!splitPath[i].equals("")) {
+        parts[i] = splitPath[i];
+      }
+    }
+    parts = Arrays.stream(parts)
+            .filter(s -> (s != null && s.length() > 0))
+            .toArray(String[]::new);
+    System.out.println(Arrays.toString(parts));
+  }
+
+  @Test
+  public void tes() {
+    NullPointerException nullPointerException = new NullPointerException("a");
+    System.out.println(nullPointerException instanceof Throwable);
   }
 }
