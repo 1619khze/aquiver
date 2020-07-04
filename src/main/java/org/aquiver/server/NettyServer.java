@@ -33,10 +33,10 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.ResourceLeakDetector;
 import org.aquiver.*;
-import org.aquiver.mvc.annotation.advice.ExceptionHandler;
-import org.aquiver.mvc.annotation.advice.RouteAdvice;
 import org.aquiver.advice.Advice;
 import org.aquiver.advice.AdviceManager;
+import org.aquiver.mvc.annotation.advice.ExceptionHandler;
+import org.aquiver.mvc.annotation.advice.RouteAdvice;
 import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.mvc.route.PathRouteFinder;
 import org.aquiver.mvc.route.RouteFinder;
@@ -173,6 +173,12 @@ public class NettyServer implements Server {
     this.loadAdvice(classSet);
   }
 
+  /**
+   * Filter out the routing class from the scanned
+   * result set and add it to the routing manager
+   *
+   * @param classSet Scanned result
+   */
   public void loadRoute(Set<Class<?>> classSet) {
     final RouteFinder routeFinder = new PathRouteFinder();
     try {
@@ -185,6 +191,14 @@ public class NettyServer implements Server {
     }
   }
 
+  /**
+   * Filter the Advice class from the scanned result
+   * set and add it to the Advice Manager
+   *
+   * @param classSet Scanned result
+   * @throws ReflectiveOperationException Exception superclass when
+   *                                      performing reflection operation
+   */
   private void loadAdvice(Set<Class<?>> classSet) throws ReflectiveOperationException {
     for (Class<?> cls : classSet) {
       Method[] declaredMethods = cls.getDeclaredMethods();
