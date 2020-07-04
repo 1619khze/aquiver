@@ -24,8 +24,8 @@
 package org.application.controller;
 
 import org.application.bean.User;
-import org.aquiver.annotation.*;
-import org.aquiver.annotation.bind.*;
+import org.aquiver.mvc.annotation.*;
+import org.aquiver.mvc.annotation.bind.*;
 import org.aquiver.mvc.route.multipart.MultipartFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
