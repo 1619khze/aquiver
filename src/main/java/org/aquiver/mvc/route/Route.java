@@ -23,7 +23,7 @@
  */
 package org.aquiver.mvc.route;
 
-import org.aquiver.annotation.PathMethod;
+import org.aquiver.mvc.annotation.PathMethod;
 import org.aquiver.mvc.route.views.HTMLView;
 import org.aquiver.mvc.route.views.ViewType;
 import org.slf4j.Logger;

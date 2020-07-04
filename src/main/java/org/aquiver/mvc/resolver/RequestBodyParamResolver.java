@@ -26,7 +26,7 @@ package org.aquiver.mvc.resolver;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.aquiver.RequestContext;
-import org.aquiver.annotation.bind.Body;
+import org.aquiver.mvc.annotation.bind.Body;
 import org.aquiver.mvc.route.RouteParam;
 import org.aquiver.mvc.route.RouteParamType;
 

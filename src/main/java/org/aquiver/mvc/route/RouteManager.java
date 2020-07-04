@@ -24,7 +24,7 @@
 package org.aquiver.mvc.route;
 
 import org.aquiver.Aquiver;
-import org.aquiver.annotation.*;
+import org.aquiver.mvc.annotation.*;
 import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.mvc.route.views.PebbleHTMLView;
 import org.aquiver.mvc.route.views.ViewType;

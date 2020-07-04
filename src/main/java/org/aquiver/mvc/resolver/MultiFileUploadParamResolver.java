@@ -25,7 +25,7 @@ package org.aquiver.mvc.resolver;
 
 import io.netty.handler.codec.http.multipart.FileUpload;
 import org.aquiver.RequestContext;
-import org.aquiver.annotation.bind.MultiFileUpload;
+import org.aquiver.mvc.annotation.bind.MultiFileUpload;
 import org.aquiver.mvc.route.RouteParam;
 import org.aquiver.mvc.route.RouteParamType;
 import org.aquiver.mvc.route.multipart.MultipartFile;

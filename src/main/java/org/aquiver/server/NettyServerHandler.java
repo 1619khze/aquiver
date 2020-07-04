@@ -30,7 +30,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.util.concurrent.EventExecutor;
 import org.aquiver.Aquiver;
 import org.aquiver.RequestContext;
-import org.aquiver.exadvice.AdviceManager;
+import org.aquiver.advice.AdviceManager;
 import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.mvc.route.PathRouteMatcher;
 import org.aquiver.mvc.route.RouteManager;

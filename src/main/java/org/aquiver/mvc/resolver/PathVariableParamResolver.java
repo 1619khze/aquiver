@@ -24,7 +24,7 @@
 package org.aquiver.mvc.resolver;
 
 import org.aquiver.RequestContext;
-import org.aquiver.annotation.bind.PathVar;
+import org.aquiver.mvc.annotation.bind.PathVar;
 import org.aquiver.mvc.route.PathVarMatcher;
 import org.aquiver.mvc.route.RouteParam;
 import org.aquiver.mvc.route.RouteParamType;
