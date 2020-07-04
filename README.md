@@ -1,37 +1,47 @@
 # Aquiver
 
- <p align="left">
-      <img src="https://img.shields.io/badge/JDK-11+-green.svg" alt="Build Status">
+<p align="left">The aquifer is a java web framework based on jdk11 and netty</p>
+<p align="left">
+   <img src="https://img.shields.io/badge/JDK-8+-green.svg" alt="Build Status">
    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Build Status">
-   <a target="_blank" href="https://github.com/everknwon/aquiver">
-    <img src="https://img.shields.io/badge/Author-1619kHz-ff69b4.svg" alt="Downloads">
-   </a>
+   <img src="https://img.shields.io/badge/Author-1619kHz-ff69b4.svg">
  </a>
  <a target="_blank" href="https://github.com/everknwon/aquiver">
-   <img src="https://img.shields.io/badge/Copyright%20-@Aquiver-%23ff3f59.svg" alt="Downloads">
+   <img src="https://img.shields.io/badge/Copyright%20-@Aquiver-%23ff3f59.svg" alt="Downloads"/>
  </a>
  </p>
 
-> The aquifer is a java web framework based on jdk11 and netty
+### Quick Start
 
-## Status: Beta.
+Create a basic `Maven` or `Gradle` project.
 
-### Usage example
+> Do not create a `webapp` project, Aquiver does not require much trouble.
 
-#### StartUp HttpServer
+Run with `Maven`:
+
+```xml
+<dependency>
+    <groupId>org.aquiver</groupId>
+    <artifactId>aquiver</artifactId>
+    <version>1.0-SNAPSHOT</version>
+</dependency>
+```
+
+#### Create Http Server
+
  ```java
 public class Application {
   public static void main(String[] args) {
     Aquiver.run(Main.class, args);
   }
 }
-```
+ ```
 
 #### Route Register
 ```java
 @GET(value = "/get")
 public String get() {
-  return "/api/get";
+    //todo
 }
 ```
 
@@ -39,7 +49,7 @@ public String get() {
 ```java
 @Path(value = "/path",method = PathMethod.GET)
 public String path(){
-  return "/api/path";
+    //todo
 }
 ```
 
@@ -47,7 +57,7 @@ public String path(){
 ```java
 @Path(value = "/path", method = PathMethod.GET)
 public String path(@Param String paramName){
-  return "/api/path";
+    //todo
 }
 ```
 
@@ -55,7 +65,7 @@ public String path(@Param String paramName){
 ```java
 @Path(value = "/path", method = PathMethod.GET)
 public String path(@Param String cookieName){
-  return "/api/path";
+    //todo
 }
 ```
 
@@ -63,28 +73,27 @@ public String path(@Param String cookieName){
 ```java
 @Path(value = "/path", method = PathMethod.POST)
 public String path(@Body User user){
-  return "/api/path";
+    //todo
 }
 ```
 
 #### File Upload
 ```java
 @POST(value = "/uploadFile")
-public String uploadFile(@FileUpload MultipartFile file) {
+public void uploadFile(@FileUpload MultipartFile file) {
   log.info("fileName:{}", file.getFileName());
   try {
     System.out.println(multipartFile.readFileContent());
   } catch (IOException e) {
     e.printStackTrace();
   }
-  return "controller/uploadFile";
 }
 ```
 
 #### Multi File Upload
 ```java
 @POST(value = "/uploadFiles")
-public String uploadFileS(@MultiFileUpload List<MultipartFile> files) {
+public void uploadFileS(@MultiFileUpload List<MultipartFile> files) {
   log.info("file size:{}", files.size());
   for (MultipartFile multipartFile : files) {
     log.info("fileName:{}", multipartFile.getFileName());
@@ -94,7 +103,6 @@ public String uploadFileS(@MultiFileUpload List<MultipartFile> files) {
       e.printStackTrace();
     }
   }
-  return "controller/uploadFiles";
 }
 ```
 ## License
