@@ -21,48 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.mvc.route.render;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
-import org.aquiver.mvc.route.Route;
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.http.*;
+import org.aquiver.Aquiver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
  * @author WangYi
- * @since 2020/6/27
+ * @since 2020/6/25
  */
-public class RequestContext {
-  private Route route;
-  private final Request request;
-  private final Response response;
-  private Throwable throwable;
+public abstract class AbstractResponseRender {
+  protected static final Logger log = LoggerFactory.getLogger(AbstractResponseRender.class);
+  protected final Aquiver aquiver = Aquiver.of();
 
-  public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
-    this.request = new Request(httpRequest, context);
-    this.response = new Response();
+  protected FullHttpResponse buildRenderResponse(HttpResponseStatus status, ByteBuf byteBuf) {
+    return new DefaultFullHttpResponse(HTTP_1_1, status, byteBuf);
   }
 
-  public Throwable throwable() {
-    return throwable;
-  }
-
-  public void throwable(Throwable throwable) {
-    this.throwable = throwable;
-  }
-
-  public Route route() {
-    return route;
-  }
-
-  public void route(Route route) {
-    this.route = route;
-  }
-
-  public Request request() {
-    return request;
-  }
-
-  public Response response() {
-    return response;
+  protected void setHeader(FullHttpResponse httpResponse, FullHttpRequest httpRequest, String mediaType) {
+    HttpHeaders headers = httpResponse.headers();
+    headers.set(HttpHeaderNames.CONTENT_TYPE, mediaType);
+    if (HttpUtil.isKeepAlive(httpRequest)) {
+      headers.set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+      headers.setInt(HttpHeaderNames.CONTENT_LENGTH, httpResponse.content().readableBytes());
+    }
   }
 }

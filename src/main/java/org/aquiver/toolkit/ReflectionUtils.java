@@ -24,8 +24,8 @@
 package org.aquiver.toolkit;
 
 import org.aquiver.RequestContext;
-import org.aquiver.resolver.ParamResolverManager;
-import org.aquiver.route.RouteParam;
+import org.aquiver.mvc.resolver.ParamResolverManager;
+import org.aquiver.mvc.route.RouteParam;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;

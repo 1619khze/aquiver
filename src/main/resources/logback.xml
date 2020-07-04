@@ -10,7 +10,7 @@
     <appender name="STDOUT"
               class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-            <layout class="org.aquiver.internal.logback.EasyPatternLayout">
+            <layout class="org.aquiver.logger.logback.EasyPatternLayout">
                 <pattern>
                     ${org.aquiver.logging.console.pattern:-${STDOUT_PATTERN}}
                 </pattern>

@@ -31,11 +31,11 @@ import io.netty.util.concurrent.EventExecutor;
 import org.aquiver.Aquiver;
 import org.aquiver.RequestContext;
 import org.aquiver.exadvice.AdviceManager;
-import org.aquiver.resolver.ParamResolverManager;
-import org.aquiver.route.PathRouteMatcher;
-import org.aquiver.route.RouteManager;
-import org.aquiver.route.RouteMatcher;
-import org.aquiver.route.render.ResponseRenderMatcher;
+import org.aquiver.mvc.resolver.ParamResolverManager;
+import org.aquiver.mvc.route.PathRouteMatcher;
+import org.aquiver.mvc.route.RouteManager;
+import org.aquiver.mvc.route.RouteMatcher;
+import org.aquiver.mvc.route.render.ResponseRenderMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

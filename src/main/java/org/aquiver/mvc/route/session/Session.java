@@ -21,48 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.mvc.route.session;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
-import org.aquiver.mvc.route.Route;
+import java.util.List;
 
 /**
  * @author WangYi
- * @since 2020/6/27
+ * @since 2020/6/19
  */
-public class RequestContext {
-  private Route route;
-  private final Request request;
-  private final Response response;
-  private Throwable throwable;
+public interface Session {
+  long getCreationTime();
 
-  public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
-    this.request = new Request(httpRequest, context);
-    this.response = new Response();
-  }
+  String getId();
 
-  public Throwable throwable() {
-    return throwable;
-  }
+  String getIp();
 
-  public void throwable(Throwable throwable) {
-    this.throwable = throwable;
-  }
+  long getLastAccessedTime();
 
-  public Route route() {
-    return route;
-  }
+  Object getAttribute(String key);
 
-  public void route(Route route) {
-    this.route = route;
-  }
+  List<String> getAttributeNames();
 
-  public Request request() {
-    return request;
-  }
+  void setAttribute(String key, Object value);
 
-  public Response response() {
-    return response;
-  }
+  void removeAttribute(String key);
 }

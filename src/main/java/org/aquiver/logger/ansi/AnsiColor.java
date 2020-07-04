@@ -21,48 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
-
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
-import org.aquiver.mvc.route.Route;
+package org.aquiver.logger.ansi;
 
 /**
  * @author WangYi
- * @since 2020/6/27
+ * @version 1.0
+ * @since 2019/1/16
  */
-public class RequestContext {
-  private Route route;
-  private final Request request;
-  private final Response response;
-  private Throwable throwable;
+public enum AnsiColor {
+  RESET("\u001B[0m"),
+  BLACK("\u001B[30m"),
+  RED("\u001B[31m"),
+  GREEN("\u001B[32m"),
+  YELLOW("\u001B[33m"),
+  BLUE("\u001B[34m"),
+  PURPLE("\u001B[35m"),
+  CYAN("\u001B[36m"),
+  WHITE("\u001B[37m");
 
-  public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
-    this.request = new Request(httpRequest, context);
-    this.response = new Response();
+  private final String code;
+
+  AnsiColor(String code) {
+    this.code = code;
   }
 
-  public Throwable throwable() {
-    return throwable;
-  }
-
-  public void throwable(Throwable throwable) {
-    this.throwable = throwable;
-  }
-
-  public Route route() {
-    return route;
-  }
-
-  public void route(Route route) {
-    this.route = route;
-  }
-
-  public Request request() {
-    return request;
-  }
-
-  public Response response() {
-    return response;
+  @Override
+  public String toString() {
+    return this.code;
   }
 }

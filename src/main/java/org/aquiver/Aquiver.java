@@ -24,9 +24,9 @@
 package org.aquiver;
 
 import org.aquiver.exadvice.AdviceManager;
-import org.aquiver.resolver.ParamResolverManager;
-import org.aquiver.route.RouteManager;
-import org.aquiver.route.session.SessionManager;
+import org.aquiver.mvc.resolver.ParamResolverManager;
+import org.aquiver.mvc.route.RouteManager;
+import org.aquiver.mvc.route.session.SessionManager;
 import org.aquiver.server.NettyServer;
 import org.aquiver.server.Server;
 import org.aquiver.server.banner.BannerFont;

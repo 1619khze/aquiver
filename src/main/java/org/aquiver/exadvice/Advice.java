@@ -23,7 +23,7 @@
  */
 package org.aquiver.exadvice;
 
-import org.aquiver.route.RouteParam;
+import org.aquiver.mvc.route.RouteParam;
 import org.aquiver.toolkit.ReflectionUtils;
 
 import java.lang.invoke.MethodHandles;

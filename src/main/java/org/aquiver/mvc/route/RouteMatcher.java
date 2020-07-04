@@ -21,48 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.mvc.route;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
-import org.aquiver.mvc.route.Route;
+import org.aquiver.RequestContext;
 
 /**
  * @author WangYi
- * @since 2020/6/27
+ * @since 2020/5/26
  */
-public class RequestContext {
-  private Route route;
-  private final Request request;
-  private final Response response;
-  private Throwable throwable;
-
-  public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
-    this.request = new Request(httpRequest, context);
-    this.response = new Response();
-  }
-
-  public Throwable throwable() {
-    return throwable;
-  }
-
-  public void throwable(Throwable throwable) {
-    this.throwable = throwable;
-  }
-
-  public Route route() {
-    return route;
-  }
-
-  public void route(Route route) {
-    this.route = route;
-  }
-
-  public Request request() {
-    return request;
-  }
-
-  public Response response() {
-    return response;
-  }
+public interface RouteMatcher<R> {
+  R match(RequestContext context);
 }

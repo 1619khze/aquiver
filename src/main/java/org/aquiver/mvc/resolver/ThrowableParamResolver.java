@@ -21,48 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.mvc.resolver;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
-import org.aquiver.mvc.route.Route;
+import org.aquiver.RequestContext;
+import org.aquiver.mvc.route.RouteParam;
+import org.aquiver.mvc.route.RouteParamType;
+
+import java.lang.reflect.Parameter;
 
 /**
  * @author WangYi
- * @since 2020/6/27
+ * @since 2020/7/4
  */
-public class RequestContext {
-  private Route route;
-  private final Request request;
-  private final Response response;
-  private Throwable throwable;
-
-  public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
-    this.request = new Request(httpRequest, context);
-    this.response = new Response();
+public class ThrowableParamResolver implements ParamResolver {
+  @Override
+  public boolean support(Parameter parameter) {
+    try {
+      return parameter.getType().newInstance() instanceof Throwable;
+    } catch (InstantiationException | IllegalAccessException e) {
+      return false;
+    }
   }
 
-  public Throwable throwable() {
-    return throwable;
+  @Override
+  public RouteParam resolve(Parameter parameter, String paramName) {
+    RouteParam handlerParam = new RouteParam();
+    handlerParam.setDataType(parameter.getType());
+    handlerParam.setName("");
+    handlerParam.setRequired(true);
+    handlerParam.setType(RouteParamType.THROWABLE_CLASS);
+    return handlerParam;
   }
 
-  public void throwable(Throwable throwable) {
-    this.throwable = throwable;
+  @Override
+  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) {
+    return paramType.cast(requestContext.throwable());
   }
 
-  public Route route() {
-    return route;
-  }
-
-  public void route(Route route) {
-    this.route = route;
-  }
-
-  public Request request() {
-    return request;
-  }
-
-  public Response response() {
-    return response;
+  @Override
+  public RouteParamType dispenType() {
+    return RouteParamType.THROWABLE_CLASS;
   }
 }

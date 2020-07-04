@@ -21,48 +21,72 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.mvc.route;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
-import org.aquiver.mvc.route.Route;
+public enum RouteParamType {
 
-/**
- * @author WangYi
- * @since 2020/6/27
- */
-public class RequestContext {
-  private Route route;
-  private final Request request;
-  private final Response response;
-  private Throwable throwable;
+  /**
+   * Request Url Param
+   */
+  REQUEST_PARAM,
 
-  public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
-    this.request = new Request(httpRequest, context);
-    this.response = new Response();
-  }
+  /**
+   * Path variable
+   */
+  PATH_VARIABLE,
 
-  public Throwable throwable() {
-    return throwable;
-  }
+  /**
+   * Http Request
+   */
+  HTTP_REQUEST,
 
-  public void throwable(Throwable throwable) {
-    this.throwable = throwable;
-  }
+  /**
+   * Http Response
+   */
+  HTTP_RESPONSE,
 
-  public Route route() {
-    return route;
-  }
+  /**
+   * 请求体
+   */
+  REQUEST_BODY,
 
-  public void route(Route route) {
-    this.route = route;
-  }
+  /**
+   * X-WWW-FORM-URLENCODED
+   */
+  URL_ENCODED_FORM,
 
-  public Request request() {
-    return request;
-  }
+  /**
+   * Cookies
+   */
+  REQUEST_COOKIES,
 
-  public Response response() {
-    return response;
-  }
+  /**
+   * Http Request Header Param
+   */
+  REQUEST_HEADER,
+
+  /**
+   * Upload file
+   */
+  UPLOAD_FILE,
+
+  /**
+   * Multiple upload files
+   */
+  UPLOAD_FILES,
+
+  /**
+   * Request Session
+   */
+  REQUEST_SESSION,
+
+  /**
+   * File operations
+   */
+  MULTIPART_FILE,
+
+  /**
+   * Throwable
+   */
+  THROWABLE_CLASS
 }

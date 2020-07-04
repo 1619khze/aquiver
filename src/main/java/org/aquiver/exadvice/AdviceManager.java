@@ -24,8 +24,8 @@
 package org.aquiver.exadvice;
 
 import org.aquiver.RequestContext;
-import org.aquiver.resolver.ParamResolverManager;
-import org.aquiver.route.RouteParam;
+import org.aquiver.mvc.resolver.ParamResolverManager;
+import org.aquiver.mvc.route.RouteParam;
 import org.aquiver.toolkit.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -21,48 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.mvc.route.render;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
+import org.aquiver.RequestContext;
 import org.aquiver.mvc.route.Route;
+import org.aquiver.mvc.route.views.ViewType;
 
 /**
  * @author WangYi
- * @since 2020/6/27
+ * @since 2020/6/17
  */
-public class RequestContext {
-  private Route route;
-  private final Request request;
-  private final Response response;
-  private Throwable throwable;
+public interface ResponseRender {
+  /**
+   * Determine if View Type is supported
+   *
+   * @param viewType 需要支持的View Type
+   * @return Support
+   */
+  boolean support(ViewType viewType);
 
-  public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
-    this.request = new Request(httpRequest, context);
-    this.response = new Response();
-  }
-
-  public Throwable throwable() {
-    return throwable;
-  }
-
-  public void throwable(Throwable throwable) {
-    this.throwable = throwable;
-  }
-
-  public Route route() {
-    return route;
-  }
-
-  public void route(Route route) {
-    this.route = route;
-  }
-
-  public Request request() {
-    return request;
-  }
-
-  public Response response() {
-    return response;
-  }
+  /**
+   * Render view
+   *
+   * @param route Routing
+   * @param requestContext request context
+   */
+  void render(Route route, RequestContext requestContext);
 }

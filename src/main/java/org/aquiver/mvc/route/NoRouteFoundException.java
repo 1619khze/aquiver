@@ -21,48 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
-
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
-import org.aquiver.mvc.route.Route;
+package org.aquiver.mvc.route;
 
 /**
  * @author WangYi
- * @since 2020/6/27
+ * @since 2020/5/29
  */
-public class RequestContext {
-  private Route route;
-  private final Request request;
-  private final Response response;
-  private Throwable throwable;
-
-  public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
-    this.request = new Request(httpRequest, context);
-    this.response = new Response();
-  }
-
-  public Throwable throwable() {
-    return throwable;
-  }
-
-  public void throwable(Throwable throwable) {
-    this.throwable = throwable;
-  }
-
-  public Route route() {
-    return route;
-  }
-
-  public void route(Route route) {
-    this.route = route;
-  }
-
-  public Request request() {
-    return request;
-  }
-
-  public Response response() {
-    return response;
+public class NoRouteFoundException extends RuntimeException {
+  /**
+   * Constructor for NoRouteFoundException.
+   *
+   * @param httpMethod the HTTP method
+   * @param requestURL the HTTP request URL
+   */
+  public NoRouteFoundException(String httpMethod, String requestURL) {
+    super(String.format("No handler found for %s %s", httpMethod, requestURL));
   }
 }

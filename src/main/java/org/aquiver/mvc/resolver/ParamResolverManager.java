@@ -21,48 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.mvc.resolver;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
-import org.aquiver.mvc.route.Route;
+import org.aquiver.ParamAssignment;
+import org.aquiver.RequestContext;
+import org.aquiver.mvc.route.RouteParam;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author WangYi
- * @since 2020/6/27
+ * @since 2020/7/3
  */
-public class RequestContext {
-  private Route route;
-  private final Request request;
-  private final Response response;
-  private Throwable throwable;
-
-  public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
-    this.request = new Request(httpRequest, context);
-    this.response = new Response();
+public class ParamResolverManager extends AbstractParamResolver implements ParamAssignment {
+  @Override
+  public Object assignment(RouteParam handlerParam, RequestContext requestContext) throws Exception {
+    Object dispen = null;
+    for (ParamResolver paramResolver : getParamResolvers()) {
+      if (!paramResolver.dispenType().equals(handlerParam.getType())) {
+        continue;
+      }
+      dispen = paramResolver.dispen(handlerParam.getDataType(),
+              handlerParam.getName(), requestContext);
+    }
+    return dispen;
   }
 
-  public Throwable throwable() {
-    return throwable;
-  }
-
-  public void throwable(Throwable throwable) {
-    this.throwable = throwable;
-  }
-
-  public Route route() {
-    return route;
-  }
-
-  public void route(Route route) {
-    this.route = route;
-  }
-
-  public Request request() {
-    return request;
-  }
-
-  public Response response() {
-    return response;
+  public String[] getMethodParamName(final Method method) {
+    Parameter[] parameters = method.getParameters();
+    List<String> nameList = new ArrayList<>();
+    for (Parameter param : parameters) {
+      String name = param.getName();
+      nameList.add(name);
+    }
+    return nameList.toArray(new String[0]);
   }
 }

@@ -21,48 +21,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.mvc.route.views;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
-import org.aquiver.mvc.route.Route;
+import com.mitchellbosecke.pebble.PebbleEngine;
+import com.mitchellbosecke.pebble.template.PebbleTemplate;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.Map;
 
 /**
  * @author WangYi
- * @since 2020/6/27
+ * @since 2020/6/17
  */
-public class RequestContext {
-  private Route route;
-  private final Request request;
-  private final Response response;
-  private Throwable throwable;
+public class PebbleHTMLView implements HTMLView {
+  private final PebbleEngine engine;
 
-  public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
-    this.request = new Request(httpRequest, context);
-    this.response = new Response();
+  public PebbleHTMLView() {
+    this.engine = new PebbleEngine.Builder().build();
   }
 
-  public Throwable throwable() {
-    return throwable;
+  /**
+   * Get the support view type.
+   *
+   * @return ViewType
+   */
+  @Override
+  public ViewType viewType() {
+    return ViewType.HTML;
   }
 
-  public void throwable(Throwable throwable) {
-    this.throwable = throwable;
-  }
-
-  public Route route() {
-    return route;
-  }
-
-  public void route(Route route) {
-    this.route = route;
-  }
-
-  public Request request() {
-    return request;
-  }
-
-  public Response response() {
-    return response;
+  /**
+   * Get the content of the returned view
+   *
+   * @param htmlPath   html path
+   * @param viewParams view render params
+   * @return the content of the returned view
+   * @throws IOException io exception
+   */
+  @Override
+  public String renderView(String htmlPath, Map<String, Object> viewParams) throws IOException {
+    final PebbleTemplate compiledTemplate = engine.getTemplate(htmlPath);
+    final Writer writer = new StringWriter();
+    compiledTemplate.evaluate(writer, viewParams);
+    return writer.toString();
   }
 }

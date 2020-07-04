@@ -21,48 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.exadvice.handler;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
-import org.aquiver.mvc.route.Route;
+import io.netty.handler.codec.http.HttpResponseStatus;
 
 /**
  * @author WangYi
- * @since 2020/6/27
+ * @since 2020/5/29
  */
-public class RequestContext {
-  private Route route;
-  private final Request request;
-  private final Response response;
-  private Throwable throwable;
+interface HttpSupport {
+  /**
+   * Returns the {@link HttpResponseStatus} represented by the specified code.
+   * If the specified code is a standard HTTP status code, a cached instance
+   * will be returned.  Otherwise, a new instance will be returned.
+   */
+  boolean support(int code);
 
-  public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
-    this.request = new Request(httpRequest, context);
-    this.response = new Response();
-  }
-
-  public Throwable throwable() {
-    return throwable;
-  }
-
-  public void throwable(Throwable throwable) {
-    this.throwable = throwable;
-  }
-
-  public Route route() {
-    return route;
-  }
-
-  public void route(Route route) {
-    this.route = route;
-  }
-
-  public Request request() {
-    return request;
-  }
-
-  public Response response() {
-    return response;
-  }
+  /**
+   * Returns the {@link HttpResponseStatus} represented by the specified {@code code} and {@code reasonPhrase}.
+   * If the specified code is a standard HTTP status {@code code} and {@code reasonPhrase}, a cached instance
+   * will be returned. Otherwise, a new instance will be returned.
+   *
+   * @param code         The response code value.
+   * @param reasonPhrase The response code reason phrase.
+   * @return the {@link HttpResponseStatus} represented by the specified {@code code} and {@code reasonPhrase}.
+   */
+  boolean support(int code, String reasonPhrase);
 }

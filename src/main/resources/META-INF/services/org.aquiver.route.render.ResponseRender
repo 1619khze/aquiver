@@ -1,3 +1,0 @@
-org.aquiver.route.render.HTMLResponseRender
-org.aquiver.route.render.JSONResponseRender
-org.aquiver.route.render.TextResponseRender
