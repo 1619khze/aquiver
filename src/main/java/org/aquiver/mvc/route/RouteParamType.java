@@ -88,5 +88,10 @@ public enum RouteParamType {
   /**
    * Throwable
    */
-  THROWABLE_CLASS
+  THROWABLE_CLASS,
+
+  /**
+   * Request Context
+   */
+  REQUEST_CONTEXT
 }
