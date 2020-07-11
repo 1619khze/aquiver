@@ -28,6 +28,8 @@ import org.aquiver.mvc.annotation.*;
 import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.mvc.route.views.PebbleHTMLView;
 import org.aquiver.mvc.route.views.ViewType;
+import org.aquiver.websocket.WebSocket;
+import org.aquiver.websocket.WebSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +51,7 @@ public final class RouteManager {
   private static final Logger log = LoggerFactory.getLogger(RouteManager.class);
 
   private final Map<String, Route> routes = new ConcurrentHashMap<>(64);
+  private final Map<String, WebSocketChannel> webSockets = new ConcurrentHashMap<>(4);
   private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
 
@@ -60,7 +63,7 @@ public final class RouteManager {
     return this.readWriteLock.writeLock();
   }
 
-  protected boolean repeat(String url) {
+  protected boolean whetherRouteIsDuplicated(String url) {
     return this.routes.containsKey(url);
   }
 
@@ -153,11 +156,11 @@ public final class RouteManager {
     List<RouteParam> routeParams = resolverManager.invokeParamResolver(parameters, paramNames);
     route.setParams(routeParams);
 
-    if (this.repeat(completeUrl)) {
+    if (this.whetherRouteIsDuplicated(completeUrl)) {
       if (log.isDebugEnabled()) {
-        log.debug("Registered request processor URL is duplicated :{}", completeUrl);
+        log.debug("Registered request route URL is duplicated :{}", completeUrl);
       }
-      throw new RouteRepeatException("Registered request processor URL is duplicated : " + completeUrl);
+      throw new RouteRepeatException("Registered request route URL is duplicated : " + completeUrl);
     } else {
       this.addRoute(completeUrl, route);
     }
@@ -196,6 +199,54 @@ public final class RouteManager {
     } finally {
       this.readWriteLock.writeLock().unlock();
     }
+  }
+
+  /**
+   * add websocket route
+   *
+   * @param webSocketClass Classes annotated with @WebSocket annotation
+   *                       and implementing the WebSocketChannel interface
+   * @throws ReflectiveOperationException Exception superclass when
+   *                                      performing reflection operation
+   */
+  public void addWebSocket(Class<?> webSocketClass) throws ReflectiveOperationException {
+    for (Class<?> interfaceCls : webSocketClass.getInterfaces()) {
+      if (!interfaceCls.isAssignableFrom(WebSocketChannel.class)) {
+        continue;
+      }
+      WebSocket webSocket = webSocketClass.getAnnotation(WebSocket.class);
+      if (Objects.nonNull(webSocket)) {
+        continue;
+      }
+      String webSocketPath = webSocket.value();
+      if (webSocketPath.equals("")) {
+        webSocketPath = "/";
+      }
+      final WebSocketChannel webSocketChannel =
+              (WebSocketChannel) webSocketClass.newInstance();
+      this.addWebSocket(webSocketPath, webSocketChannel);
+    }
+  }
+
+  /**
+   * add websocket route
+   *
+   * @param webSocketPath    WebSocket url path
+   * @param webSocketChannel WebSocket abstract interface
+   */
+  public void addWebSocket(String webSocketPath, WebSocketChannel webSocketChannel) {
+    if (this.whetherRouteIsDuplicated(webSocketPath)
+            || this.webSockets.containsKey(webSocketPath)) {
+      if (log.isDebugEnabled()) {
+        log.debug("Registered websocket channel URL is duplicated :{}", webSocketPath);
+      }
+      throw new RouteRepeatException("Registered websocket channel URL is duplicated : " + webSocketPath);
+    }
+    this.webSockets.put(webSocketPath, webSocketChannel);
+  }
+
+  public Map<String, WebSocketChannel> getWebSockets() {
+    return webSockets;
   }
 
   protected String getMethodUrl(String baseUrl, String methodMappingUrl) {
