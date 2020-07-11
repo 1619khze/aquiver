@@ -45,7 +45,6 @@ import org.aquiver.mvc.route.RouteParam;
 import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvTask;
-import org.aquiver.websocket.WebSocketServerInitializer;
 import org.aquiver.toolkit.ReflectionUtils;
 import org.aquiver.toolkit.SystemUtils;
 import org.slf4j.Logger;
@@ -129,7 +128,6 @@ public class NettyServer implements Server {
     this.configLoadLog(aquiver, envName);
 
     this.initSsl();
-    this.initWebSocket();
     this.initComponent();
     this.startServer(startMs);
     this.watchEnv();
@@ -255,21 +253,6 @@ public class NettyServer implements Server {
 
     log.info("Current netty server ssl startup status: {}", ssl);
     log.info("A valid ssl connection configuration is not configured and is rolled back to the default connection state.");
-  }
-
-  /**
-   * init webSocket and bind netty childHandler
-   */
-  private void initWebSocket() {
-    final Boolean webSocket = environment.getBoolean(PATH_SERVER_WEBSOCKET, SERVER_WEBSOCKET);
-    log.info("Websocket current state: {}", webSocket);
-
-    if (webSocket) {
-      final String webSocketPath = environment.get(PATH_SERVER_WEBSOCKET_PATH, SERVER_WEBSOCKET_PATH);
-      this.serverBootstrap.childHandler(new WebSocketServerInitializer(webSocketPath));
-      log.info("Websocket path: {}", webSocketPath);
-      log.info("Websocket initialization configuration completed");
-    }
   }
 
   /**

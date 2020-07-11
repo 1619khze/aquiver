@@ -27,15 +27,14 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpContentCompressor;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 import io.netty.handler.codec.http.cors.CorsConfig;
 import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.cors.CorsHandler;
 import io.netty.handler.ssl.SslContext;
-import io.netty.handler.stream.ChunkedWriteHandler;
 import org.aquiver.Aquiver;
+import org.aquiver.websocket.WebSocketServerHandler;
 
 import java.util.Objects;
 
@@ -47,39 +46,41 @@ import static org.aquiver.Const.*;
  */
 public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
   private final SslContext sslCtx;
-  private boolean cors;
-  private boolean compressor;
-  private CorsConfig corsConfig;
+  private final Aquiver aquiver = Aquiver.of();
 
   NettyServerInitializer(SslContext sslCtx) {
     this.sslCtx = sslCtx;
-    final Aquiver aquiver = Aquiver.of();
-    final Boolean cors = aquiver.environment().getBoolean(PATH_SERVER_CORS, SERVER_CORS);
-    final Boolean gzip = aquiver.environment().getBoolean(PATH_SERVER_CONTENT_COMPRESSOR, SERVER_CONTENT_COMPRESSOR);
-    this.cors(cors).gzip(gzip);
-  }
-
-  private NettyServerInitializer cors(boolean cors) {
-    this.cors = cors;
-    this.corsConfig = CorsConfigBuilder.forAnyOrigin().allowNullOrigin().allowCredentials().build();
-    return this;
-  }
-
-  private NettyServerInitializer gzip(boolean compressor) {
-    this.compressor = compressor;
-    return this;
   }
 
   @Override
   protected void initChannel(SocketChannel ch) {
     ChannelPipeline channelPipeline = ch.pipeline();
-    if (Objects.nonNull(sslCtx)) channelPipeline.addLast(sslCtx.newHandler(ch.alloc()));
-    if (cors) channelPipeline.addLast(new CorsHandler(corsConfig));
-    if (compressor) channelPipeline.addLast(new HttpContentCompressor());
-    channelPipeline.addLast(new HttpRequestDecoder());
-    channelPipeline.addLast(new HttpResponseEncoder());
-    channelPipeline.addLast(new HttpObjectAggregator(65536));
-    channelPipeline.addLast(new ChunkedWriteHandler());
+    /** Determine whether SSL needs to be enabled based on whether the incoming SSLContext is null */
+    if (Objects.nonNull(sslCtx)) {
+      channelPipeline.addLast(sslCtx.newHandler(ch.alloc()));
+    }
+
+    final Boolean cors = aquiver.environment().getBoolean(PATH_SERVER_CORS, SERVER_CORS);
+    if (cors) {
+      CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin()
+              .allowNullOrigin().allowCredentials().build();
+
+      channelPipeline.addLast(new CorsHandler(corsConfig));
+    }
+
+    final Boolean gzip = aquiver.environment().getBoolean(PATH_SERVER_CONTENT_COMPRESSOR, SERVER_CONTENT_COMPRESSOR);
+    if (gzip) {
+      channelPipeline.addLast(new HttpContentCompressor());
+    }
+
+    channelPipeline.addLast(new HttpServerCodec());
+    channelPipeline.addLast(new HttpServerExpectContinueHandler());
+
+    /** init webSocket and bind netty childHandler */
+    final Boolean websocket = aquiver.environment().getBoolean(PATH_SERVER_WEBSOCKET, SERVER_WEBSOCKET);
+    if (websocket) {
+      channelPipeline.addLast(new WebSocketServerHandler());
+    }
     channelPipeline.addLast(new NettyServerHandler());
   }
 }
