@@ -39,7 +39,6 @@ public interface Const {
   Boolean SERVER_CONTENT_COMPRESSOR = false;
   Boolean SERVER_SESSION_ENABLE = true;
   Integer STRAP_LINE_SIZE = 42;
-  String SERVER_WEBSOCKET_PATH = "/websocket";
   String SERVER_ADDRESS = "localhost";
   String CRISPY_VERSION = "(v1.0.0 RELEASE)";
   String BANNER_TEXT = "aquiver";
@@ -53,7 +52,6 @@ public interface Const {
   String PATH_SERVER_ADDRESS = "server.address";
   String PATH_SERVER_CORS = "server.cors";
   String PATH_SERVER_WEBSOCKET = "server.websocket";
-  String PATH_SERVER_WEBSOCKET_PATH = "server.websocketPath";
   String PATH_SERVER_CONTENT_COMPRESSOR = "server.autoCompression";
   String PATH_SERVER_PROFILE = "server.profile";
   String PATH_SERVER_BOOT_CONFIG = "server.boot.conf";
