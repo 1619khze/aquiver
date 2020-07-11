@@ -24,6 +24,7 @@
 package org.aquiver.websocket;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import org.aquiver.mvc.route.session.Session;
 
 import java.util.*;
@@ -39,11 +40,18 @@ public class WebSocketSession implements Session {
   private final long creationTime;
   private final String id;
   private volatile long lastAccessedTime;
+  private final ChannelHandlerContext channelHandlerContext;
 
-  WebSocketSession(Channel channel, String id) {
-    this.channel = channel;
+  WebSocketSession(ChannelHandlerContext channelHandlerContext, String id) {
+    this.channelHandlerContext = channelHandlerContext;
+    this.channel = channelHandlerContext.channel();
     this.id = id;
     this.creationTime = System.currentTimeMillis();
+  }
+
+  @Override
+  public ChannelHandlerContext channelHandlerContext() {
+    return channelHandlerContext;
   }
 
   @Override

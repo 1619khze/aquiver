@@ -24,6 +24,7 @@
 package org.aquiver.mvc.route.session;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 
 import java.util.*;
 
@@ -40,11 +41,18 @@ public final class HttpSession implements Session {
   private volatile long lastAccessedTime;
   private final long creationTime;
   private final String id;
+  private final ChannelHandlerContext channelHandlerContext;
 
-  public HttpSession(Channel channel, String id) {
-    this.channel = channel;
+  public HttpSession(ChannelHandlerContext channelHandlerContext, String id) {
+    this.channelHandlerContext = channelHandlerContext;
+    this.channel = channelHandlerContext.channel();
     this.id = id;
     this.creationTime = System.currentTimeMillis();
+  }
+
+  @Override
+  public ChannelHandlerContext channelHandlerContext() {
+    return channelHandlerContext;
   }
 
   @Override

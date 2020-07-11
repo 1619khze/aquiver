@@ -47,9 +47,8 @@ public final class SessionManager {
     Objects.requireNonNull(request, "request can't be null");
     Session httpSession = getSession(request);
     if (Objects.isNull(httpSession)) {
-      Channel channel = request.channelHandlerContext().channel();
       long l = ThreadLocalRandom.current().nextLong();
-      httpSession = new HttpSession(channel,String.valueOf(l)
+      httpSession = new HttpSession(request.channelHandlerContext(),String.valueOf(l)
               .replaceFirst("-",""));
       this.sessionPool.put(httpSession.getId(), httpSession);
     }

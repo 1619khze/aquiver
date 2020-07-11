@@ -23,6 +23,8 @@
  */
 package org.aquiver.mvc.route.session;
 
+import io.netty.channel.ChannelHandlerContext;
+
 import java.util.List;
 
 /**
@@ -30,6 +32,8 @@ import java.util.List;
  * @since 2020/6/19
  */
 public interface Session {
+  ChannelHandlerContext channelHandlerContext();
+
   long getCreationTime();
 
   String getId();
