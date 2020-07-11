@@ -31,6 +31,7 @@ import org.aquiver.server.NettyServer;
 import org.aquiver.server.Server;
 import org.aquiver.server.banner.BannerFont;
 import org.aquiver.toolkit.PropertyUtils;
+import org.aquiver.websocket.WebSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -509,6 +510,21 @@ public final class Aquiver {
    */
   public String viewSuffix() {
     return viewSuffix;
+  }
+
+  /**
+   * Register websocket route
+   *
+   * @param path Websocket route path
+   * @param webSocketChannel WebSocket abstract interface
+   * @return
+   */
+  public Aquiver websocket(String path, WebSocketChannel webSocketChannel) {
+    requireNonNull(path, "WebSocket url path can't be null");
+    requireNonNull(webSocketChannel, "WebSocketChannel can't be null");
+
+    this.routeManager.addWebSocket(path, webSocketChannel);
+    return this;
   }
 
   /**
