@@ -35,7 +35,6 @@ public interface Const {
   Integer SERVER_SESSION_TIMEOUT = 1800;
   Boolean SERVER_SSL = false;
   Boolean SERVER_CORS = false;
-  Boolean SERVER_WEBSOCKET = false;
   Boolean SERVER_CONTENT_COMPRESSOR = false;
   Boolean SERVER_SESSION_ENABLE = true;
   Integer STRAP_LINE_SIZE = 42;
@@ -51,7 +50,6 @@ public interface Const {
   String PATH_SERVER_SSL = "server.ssl";
   String PATH_SERVER_ADDRESS = "server.address";
   String PATH_SERVER_CORS = "server.cors";
-  String PATH_SERVER_WEBSOCKET = "server.websocket";
   String PATH_SERVER_CONTENT_COMPRESSOR = "server.autoCompression";
   String PATH_SERVER_PROFILE = "server.profile";
   String PATH_SERVER_BOOT_CONFIG = "server.boot.conf";

@@ -60,7 +60,8 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
       channelPipeline.addLast(sslCtx.newHandler(ch.alloc()));
     }
 
-    final Boolean cors = aquiver.environment().getBoolean(PATH_SERVER_CORS, SERVER_CORS);
+    final Boolean cors = aquiver.environment()
+            .getBoolean(PATH_SERVER_CORS, SERVER_CORS);
     if (cors) {
       CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin()
               .allowNullOrigin().allowCredentials().build();
@@ -68,7 +69,8 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
       channelPipeline.addLast(new CorsHandler(corsConfig));
     }
 
-    final Boolean gzip = aquiver.environment().getBoolean(PATH_SERVER_CONTENT_COMPRESSOR, SERVER_CONTENT_COMPRESSOR);
+    final Boolean gzip = aquiver.environment()
+            .getBoolean(PATH_SERVER_CONTENT_COMPRESSOR, SERVER_CONTENT_COMPRESSOR);
     if (gzip) {
       channelPipeline.addLast(new HttpContentCompressor());
     }
@@ -77,10 +79,10 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
     channelPipeline.addLast(new HttpServerExpectContinueHandler());
 
     /** init webSocket and bind netty childHandler */
-    final Boolean websocket = aquiver.environment().getBoolean(PATH_SERVER_WEBSOCKET, SERVER_WEBSOCKET);
-    if (websocket) {
+    if (!aquiver.routeManager().getWebSockets().isEmpty()) {
       channelPipeline.addLast(new WebSocketServerHandler());
     }
+
     channelPipeline.addLast(new NettyServerHandler());
   }
 }
