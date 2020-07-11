@@ -47,6 +47,7 @@ import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvTask;
 import org.aquiver.toolkit.ReflectionUtils;
 import org.aquiver.toolkit.SystemUtils;
+import org.aquiver.websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,6 +170,7 @@ public class NettyServer implements Server {
     this.resolverManager.initialize(classSet);
     this.loadRoute(classSet);
     this.loadAdvice(classSet);
+    this.loadWebSocket(classSet);
   }
 
   /**
@@ -200,9 +202,9 @@ public class NettyServer implements Server {
   private void loadAdvice(Set<Class<?>> classSet) throws ReflectiveOperationException {
     for (Class<?> cls : classSet) {
       Method[] declaredMethods = cls.getDeclaredMethods();
-      if (!ReflectionUtils.isNormal(cls) ||
-              !cls.isAnnotationPresent(RouteAdvice.class) ||
-              declaredMethods.length == 0) {
+      if (!ReflectionUtils.isNormal(cls)
+              || !cls.isAnnotationPresent(RouteAdvice.class)
+              || declaredMethods.length == 0) {
         continue;
       }
       for (Method method : declaredMethods) {
@@ -219,6 +221,25 @@ public class NettyServer implements Server {
                 .methodName(method.getName()).params(routeParams).target(cls.newInstance());
         this.adviceManager.addAdvice(declaredAnnotation.value(), advice);
       }
+    }
+  }
+
+  /**
+   * Filter out the classes marked with Web Socket annotations
+   * from the scan result set and reduce them to the Web Socket
+   * list of the routing manager
+   *
+   * @param classSet Scanned result
+   * @throws ReflectiveOperationException Exception superclass when
+   *                                      performing reflection operation
+   */
+  private void loadWebSocket(Set<Class<?>> classSet) throws ReflectiveOperationException {
+    for (Class<?> cls : classSet) {
+      Method[] declaredMethods = cls.getDeclaredMethods();
+      if (!ReflectionUtils.isNormal(cls)
+              || !cls.isAnnotationPresent(WebSocket.class)
+              || declaredMethods.length == 0) continue;
+      this.routeManager.addWebSocket(cls);
     }
   }
 
