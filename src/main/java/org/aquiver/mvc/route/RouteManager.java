@@ -215,7 +215,7 @@ public final class RouteManager {
         continue;
       }
       WebSocket webSocket = webSocketClass.getAnnotation(WebSocket.class);
-      if (Objects.nonNull(webSocket)) {
+      if (Objects.isNull(webSocket)) {
         continue;
       }
       String webSocketPath = webSocket.value();
