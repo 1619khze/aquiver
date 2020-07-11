@@ -109,5 +109,4 @@ public class WebSocketSession implements Session {
   private synchronized void updateLastAccessedTime() {
     this.lastAccessedTime = System.currentTimeMillis();
   }
-
 }

@@ -23,36 +23,43 @@
  */
 package org.aquiver.websocket;
 
+import io.netty.channel.ChannelFutureListener;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+
 /**
  * @author WangYi
  * @since 2020/7/11
  */
-public interface WebSocketChannel {
-  void onConnect(WebSocketContext webSocketContext);
+public class WebSocketContext {
+  private final WebSocketSession session;
+  private final WebSocketChannel channel;
 
-  void onMessage(Message message);
-
-  void onClose(WebSocketContext webSocketContext);
-
-  void onError(Error error);
-
-  class Message {
-    public String text;
-    public WebSocketContext context;
-
-    Message(String text, WebSocketContext context) {
-      this.text = text;
-      this.context = context;
-    }
+  private WebSocketContext(WebSocketSession session, WebSocketChannel channel) {
+    this.session = session;
+    this.channel = channel;
   }
 
-  class Error {
-    public Throwable cause;
-    public WebSocketContext context;
+  public static WebSocketContext create(WebSocketSession webSocketSession, WebSocketChannel webSocketChannel) {
+    return new WebSocketContext(webSocketSession, webSocketChannel);
+  }
 
-    Error(Throwable cause,WebSocketContext context) {
-      this.cause = cause;
-      this.context = context;
-    }
+  public void message(String message) {
+    this.session.channelHandlerContext()
+            .writeAndFlush(new TextWebSocketFrame(message));
+  }
+
+  /**
+   * Allows the user to disconnect the websocket
+   */
+  public void disconnect() {
+    session.channelHandlerContext().disconnect().addListener(ChannelFutureListener.CLOSE);
+  }
+
+  public WebSocketSession session() {
+    return session;
+  }
+
+  public WebSocketChannel channel() {
+    return channel;
   }
 }
