@@ -30,7 +30,7 @@ import org.aquiver.mvc.route.session.SessionManager;
 import org.aquiver.server.NettyServer;
 import org.aquiver.server.Server;
 import org.aquiver.server.banner.BannerFont;
-import org.aquiver.toolkit.PropertyUtils;
+import org.aquiver.utils.PropertyUtils;
 import org.aquiver.websocket.WebSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

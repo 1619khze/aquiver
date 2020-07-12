@@ -25,7 +25,7 @@ package org.aquiver.mvc.route;
 
 import org.aquiver.mvc.annotation.Path;
 import org.aquiver.mvc.annotation.RestPath;
-import org.aquiver.toolkit.ReflectionUtils;
+import org.aquiver.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

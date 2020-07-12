@@ -25,7 +25,7 @@ package org.aquiver.logger.logback;
 
 import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import org.aquiver.toolkit.SystemUtils;
+import org.aquiver.utils.SystemUtils;
 
 public class ProcessIdClassicConverter extends ClassicConverter {
 

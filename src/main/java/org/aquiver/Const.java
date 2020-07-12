@@ -23,7 +23,7 @@
  */
 package org.aquiver;
 
-import org.aquiver.toolkit.PropertyUtils;
+import org.aquiver.utils.PropertyUtils;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

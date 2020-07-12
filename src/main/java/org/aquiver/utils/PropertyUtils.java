@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.toolkit;
+package org.aquiver.utils;
 
 import org.aquiver.Const;
 import org.slf4j.Logger;
