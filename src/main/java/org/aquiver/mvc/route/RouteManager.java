@@ -210,12 +210,12 @@ public final class RouteManager {
    *                                      performing reflection operation
    */
   public void addWebSocket(Class<?> webSocketClass) throws ReflectiveOperationException {
+    WebSocket webSocket = webSocketClass.getAnnotation(WebSocket.class);
+    if (Objects.isNull(webSocket)) {
+      return;
+    }
     for (Class<?> interfaceCls : webSocketClass.getInterfaces()) {
       if (!interfaceCls.isAssignableFrom(WebSocketChannel.class)) {
-        continue;
-      }
-      WebSocket webSocket = webSocketClass.getAnnotation(WebSocket.class);
-      if (Objects.isNull(webSocket)) {
         continue;
       }
       String webSocketPath = webSocket.value();
