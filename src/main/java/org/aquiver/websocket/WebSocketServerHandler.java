@@ -27,11 +27,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.ReferenceCountUtil;
 import org.aquiver.Aquiver;
+import org.aquiver.RequestContext;
 import org.aquiver.mvc.route.RouteManager;
+import org.aquiver.utils.StringUtils;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -46,6 +49,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
   private WebSocketChannel webSocketChannel;
   private WebSocketSession webSocketSession;
   private final RouteManager routeManager;
+  private RequestContext requestContext;
 
   public WebSocketServerHandler() {
     Aquiver of = Aquiver.of();
@@ -76,6 +80,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
    * @param req An HTTP request.
    */
   private void handleHttpRequest(ChannelHandlerContext ctx, HttpRequest req) {
+    DefaultFullHttpRequest defaultFullHttpRequest =
+            new DefaultFullHttpRequest(req.protocolVersion(), req.method(), req.uri());
+    this.requestContext = new RequestContext(defaultFullHttpRequest, ctx);
     if (isWebSocketRequest(req)) {
       final WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
               req.uri(), null, true);
@@ -99,7 +106,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
   }
 
   private WebSocketContext webSocketContext() {
-    return WebSocketContext.create(webSocketSession, webSocketChannel);
+    return WebSocketContext.create(requestContext, webSocketSession, webSocketChannel);
   }
 
   /**
@@ -125,12 +132,19 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
               new UnsupportedOperationException("Unsupported frame type [" + frame.getClass().getName() + "]");
 
       this.handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-      CompletableFuture.completedFuture(new WebSocketChannel.Error(throwable, webSocketContext()))
+
+      WebSocketContext webSocketContext = webSocketContext();
+      webSocketContext.setError(new WebSocketContext.Error(throwable, webSocketContext()));
+      CompletableFuture.completedFuture(webSocketContext)
               .thenAcceptAsync(webSocketChannel::onError, ctx.executor());
       return;
     }
-    CompletableFuture.completedFuture(new WebSocketChannel.Message(((TextWebSocketFrame) frame)
-            .text(), webSocketContext())).thenAcceptAsync(webSocketChannel::onMessage, ctx.executor());
+    WebSocketContext webSocketContext = webSocketContext();
+    webSocketContext.setMessage(new WebSocketContext
+            .Message(((TextWebSocketFrame) frame).text(), webSocketContext()));
+
+    CompletableFuture.completedFuture(webSocketContext)
+            .thenAcceptAsync(webSocketChannel::onMessage, ctx.executor());
   }
 
   /**
@@ -140,8 +154,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
    * @return Is it websocket request
    */
   private boolean isWebSocketRequest(HttpRequest req) {
+    String uri = StringUtils.substringBefore(req.uri(), "?");
     return Objects.nonNull(req)
-            && Objects.nonNull((this.webSocketChannel = this.routeManager.getWebSockets().get(req.uri())))
+            && Objects.nonNull((this.webSocketChannel = this.routeManager.getWebSockets().get(uri)))
             && req.decoderResult().isSuccess()
             && "websocket".equals(req.headers().get("Upgrade"));
   }
@@ -155,7 +170,9 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
   @Override
   public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) {
     if (null != webSocketSession && null != webSocketChannel) {
-      CompletableFuture.completedFuture(new WebSocketChannel.Error(cause, webSocketContext()))
+      WebSocketContext webSocketContext = webSocketContext();
+      webSocketContext.setError(new WebSocketContext.Error(cause, webSocketContext()));
+      CompletableFuture.completedFuture(webSocketContext)
               .thenAcceptAsync(webSocketChannel::onError, ctx.executor());
     }
     ctx.close();

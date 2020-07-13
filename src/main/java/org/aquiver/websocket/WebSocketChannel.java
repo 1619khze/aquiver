@@ -30,29 +30,9 @@ package org.aquiver.websocket;
 public interface WebSocketChannel {
   void onConnect(WebSocketContext webSocketContext);
 
-  void onMessage(Message message);
+  void onMessage(WebSocketContext webSocketContext);
 
   void onClose(WebSocketContext webSocketContext);
 
-  void onError(Error error);
-
-  class Message {
-    public String text;
-    public WebSocketContext context;
-
-    Message(String text, WebSocketContext context) {
-      this.text = text;
-      this.context = context;
-    }
-  }
-
-  class Error {
-    public Throwable cause;
-    public WebSocketContext context;
-
-    Error(Throwable cause,WebSocketContext context) {
-      this.cause = cause;
-      this.context = context;
-    }
-  }
+  void onError(WebSocketContext webSocketContext);
 }
