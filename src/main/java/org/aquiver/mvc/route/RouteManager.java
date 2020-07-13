@@ -23,13 +23,13 @@
  */
 package org.aquiver.mvc.route;
 
-import org.aquiver.Aquiver;
 import org.aquiver.mvc.annotation.*;
 import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.mvc.route.views.PebbleHTMLView;
 import org.aquiver.mvc.route.views.ViewType;
 import org.aquiver.websocket.WebSocket;
 import org.aquiver.websocket.WebSocketChannel;
+import org.aquiver.websocket.WebSocketWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +37,7 @@ import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -54,6 +55,11 @@ public final class RouteManager {
   private final Map<String, WebSocketChannel> webSockets = new ConcurrentHashMap<>(4);
   private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
+  private ParamResolverManager resolverManager;
+
+  public void setResolverManager(ParamResolverManager resolverManager) {
+    this.resolverManager = resolverManager;
+  }
 
   protected ReentrantReadWriteLock.ReadLock readLock() {
     return this.readWriteLock.readLock();
@@ -76,6 +82,20 @@ public final class RouteManager {
     }
   }
 
+  /**
+   * Get WebSocket Route Map
+   *
+   * @return WebSocket Route Map
+   */
+  public Map<String, WebSocketChannel> getWebSockets() {
+    return webSockets;
+  }
+
+  /**
+   * Get Route Map
+   *
+   * @return Route Map
+   */
   public Map<String, Route> getRoutes() {
     readLock().lock();
     try {
@@ -147,9 +167,8 @@ public final class RouteManager {
     if (completeUrl.trim().isEmpty()) {
       return;
     }
-    Route route = builderRoute(clazz, method, pathMethod, completeUrl);
+    Route route = createRoute(clazz, method, pathMethod, completeUrl);
 
-    ParamResolverManager resolverManager = Aquiver.of().resolverManager();
     Parameter[] parameters = method.getParameters();
     String[] paramNames = resolverManager.getMethodParamName(method);
 
@@ -166,7 +185,16 @@ public final class RouteManager {
     }
   }
 
-  private Route builderRoute(Class<?> clazz, Method method, PathMethod pathMethod, String completeUrl) {
+  /**
+   * Create route
+   *
+   * @param clazz       Route class
+   * @param method      Route method
+   * @param pathMethod  Route root path
+   * @param completeUrl Complete route path
+   * @return Route
+   */
+  private Route createRoute(Class<?> clazz, Method method, PathMethod pathMethod, String completeUrl) {
     Route route = Route.of(completeUrl, clazz, method.getName(), pathMethod);
 
     boolean isAllJsonResponse = Objects.isNull(clazz.getAnnotation(RestPath.class));
@@ -214,18 +242,30 @@ public final class RouteManager {
     if (Objects.isNull(webSocket)) {
       return;
     }
+    String webSocketPath = webSocket.value();
+    if (webSocketPath.equals("")) {
+      webSocketPath = "/";
+    }
+
     for (Class<?> interfaceCls : webSocketClass.getInterfaces()) {
       if (!interfaceCls.isAssignableFrom(WebSocketChannel.class)) {
         continue;
-      }
-      String webSocketPath = webSocket.value();
-      if (webSocketPath.equals("")) {
-        webSocketPath = "/";
       }
       final WebSocketChannel webSocketChannel =
               (WebSocketChannel) webSocketClass.newInstance();
       this.addWebSocket(webSocketPath, webSocketChannel);
     }
+    this.addWebSocket(webSocketPath, webSocketClass);
+  }
+
+  private void addWebSocket(String webSocketPath, Class<?> webSocketClass) {
+    List<Class<?>> classes = Arrays.asList(webSocketClass.getInterfaces());
+    if (classes.contains(WebSocketChannel.class)) {
+      return;
+    }
+    final WebSocketWrapper wrapper = new WebSocketWrapper(resolverManager);
+    wrapper.initialize(webSocketClass);
+    this.addWebSocket(webSocketPath, wrapper);
   }
 
   /**
@@ -245,10 +285,13 @@ public final class RouteManager {
     this.webSockets.put(webSocketPath, webSocketChannel);
   }
 
-  public Map<String, WebSocketChannel> getWebSockets() {
-    return webSockets;
-  }
-
+  /**
+   * Get the complete mapped address
+   *
+   * @param baseUrl          The address of @Path or @RestPath on the class
+   * @param methodMappingUrl Annotated address on method
+   * @return complete mapped address
+   */
   protected String getMethodUrl(String baseUrl, String methodMappingUrl) {
     StringBuilder url = new StringBuilder(256);
     url.append((baseUrl == null || baseUrl.trim().isEmpty()) ? "" : baseUrl.trim());

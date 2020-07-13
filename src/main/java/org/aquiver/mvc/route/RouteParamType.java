@@ -93,5 +93,10 @@ public enum RouteParamType {
   /**
    * Request Context
    */
-  REQUEST_CONTEXT
+  REQUEST_CONTEXT,
+
+  /**
+   * WebSocket Context
+   */
+  WEBSOCKET_CONTEXT
 }

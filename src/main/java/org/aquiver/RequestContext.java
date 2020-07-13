@@ -26,6 +26,7 @@ package org.aquiver;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import org.aquiver.mvc.route.Route;
+import org.aquiver.websocket.WebSocketContext;
 
 /**
  * @author WangYi
@@ -36,10 +37,19 @@ public class RequestContext {
   private final Request request;
   private final Response response;
   private Throwable throwable;
+  private WebSocketContext webSocketContext;
 
   public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
     this.request = new Request(httpRequest, context);
     this.response = new Response();
+  }
+
+  public void webSocketContext(WebSocketContext webSocketContext) {
+    this.webSocketContext = webSocketContext;
+  }
+
+  public WebSocketContext webSocketContext() {
+    return webSocketContext;
   }
 
   public Throwable throwable() {
