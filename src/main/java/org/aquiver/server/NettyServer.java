@@ -168,6 +168,7 @@ public class NettyServer implements Server {
       return;
     }
     this.resolverManager.initialize(classSet);
+    this.routeManager.setResolverManager(resolverManager);
     this.loadRoute(classSet);
     this.loadAdvice(classSet);
     this.loadWebSocket(classSet);
