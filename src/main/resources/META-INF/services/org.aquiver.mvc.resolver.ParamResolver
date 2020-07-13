@@ -9,3 +9,4 @@ org.aquiver.mvc.resolver.SessionParamResolver
 org.aquiver.mvc.resolver.MultipartFileParamResolver
 org.aquiver.mvc.resolver.ThrowableParamResolver
 org.aquiver.mvc.resolver.RequestContextParamResolver
+org.aquiver.mvc.resolver.WebSocketContextParamResolver
