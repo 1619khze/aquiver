@@ -21,37 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.application.mvc.route;
+package example.advice;
 
-import org.junit.Test;
-
-import java.util.Arrays;
+import org.aquiver.mvc.annotation.advice.ExceptionHandler;
+import org.aquiver.mvc.annotation.advice.RouteAdvice;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author WangYi
- * @since 2020/6/24
+ * @since 2020/7/1
  */
-public class RouteTrie {
+@RouteAdvice
+public class NullAdvice {
+  private static final Logger log = LoggerFactory.getLogger(NullAdvice.class);
 
-  @Test
-  public void test() {
-    String path = "/home/:name/path/:path";
-    String[] splitPath = path.split("/");
-    String[] parts = new String[splitPath.length];
-    for (int i = 0; i < splitPath.length; i++) {
-      if (!splitPath[i].equals("")) {
-        parts[i] = splitPath[i];
-      }
-    }
-    parts = Arrays.stream(parts)
-            .filter(s -> (s != null && s.length() > 0))
-            .toArray(String[]::new);
-    System.out.println(Arrays.toString(parts));
-  }
-
-  @Test
-  public void tes() {
-    NullPointerException nullPointerException = new NullPointerException("a");
-    System.out.println(nullPointerException instanceof Throwable);
+  @ExceptionHandler(NullPointerException.class)
+  public String nullExceptionHandler(NullPointerException exception) {
+    log.info("nullExceptionHandler...");
+    return exception.getMessage();
   }
 }

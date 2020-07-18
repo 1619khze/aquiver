@@ -21,23 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.application.controller;
+package example.route;
 
-import org.application.bean.User;
+import example.bean.User;
+import io.netty.channel.ChannelHandlerContext;
+import org.aquiver.ModelAndView;
+import org.aquiver.RequestContext;
 import org.aquiver.mvc.annotation.*;
 import org.aquiver.mvc.annotation.bind.*;
 import org.aquiver.mvc.route.multipart.MultipartFile;
+import org.aquiver.mvc.route.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-@RestPath
 @Path(value = "/controller")
-public class ApplicationController {
+public class ApiRoute {
 
-  private static final Logger log = LoggerFactory.getLogger(ApplicationController.class);
+  private static final Logger log = LoggerFactory.getLogger(ApiRoute.class);
 
   @Path(value = "/requestParam", method = PathMethod.GET)
   public String requestParam(@Param String name) {
@@ -82,33 +87,88 @@ public class ApplicationController {
     return "post body:" + user;
   }
 
+  @View
+  @GET(value = "/getHtml")
+  public String getHtml() {
+    return "/index.html";
+  }
+
+  @View
   @GET(value = "/get")
   public String get() {
-    return "controller/get";
+    return "/index";
+  }
+
+  @View
+  @GET(value = "/modelAndView")
+  public ModelAndView modelAndView() {
+    ModelAndView modelAndView = new ModelAndView();
+
+    Map<String, Object> paramMap = new HashMap<>();
+    paramMap.put("name", "Mitchell");
+
+    modelAndView.htmlPath("/index.html");
+    modelAndView.params(paramMap);
+    return modelAndView;
+  }
+
+  @GET(value = "/void")
+  public void testVoid() {
+    log.info("void test");
+  }
+
+  @GET(value = "/redirectaaaa")
+  public String redirect() {
+    return "redirect:/http://www.baidu.com";
+  }
+
+
+  @GET(value = "/session")
+  public void session(Session session) {
+    String id = session.getId();
+    System.out.println(id);
+    session.setAttribute("loginName", "WangYi");
+  }
+
+  @GET(value = "/session2")
+  public void session2(Session session) {
+    Object loginName = session.getAttribute("loginName");
+    System.out.println(loginName);
   }
 
   @POST(value = "/uploadFile")
-  public String uploadFile(@FileUpload MultipartFile file) {
+  public String uploadFile(@FileUpload MultipartFile file) throws IOException {
     log.info("fileName:{}", file.fileName());
-    try {
-      System.out.println(file.readFileContent());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    System.out.println(file.readFileContent());
     return "controller/uploadFile";
   }
 
   @POST(value = "/uploadFiles")
-  public String uploadFileS(@MultiFileUpload List<MultipartFile> files) {
+  public void uploadFileS(@MultiFileUpload List<MultipartFile> files) throws IOException {
     log.info("file size:{}", files.size());
     for (MultipartFile multipartFile : files) {
       log.info("fileName:{}", multipartFile.fileName());
-      try {
-        System.out.println(multipartFile.readFileContent());
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+      System.out.println(multipartFile.readFileContent());
     }
-    return "controller/uploadFiles";
+  }
+
+  @GET(value = "/downloadFile")
+  public void downloadFile(MultipartFile multipartFile) {
+    multipartFile.download("C:\\Users\\ever\\Desktop\\aa.png");
+  }
+
+  @GET(value = "/downloadFilea")
+  public void downloadFilea(ChannelHandlerContext multipartFile) {
+    System.out.println(multipartFile);
+  }
+
+  @GET(value = "/exception")
+  public void exception() {
+    throw new NullPointerException("aaa");
+  }
+
+  @GET(value = "/rc")
+  public void requestContext(RequestContext requestContext) {
+    System.out.println(requestContext.request().uri());
   }
 }

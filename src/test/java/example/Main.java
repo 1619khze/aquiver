@@ -21,14 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.application;
+package example;
 
 import org.aquiver.Aquiver;
 
-public class Application {
+/**
+ * @author WangYi
+ * @since 2020/6/16
+ */
+public class Main {
   public static void main(String[] args) {
-    Aquiver.of().bind(9900)
-            .bannerText("aaa")
-            .start(Application.class, args);
+    Aquiver.of().bind(9999)
+            .start(Main.class, args);
   }
 }
