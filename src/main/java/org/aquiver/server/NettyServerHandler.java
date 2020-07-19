@@ -26,7 +26,10 @@ package org.aquiver.server;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpMessage;
+import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.concurrent.EventExecutor;
 import org.aquiver.Aquiver;
 import org.aquiver.RequestContext;
@@ -46,12 +49,13 @@ import java.util.concurrent.CompletableFuture;
  * @since 2020/5/26
  */
 @ChannelHandler.Sharable
-public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
+public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
 
   private final static String FAVICON_PATH = "/favicon.ico";
   private final RouteMatcher<RequestContext> matcher;
   private final ResponseRenderMatcher responseRenderMatcher;
+  private FullHttpRequest fullHttpRequest;
 
   public NettyServerHandler() {
     Aquiver aquiver = Aquiver.of();
@@ -64,7 +68,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
   @Override
   public boolean acceptInboundMessage(final Object msg) {
-    return msg instanceof FullHttpRequest;
+    return msg instanceof HttpMessage;
   }
 
   @Override
@@ -79,7 +83,16 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
   }
 
   @Override
-  protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest fullHttpRequest) {
+  protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
+    if (msg instanceof HttpRequest) {
+      HttpRequest httpRequest = (HttpRequest) msg;
+      this.fullHttpRequest = new DefaultFullHttpRequest(httpRequest.protocolVersion(),
+              httpRequest.method(), httpRequest.uri());
+    }
+    if (msg instanceof FullHttpRequest) {
+      this.fullHttpRequest = (FullHttpRequest) msg;
+    }
+
     if (FAVICON_PATH.equals(fullHttpRequest.uri())) {
       return;
     }
