@@ -27,11 +27,6 @@ import org.aquiver.ParamAssignment;
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.route.RouteParam;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author WangYi
  * @since 2020/7/3
@@ -48,15 +43,5 @@ public class ParamResolverManager extends AbstractParamResolver implements Param
               handlerParam.getName(), requestContext);
     }
     return dispen;
-  }
-
-  public String[] getMethodParamName(final Method method) {
-    Parameter[] parameters = method.getParameters();
-    List<String> nameList = new ArrayList<>();
-    for (Parameter param : parameters) {
-      String name = param.getName();
-      nameList.add(name);
-    }
-    return nameList.toArray(new String[0]);
   }
 }

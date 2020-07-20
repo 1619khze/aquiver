@@ -29,6 +29,8 @@ import org.aquiver.mvc.route.RouteParam;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class ReflectionUtils {
@@ -66,5 +68,15 @@ public final class ReflectionUtils {
   public static Method getInvokeMethod(Class<?> refClass, String method,
                                        Class<?>[] paramTypes) throws NoSuchMethodException {
     return refClass.getMethod(method, paramTypes);
+  }
+
+  public static String[] getMethodParamName(Method method) {
+    Parameter[] parameters = method.getParameters();
+    List<String> nameList = new ArrayList<>();
+    for (Parameter param : parameters) {
+      String name = param.getName();
+      nameList.add(name);
+    }
+    return nameList.toArray(new String[0]);
   }
 }
