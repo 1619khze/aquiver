@@ -23,7 +23,7 @@
  */
 package org.aquiver.mvc.route;
 
-import org.aquiver.mvc.annotation.PathMethod;
+import org.aquiver.mvc.annotation.HttpMethod;
 import org.aquiver.mvc.route.views.HTMLView;
 import org.aquiver.mvc.route.views.ViewType;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ public class Route {
   private Class<?> clazz;
   private String method;
   private Object bean;
-  private PathMethod pathMethod;
+  private HttpMethod httpMethod;
   private Object[] paramValues;
   private Class<?>[] paramTypes;
   private Object invokeResult;
@@ -50,20 +50,20 @@ public class Route {
 
   private List<RouteParam> params = new ArrayList<>();
 
-  private Route(String url, Class<?> clazz, Object bean, String method, PathMethod pathMethod) {
+  private Route(String url, Class<?> clazz, Object bean, String method, HttpMethod httpMethod) {
     this.url = url;
     this.clazz = clazz;
     this.method = method;
-    this.pathMethod = pathMethod;
+    this.httpMethod = httpMethod;
     this.bean = bean;
   }
 
-  public static Route of(String url, Class<?> clazz, Object bean, String method, PathMethod pathMethod) {
+  public static Route of(String url, Class<?> clazz, Object bean, String method, HttpMethod httpMethod) {
     Objects.requireNonNull(url, "url must not be null");
     Objects.requireNonNull(clazz, "clazz must not be null");
     Objects.requireNonNull(method, "method must not be null");
-    Objects.requireNonNull(pathMethod, "pathMethod must not be null");
-    return new Route(url, clazz, bean, method, pathMethod);
+    Objects.requireNonNull(httpMethod, "pathMethod must not be null");
+    return new Route(url, clazz, bean, method, httpMethod);
   }
 
   public String getUrl() {
@@ -90,12 +90,12 @@ public class Route {
     this.method = method;
   }
 
-  public PathMethod getPathMethod() {
-    return pathMethod;
+  public HttpMethod getHttpMethod() {
+    return httpMethod;
   }
 
-  public void setPathMethod(PathMethod pathMethod) {
-    this.pathMethod = pathMethod;
+  public void setHttpMethod(HttpMethod httpMethod) {
+    this.httpMethod = httpMethod;
   }
 
   public Object getBean() {
@@ -161,7 +161,7 @@ public class Route {
             ", clazz=" + clazz +
             ", method='" + method + '\'' +
             ", bean=" + bean +
-            ", pathMethod=" + pathMethod +
+            ", pathMethod=" + httpMethod +
             ", paramValues=" + Arrays.toString(paramValues) +
             ", paramTypes=" + Arrays.toString(paramTypes) +
             ", invokeResult=" + invokeResult +

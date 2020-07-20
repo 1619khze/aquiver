@@ -24,7 +24,7 @@
 package org.aquiver;
 
 import org.aquiver.advice.AdviceManager;
-import org.aquiver.mvc.annotation.PathMethod;
+import org.aquiver.mvc.annotation.HttpMethod;
 import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.mvc.route.RouteManager;
 import org.aquiver.mvc.route.session.SessionManager;
@@ -544,7 +544,7 @@ public final class Aquiver {
    * @return this
    */
   public Aquiver get(String path, RequestHandler requestHandler) {
-    this.routeManager.addRoute(path, requestHandler, PathMethod.GET);
+    this.routeManager.addRoute(path, requestHandler, HttpMethod.GET);
     return this;
   }
 

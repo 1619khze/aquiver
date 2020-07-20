@@ -23,7 +23,7 @@
  */
 package org.aquiver.mvc.annotation;
 
-public enum PathMethod {
+public enum HttpMethod {
   GET,
   HEAD,
   POST,

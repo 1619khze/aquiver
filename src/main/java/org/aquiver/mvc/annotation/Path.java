@@ -31,5 +31,5 @@ import java.lang.annotation.*;
 public @interface Path {
   String value() default "";
 
-  PathMethod method() default PathMethod.GET;
+  HttpMethod method() default HttpMethod.GET;
 }

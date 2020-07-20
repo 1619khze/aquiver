@@ -32,7 +32,7 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Path(method = PathMethod.GET)
+@Path(method = HttpMethod.GET)
 public @interface GET {
   String value() default "";
 }

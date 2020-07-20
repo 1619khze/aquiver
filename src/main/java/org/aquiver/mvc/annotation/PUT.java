@@ -32,7 +32,7 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Path(method = PathMethod.PUT)
+@Path(method = HttpMethod.PUT)
 public @interface PUT {
   String value() default "";
 }

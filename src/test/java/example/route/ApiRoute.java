@@ -44,44 +44,44 @@ public class ApiRoute {
 
   private static final Logger log = LoggerFactory.getLogger(ApiRoute.class);
 
-  @Path(value = "/requestParam", method = PathMethod.GET)
+  @Path(value = "/requestParam", method = HttpMethod.GET)
   public String requestParam(@Param String name) {
     log.info("request param:" + name);
     return "requestParam:" + name;
   }
 
   @JSON
-  @Path(value = "/requestParamJson", method = PathMethod.GET)
+  @Path(value = "/requestParamJson", method = HttpMethod.GET)
   public User requestParamJson(@Param String name) {
     log.info("request param:" + name);
     return new User("1", 2, (short) 3);
   }
 
-  @Path(value = "/requestParamAlisa", method = PathMethod.GET)
+  @Path(value = "/requestParamAlisa", method = HttpMethod.GET)
   public String requestParamAlisa(@Param(value = "username") String name) {
     log.info("request param:" + name);
     return "requestParamAlisa:" + name;
   }
 
-  @Path(value = "/requestCookies", method = PathMethod.GET)
+  @Path(value = "/requestCookies", method = HttpMethod.GET)
   public String requestCookies(@Cookies String name) {
     log.info("request param:" + name);
     return "requestCookies:" + name;
   }
 
-  @Path(value = "/requestHeaders", method = PathMethod.GET)
+  @Path(value = "/requestHeaders", method = HttpMethod.GET)
   public String requestHeaders(@Header(value = "Accept") String name) {
     log.info("request param:" + name);
     return "requestHeaders:" + name;
   }
 
-  @Path(value = "/pathVariable/{name}/{code}", method = PathMethod.GET)
+  @Path(value = "/pathVariable/{name}/{code}", method = HttpMethod.GET)
   public String pathVariable(@PathVar String name, @PathVar String code) {
     log.info("request param:" + name + ":" + "request param:" + code);
     return "pathVariable:" + name + ":" + code;
   }
 
-  @Path(value = "/postBody", method = PathMethod.POST)
+  @Path(value = "/postBody", method = HttpMethod.POST)
   public String postBody(@Body User user) {
     log.info("post body param:" + user);
     return "post body:" + user;

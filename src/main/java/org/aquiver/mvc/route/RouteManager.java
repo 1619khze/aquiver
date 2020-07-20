@@ -131,11 +131,11 @@ public final class RouteManager {
     }
   }
 
-  public void addRoute(String path, RequestHandler handler, PathMethod pathMethod) {
+  public void addRoute(String path, RequestHandler handler, HttpMethod httpMethod) {
     try {
       Class<? extends RequestHandler> ref = handler.getClass();
       Method handle = ref.getMethod("handle", RequestContext.class);
-      this.addRoute(RequestHandler.class, handler, path, handle, pathMethod);
+      this.addRoute(RequestHandler.class, handler, path, handle, httpMethod);
     } catch (NoSuchMethodException e) {
       log.error("There is no such method {}", "handle", e);
     }
@@ -160,7 +160,7 @@ public final class RouteManager {
         if (Objects.isNull(path) && Objects.isNull(restPath)) {
           continue;
         }
-        PathMethod pathMethod = path.method();
+        HttpMethod httpMethod = path.method();
         Method valueMethod = annotationType.getMethod("value");
         Object valueInvokeResult = lookup.unreflect(valueMethod).bindTo(annotation).invoke();
         if (!Objects.isNull(valueInvokeResult) && !valueInvokeResult.equals(routeUrl)) {
@@ -168,7 +168,7 @@ public final class RouteManager {
         }
         String completeUrl = this.getMethodUrl(url, routeUrl);
         Object bean = cls.newInstance();
-        this.addRoute(cls, bean, completeUrl, method, pathMethod);
+        this.addRoute(cls, bean, completeUrl, method, httpMethod);
       }
     }
   }
@@ -178,13 +178,13 @@ public final class RouteManager {
    *
    * @param clazz      route class
    * @param method     Mapping annotation annotation method
-   * @param pathMethod http method
+   * @param httpMethod http method
    */
-  public void addRoute(Class<?> clazz, Object bean, String completeUrl, Method method, PathMethod pathMethod) {
+  public void addRoute(Class<?> clazz, Object bean, String completeUrl, Method method, HttpMethod httpMethod) {
     if (completeUrl.trim().isEmpty()) {
       return;
     }
-    Route route = createRoute(clazz, bean, method, pathMethod, completeUrl);
+    Route route = createRoute(clazz, bean, method, httpMethod, completeUrl);
 
     Parameter[] parameters = method.getParameters();
     String[] paramNames = ReflectionUtils.getMethodParamName(method);
@@ -207,12 +207,12 @@ public final class RouteManager {
    *
    * @param clazz       Route class
    * @param method      Route method
-   * @param pathMethod  Route root path
+   * @param httpMethod  Route root path
    * @param completeUrl Complete route path
    * @return Route
    */
-  private Route createRoute(Class<?> clazz, Object bean, Method method, PathMethod pathMethod, String completeUrl) {
-    Route route = Route.of(completeUrl, clazz, bean, method.getName(), pathMethod);
+  private Route createRoute(Class<?> clazz, Object bean, Method method, HttpMethod httpMethod, String completeUrl) {
+    Route route = Route.of(completeUrl, clazz, bean, method.getName(), httpMethod);
 
     boolean isAllJsonResponse = Objects.isNull(clazz.getAnnotation(RestPath.class));
     boolean isJsonResponse = Objects.isNull(method.getAnnotation(JSON.class));
