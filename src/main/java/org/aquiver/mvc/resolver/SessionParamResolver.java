@@ -45,7 +45,7 @@ public class SessionParamResolver extends AbstractParamResolver implements Param
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("");
+    handlerParam.setName(paramName);
     handlerParam.setRequired(true);
     handlerParam.setType(RouteParamType.REQUEST_SESSION);
     return handlerParam;

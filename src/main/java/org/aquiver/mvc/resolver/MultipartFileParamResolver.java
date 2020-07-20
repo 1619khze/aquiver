@@ -45,7 +45,7 @@ public class MultipartFileParamResolver extends AbstractParamResolver implements
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("");
+    handlerParam.setName(paramName);
     handlerParam.setRequired(true);
     handlerParam.setType(RouteParamType.MULTIPART_FILE);
     return handlerParam;

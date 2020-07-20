@@ -94,29 +94,12 @@ public abstract class AbstractParamResolver {
     return Map.class.isAssignableFrom(cls);
   }
 
-  private void initialize() throws Exception {
+  public void initialize() throws Exception {
     ServiceLoader<ParamResolver> paramResolverLoad = ServiceLoader.load(ParamResolver.class);
     for (ParamResolver ser : paramResolverLoad) {
       ParamResolver paramResolver = ser.getClass().getDeclaredConstructor().newInstance();
       getParamResolvers().add(paramResolver);
     }
-  }
-
-  public void initialize(Set<Class<?>> classSet) throws Exception {
-    for (Class<?> cls : classSet) {
-      Class<?>[] interfaces = cls.getInterfaces();
-      if (interfaces.length == 0) {
-        continue;
-      }
-      for (Class<?> interfaceCls : interfaces) {
-        if (!interfaceCls.equals(ParamResolver.class)) {
-          continue;
-        }
-        ParamResolver paramResolver = (ParamResolver) cls.getDeclaredConstructor().newInstance();
-        getParamResolvers().add(paramResolver);
-      }
-    }
-    this.initialize();
   }
 
   public List<RouteParam> invokeParamResolver(Parameter[] ps, String[] paramNames) {

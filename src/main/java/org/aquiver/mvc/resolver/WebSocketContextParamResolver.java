@@ -44,7 +44,7 @@ public class WebSocketContextParamResolver implements ParamResolver{
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("");
+    handlerParam.setName(paramName);
     handlerParam.setRequired(true);
     handlerParam.setType(RouteParamType.WEBSOCKET_CONTEXT);
     return handlerParam;
