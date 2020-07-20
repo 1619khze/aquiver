@@ -52,7 +52,8 @@ public class MultipartFileParamResolver extends AbstractParamResolver implements
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) {
+  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext resolverContext) {
+    RequestContext requestContext = resolverContext.requestContext();
     final MultipartFile multipartFile = new MultipartFile();
     multipartFile.channelContext(requestContext.request().channelHandlerContext());
     return paramType.cast(multipartFile);

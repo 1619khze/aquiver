@@ -54,8 +54,9 @@ public class ThrowableParamResolver implements ParamResolver {
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) {
-    return paramType.cast(requestContext.throwable());
+  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
+    Throwable throwable = paramResolverContext.throwable();
+    return paramType.cast(throwable);
   }
 
   @Override

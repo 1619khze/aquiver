@@ -23,7 +23,6 @@
  */
 package org.aquiver.mvc.resolver;
 
-import org.aquiver.RequestContext;
 import org.aquiver.mvc.route.RouteParam;
 import org.aquiver.mvc.route.RouteParamType;
 import org.aquiver.websocket.WebSocketContext;
@@ -34,7 +33,7 @@ import java.lang.reflect.Parameter;
  * @author WangYi
  * @since 2020/7/13
  */
-public class WebSocketContextParamResolver implements ParamResolver{
+public class WebSocketContextParamResolver implements ParamResolver {
   @Override
   public boolean support(Parameter parameter) {
     return parameter.getType().isAssignableFrom(WebSocketContext.class);
@@ -51,8 +50,8 @@ public class WebSocketContextParamResolver implements ParamResolver{
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) {
-    return requestContext.webSocketContext();
+  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
+    return paramResolverContext.webSocketContext();
   }
 
   @Override

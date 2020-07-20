@@ -52,7 +52,8 @@ public class SessionParamResolver extends AbstractParamResolver implements Param
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) {
+  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
+    RequestContext requestContext = paramResolverContext.requestContext();
     return paramType.cast(requestContext.request().session());
   }
 

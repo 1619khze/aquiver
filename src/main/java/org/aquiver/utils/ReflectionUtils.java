@@ -24,6 +24,7 @@
 package org.aquiver.utils;
 
 import org.aquiver.RequestContext;
+import org.aquiver.mvc.resolver.ParamResolverContext;
 import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.mvc.route.RouteParam;
 
@@ -54,7 +55,7 @@ public final class ReflectionUtils {
     return !isAbstract(clazz) && !isInterface(clazz) && !isEnum(clazz);
   }
 
-  public static void invokeParam(RequestContext context, List<RouteParam> routeParams,
+  public static void invokeParam(ParamResolverContext context, List<RouteParam> routeParams,
                                  Object[] paramValues, Class<?>[] paramTypes,
                                  ParamResolverManager resolverManager) throws Exception {
     for (int i = 0; i < paramValues.length; i++) {

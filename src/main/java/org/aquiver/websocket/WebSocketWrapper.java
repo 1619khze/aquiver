@@ -24,6 +24,7 @@
 package org.aquiver.websocket;
 
 import org.aquiver.RequestContext;
+import org.aquiver.mvc.resolver.ParamResolverContext;
 import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.mvc.route.RouteParam;
 import org.aquiver.utils.ReflectionUtils;
@@ -133,9 +134,10 @@ public class WebSocketWrapper implements WebSocketChannel {
     Class<?>[] paramTypes = new Class[params.size()];
     try {
       final RequestContext requestContext = webSocketContext.requestContext();
-      requestContext.webSocketContext(webSocketContext);
-
-      ReflectionUtils.invokeParam(requestContext,
+      final ParamResolverContext context = new ParamResolverContext();
+      context.requestContext(requestContext);
+      context.webSocketContext(webSocketContext);
+      ReflectionUtils.invokeParam(context,
               params, paramValues, paramTypes, resolver);
 
       Method method = ReflectionUtils.getInvokeMethod(webSocketClass,

@@ -49,7 +49,8 @@ public class RequestParamParamResolver extends AbstractParamResolver implements 
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) {
+  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
+    RequestContext requestContext = paramResolverContext.requestContext();
     if (isMap(paramType)) {
       return requestContext.request().queryStrings();
     }

@@ -36,28 +36,10 @@ public class RequestContext {
   private Route route;
   private final Request request;
   private final Response response;
-  private Throwable throwable;
-  private WebSocketContext webSocketContext;
 
   public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
     this.request = new Request(httpRequest, context);
     this.response = new Response();
-  }
-
-  public void webSocketContext(WebSocketContext webSocketContext) {
-    this.webSocketContext = webSocketContext;
-  }
-
-  public WebSocketContext webSocketContext() {
-    return webSocketContext;
-  }
-
-  public Throwable throwable() {
-    return throwable;
-  }
-
-  public void throwable(Throwable throwable) {
-    this.throwable = throwable;
   }
 
   public Route route() {

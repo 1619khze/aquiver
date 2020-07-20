@@ -51,7 +51,8 @@ public class PathVariableParamResolver extends AbstractParamResolver implements 
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) {
+  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
+    RequestContext requestContext = paramResolverContext.requestContext();
     return paramType.cast(
             PathVarMatcher.getPathVariable(requestContext.request().uri(),
                     requestContext.route().getUrl(), paramName));

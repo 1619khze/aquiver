@@ -49,7 +49,8 @@ public class RequestHeadersParamResolver extends AbstractParamResolver implement
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) {
+  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
+    RequestContext requestContext = paramResolverContext.requestContext();
     if (isMap(paramType)) {
       return requestContext.request().headers();
     }

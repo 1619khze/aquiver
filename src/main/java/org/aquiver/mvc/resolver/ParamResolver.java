@@ -23,7 +23,6 @@
  */
 package org.aquiver.mvc.resolver;
 
-import org.aquiver.RequestContext;
 import org.aquiver.mvc.route.RouteParam;
 import org.aquiver.mvc.route.RouteParamType;
 
@@ -51,12 +50,12 @@ public interface ParamResolver {
    * Assign parameters in advance according to the amount
    * of methods called by reflection
    *
-   * @param paramType param type class
-   * @param paramName param name
-   * @param requestContext request context
+   * @param paramType       param type class
+   * @param paramName       param name
+   * @param resolverContext resolver context
    * @return Assigned parameters
    */
-  Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) throws Exception;
+  Object dispen(Class<?> paramType, String paramName, ParamResolverContext resolverContext) throws Exception;
 
   /**
    * Get the parameter type to be assigned

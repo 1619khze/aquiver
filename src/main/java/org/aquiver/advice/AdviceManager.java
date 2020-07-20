@@ -24,6 +24,7 @@
 package org.aquiver.advice;
 
 import org.aquiver.RequestContext;
+import org.aquiver.mvc.resolver.ParamResolverContext;
 import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.mvc.route.RouteParam;
 import org.aquiver.utils.ReflectionUtils;
@@ -48,9 +49,10 @@ public class AdviceManager {
     this.adviceMap.put(throwableCls, advice);
   }
 
-  public Object handlerException(Throwable throwable, ParamResolverManager resolverManager, RequestContext context) {
+  public Object handlerException(Throwable throwable, ParamResolverManager resolverManager, ParamResolverContext context) {
     if (adviceMap.isEmpty()) {
-      context.request().channelHandlerContext().channel().close();
+      RequestContext requestContext = context.requestContext();
+      requestContext.request().channelHandlerContext().channel().close();
     }
     if (!adviceMap.containsKey(throwable.getClass())) {
       return null;

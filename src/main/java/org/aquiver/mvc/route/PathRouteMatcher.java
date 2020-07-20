@@ -29,6 +29,7 @@ import org.aquiver.Async;
 import org.aquiver.RequestContext;
 import org.aquiver.advice.AdviceManager;
 import org.aquiver.advice.handler.HttpExceptionHandler;
+import org.aquiver.mvc.resolver.ParamResolverContext;
 import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.server.StaticFileServerHandler;
 import org.aquiver.utils.ReflectionUtils;
@@ -55,6 +56,7 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
   private final AdviceManager adviceManager;
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
   private final ParamResolverManager resolverManager;
+  private final ParamResolverContext paramResolverContext = new ParamResolverContext();
 
   public PathRouteMatcher(Map<String, Route> routeMap, AdviceManager adviceManager,
                           ParamResolverManager resolverManager) {
@@ -93,7 +95,8 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     Class<?>[] paramTypes = new Class[params.size()];
 
     try {
-      ReflectionUtils.invokeParam(context, route.getParams(),
+      this.paramResolverContext.requestContext(context);
+      ReflectionUtils.invokeParam(paramResolverContext, route.getParams(),
               paramValues, paramTypes, resolverManager);
     } catch (Exception e) {
       log.error("An exception occurred when obtaining invoke param");
@@ -119,9 +122,9 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
       return route;
     } catch (Throwable throwable) {
       log.error("An exception occurred when calling the mapping method", throwable);
-      context.throwable(throwable);
+      this.paramResolverContext.throwable(throwable);
       Object handlerExceptionResult = this.adviceManager
-              .handlerException(throwable, resolverManager, context);
+              .handlerException(throwable, resolverManager, paramResolverContext);
       if (Objects.nonNull(handlerExceptionResult)) {
         route.setInvokeResult(handlerExceptionResult);
       }
@@ -154,7 +157,7 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
       lookupPath = lookupPath.substring(0, paramStartIndex);
     }
 
-    if (lookupPath.equals("")){
+    if (lookupPath.equals("")) {
       lookupPath = "/";
     }
 

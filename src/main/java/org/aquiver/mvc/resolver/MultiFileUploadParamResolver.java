@@ -58,7 +58,8 @@ public class MultiFileUploadParamResolver extends AbstractParamResolver implemen
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) throws Exception {
+  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext resolverContext) throws Exception {
+    RequestContext requestContext = resolverContext.requestContext();
     Map<String, FileUpload> fileUploads = requestContext.request().fileUpload();
     List<MultipartFile> multipartFiles = new ArrayList<>();
     if (List.class.isAssignableFrom(paramType)) {

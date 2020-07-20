@@ -50,7 +50,8 @@ public class RequestCookiesParamResolver extends AbstractParamResolver implement
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, RequestContext requestContext) {
+  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
+    RequestContext requestContext = paramResolverContext.requestContext();
     Map<String, Object> cookies = requestContext.request().cookies();
     if (isMap(paramType)) {
       return cookies;

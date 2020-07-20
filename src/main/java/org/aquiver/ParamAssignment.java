@@ -23,6 +23,7 @@
  */
 package org.aquiver;
 
+import org.aquiver.mvc.resolver.ParamResolverContext;
 import org.aquiver.mvc.route.RouteParam;
 
 /**
@@ -31,5 +32,5 @@ import org.aquiver.mvc.route.RouteParam;
  */
 @FunctionalInterface
 public interface ParamAssignment {
-  Object assignment(RouteParam handlerParam, RequestContext requestContext) throws Exception;
+  Object assignment(RouteParam handlerParam, ParamResolverContext paramResolverContext) throws Exception;
 }
