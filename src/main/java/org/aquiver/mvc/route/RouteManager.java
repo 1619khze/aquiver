@@ -23,10 +23,13 @@
  */
 package org.aquiver.mvc.route;
 
+import org.aquiver.RequestContext;
+import org.aquiver.RequestHandler;
 import org.aquiver.mvc.annotation.*;
 import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.mvc.route.views.PebbleHTMLView;
 import org.aquiver.mvc.route.views.ViewType;
+import org.aquiver.utils.ReflectionUtils;
 import org.aquiver.websocket.WebSocket;
 import org.aquiver.websocket.WebSocketChannel;
 import org.aquiver.websocket.WebSocketWrapper;
@@ -110,16 +113,31 @@ public final class RouteManager {
    *
    * @param cls route class
    * @param url @Path value
-   * @throws Throwable reflection exception
    */
-  public void addRoute(Class<?> cls, String url) throws Throwable {
-    Method[] methods = cls.getMethods();
-    for (Method method : methods) {
-      Path methodPath = method.getAnnotation(Path.class);
-      if (!Objects.isNull(methodPath)) {
-        this.addRoute(cls, url, method, methodPath.value(), methodPath.method());
+  public void addRoute(Class<?> cls, String url) {
+    try {
+      Method[] methods = cls.getMethods();
+      for (Method method : methods) {
+        Path methodPath = method.getAnnotation(Path.class);
+        if (Objects.nonNull(methodPath)) {
+          String completeUrl = this.getMethodUrl(url, methodPath.value());
+          Object bean = cls.newInstance();
+          this.addRoute(cls, bean, completeUrl, method, methodPath.method());
+        }
+        addRoute(cls, url, method);
       }
-      addRoute(cls, url, method);
+    } catch (Throwable throwable) {
+      throwable.printStackTrace();
+    }
+  }
+
+  public void addRoute(String path, RequestHandler handler, PathMethod pathMethod) {
+    try {
+      Class<? extends RequestHandler> ref = handler.getClass();
+      Method handle = ref.getMethod("handle", RequestContext.class);
+      this.addRoute(RequestHandler.class, handler, path, handle, pathMethod);
+    } catch (NoSuchMethodException e) {
+      log.error("There is no such method {}", "handle", e);
     }
   }
 
@@ -148,7 +166,9 @@ public final class RouteManager {
         if (!Objects.isNull(valueInvokeResult) && !valueInvokeResult.equals(routeUrl)) {
           routeUrl = String.join(routeUrl, String.valueOf(valueInvokeResult));
         }
-        this.addRoute(cls, url, method, routeUrl, pathMethod);
+        String completeUrl = this.getMethodUrl(url, routeUrl);
+        Object bean = cls.newInstance();
+        this.addRoute(cls, bean, completeUrl, method, pathMethod);
       }
     }
   }
@@ -157,20 +177,17 @@ public final class RouteManager {
    * add route
    *
    * @param clazz      route class
-   * @param baseUrl    url
    * @param method     Mapping annotation annotation method
-   * @param methodUrl  method url
    * @param pathMethod http method
    */
-  public void addRoute(Class<?> clazz, String baseUrl, Method method, String methodUrl, PathMethod pathMethod) {
-    String completeUrl = this.getMethodUrl(baseUrl, methodUrl);
+  public void addRoute(Class<?> clazz, Object bean, String completeUrl, Method method, PathMethod pathMethod) {
     if (completeUrl.trim().isEmpty()) {
       return;
     }
-    Route route = createRoute(clazz, method, pathMethod, completeUrl);
+    Route route = createRoute(clazz, bean, method, pathMethod, completeUrl);
 
     Parameter[] parameters = method.getParameters();
-    String[] paramNames = resolverManager.getMethodParamName(method);
+    String[] paramNames = ReflectionUtils.getMethodParamName(method);
 
     List<RouteParam> routeParams = resolverManager.invokeParamResolver(parameters, paramNames);
     route.setParams(routeParams);
@@ -194,8 +211,8 @@ public final class RouteManager {
    * @param completeUrl Complete route path
    * @return Route
    */
-  private Route createRoute(Class<?> clazz, Method method, PathMethod pathMethod, String completeUrl) {
-    Route route = Route.of(completeUrl, clazz, method.getName(), pathMethod);
+  private Route createRoute(Class<?> clazz, Object bean, Method method, PathMethod pathMethod, String completeUrl) {
+    Route route = Route.of(completeUrl, clazz, bean, method.getName(), pathMethod);
 
     boolean isAllJsonResponse = Objects.isNull(clazz.getAnnotation(RestPath.class));
     boolean isJsonResponse = Objects.isNull(method.getAnnotation(JSON.class));

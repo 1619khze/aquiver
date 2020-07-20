@@ -50,24 +50,20 @@ public class Route {
 
   private List<RouteParam> params = new ArrayList<>();
 
-  private Route(String url, Class<?> clazz, String method, PathMethod pathMethod) {
+  private Route(String url, Class<?> clazz, Object bean, String method, PathMethod pathMethod) {
     this.url = url;
     this.clazz = clazz;
     this.method = method;
     this.pathMethod = pathMethod;
-    try {
-      this.bean = clazz.newInstance();
-    } catch (ReflectiveOperationException e) {
-      log.error("An exception occurred during instantiation");
-    }
+    this.bean = bean;
   }
 
-  public static Route of(String url, Class<?> clazz, String method, PathMethod pathMethod) {
+  public static Route of(String url, Class<?> clazz, Object bean, String method, PathMethod pathMethod) {
     Objects.requireNonNull(url, "url must not be null");
     Objects.requireNonNull(clazz, "clazz must not be null");
     Objects.requireNonNull(method, "method must not be null");
     Objects.requireNonNull(pathMethod, "pathMethod must not be null");
-    return new Route(url, clazz, method, pathMethod);
+    return new Route(url, clazz, bean, method, pathMethod);
   }
 
   public String getUrl() {

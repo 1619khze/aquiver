@@ -24,6 +24,7 @@
 package org.aquiver;
 
 import org.aquiver.advice.AdviceManager;
+import org.aquiver.mvc.annotation.PathMethod;
 import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.mvc.route.RouteManager;
 import org.aquiver.mvc.route.session.SessionManager;
@@ -108,9 +109,9 @@ public final class Aquiver {
   private String viewSuffix;
 
   /** Web components that need to be initialized */
-  private final RouteManager routeManager = new RouteManager();
   private final AdviceManager adviceManager = new AdviceManager();
-  private final ParamResolverManager resolverManager = new ParamResolverManager();
+  private final RouteManager routeManager;
+  private final ParamResolverManager resolverManager;
 
   public RouteManager routeManager() {
     return routeManager;
@@ -125,6 +126,14 @@ public final class Aquiver {
   }
 
   private Aquiver() {
+    this.routeManager = new RouteManager();
+    this.resolverManager = new ParamResolverManager();
+    try {
+      this.resolverManager.initialize();
+      this.routeManager.setResolverManager(resolverManager);
+    } catch (Exception e) {
+      log.error("An exception occurred when Aquiver was instantiated", e);
+    }
   }
 
   /** Ensures that the argument expression is true. */
@@ -515,7 +524,7 @@ public final class Aquiver {
   /**
    * Register websocket route
    *
-   * @param path Websocket route path
+   * @param path             Websocket route path
    * @param webSocketChannel WebSocket abstract interface
    * @return
    */
@@ -524,6 +533,18 @@ public final class Aquiver {
     requireNonNull(webSocketChannel, "WebSocketChannel can't be null");
 
     this.routeManager.addWebSocket(path, webSocketChannel);
+    return this;
+  }
+
+  /**
+   * Register get route
+   *
+   * @param path           Route path
+   * @param requestHandler Request handler
+   * @return this
+   */
+  public Aquiver get(String path, RequestHandler requestHandler) {
+    this.routeManager.addRoute(path, requestHandler, PathMethod.GET);
     return this;
   }
 
