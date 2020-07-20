@@ -92,7 +92,7 @@ public class WebSocketWrapper implements WebSocketChannel {
     if (methodList.size() == 1) {
       final Method method = methodList.get(0);
       final Parameter[] parameters = method.getParameters();
-      final String[] paramNames = resolver.getMethodParamName(method);
+      final String[] paramNames = ReflectionUtils.getMethodParamName(method);
       final List<RouteParam> routeParams = resolver
               .invokeParamResolver(parameters, paramNames);
 
