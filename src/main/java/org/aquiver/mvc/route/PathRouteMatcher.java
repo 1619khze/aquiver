@@ -153,6 +153,11 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     if (paramStartIndex > 0) {
       lookupPath = lookupPath.substring(0, paramStartIndex);
     }
+
+    if (lookupPath.equals("")){
+      lookupPath = "/";
+    }
+
     Route route = loopLookUp(lookupPath);
 
     try {
