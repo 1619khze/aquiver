@@ -167,8 +167,6 @@ public class NettyServer implements Server {
     if (classSet.isEmpty()) {
       return;
     }
-    this.resolverManager.initialize(classSet);
-    this.routeManager.setResolverManager(resolverManager);
     this.loadRoute(classSet);
     this.loadAdvice(classSet);
     this.loadWebSocket(classSet);
@@ -215,7 +213,7 @@ public class NettyServer implements Server {
           continue;
         }
         Parameter[] parameters = method.getParameters();
-        String[] paramNames = resolverManager.getMethodParamName(method);
+        String[] paramNames = ReflectionUtils.getMethodParamName(method);
         List<RouteParam> routeParams = this.resolverManager.invokeParamResolver(parameters, paramNames);
 
         Advice advice = Advice.builder().clazz(cls).exception(declaredAnnotation.value())
