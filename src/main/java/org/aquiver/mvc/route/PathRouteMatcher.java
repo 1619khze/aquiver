@@ -164,7 +164,7 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
     Route route = loopLookUp(lookupPath);
 
     try {
-      if (!Objects.isNull(route)) {
+      if (Objects.nonNull(route)) {
         context.route(route);
         return context;
       } else {
