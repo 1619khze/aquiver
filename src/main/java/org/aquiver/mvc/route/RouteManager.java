@@ -242,7 +242,7 @@ public final class RouteManager {
     try {
       this.routes.put(url, route);
     } finally {
-      this.readWriteLock.writeLock().unlock();
+      this.writeLock().unlock();
     }
   }
 
