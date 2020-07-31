@@ -109,9 +109,9 @@ public class NettyServer implements Server {
 
     this.aquiver = aquiver;
     this.environment = aquiver.environment();
-    this.routeManager = Aquiver.of().routeManager();
-    this.adviceManager = Aquiver.of().adviceManager();
-    this.resolverManager = Aquiver.of().resolverManager();
+    this.routeManager = aquiver.routeManager();
+    this.adviceManager = aquiver.adviceManager();
+    this.resolverManager = aquiver.resolverManager();
     this.printBanner();
 
     final String bootClsName = aquiver.bootClsName();
