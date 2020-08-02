@@ -549,6 +549,90 @@ public final class Aquiver {
   }
 
   /**
+   * Register post route
+   *
+   * @param path           Route path
+   * @param requestHandler Request handler
+   * @return this
+   */
+  public Aquiver post(String path, RequestHandler requestHandler) {
+    this.routeManager.addRoute(path, requestHandler, HttpMethod.POST);
+    return this;
+  }
+
+  /**
+   * Register head route
+   *
+   * @param path           Route path
+   * @param requestHandler Request handler
+   * @return this
+   */
+  public Aquiver head(String path, RequestHandler requestHandler) {
+    this.routeManager.addRoute(path, requestHandler, HttpMethod.HEAD);
+    return this;
+  }
+
+  /**
+   * Register put route
+   *
+   * @param path           Route path
+   * @param requestHandler Request handler
+   * @return this
+   */
+  public Aquiver put(String path, RequestHandler requestHandler) {
+    this.routeManager.addRoute(path, requestHandler, HttpMethod.PUT);
+    return this;
+  }
+
+  /**
+   * Register patch route
+   *
+   * @param path           Route path
+   * @param requestHandler Request handler
+   * @return this
+   */
+  public Aquiver patch(String path, RequestHandler requestHandler) {
+    this.routeManager.addRoute(path, requestHandler, HttpMethod.PATCH);
+    return this;
+  }
+
+  /**
+   * Register delete route
+   *
+   * @param path           Route path
+   * @param requestHandler Request handler
+   * @return this
+   */
+  public Aquiver delete(String path, RequestHandler requestHandler) {
+    this.routeManager.addRoute(path, requestHandler, HttpMethod.DELETE);
+    return this;
+  }
+
+  /**
+   * Register options route
+   *
+   * @param path           Route path
+   * @param requestHandler Request handler
+   * @return this
+   */
+  public Aquiver options(String path, RequestHandler requestHandler) {
+    this.routeManager.addRoute(path, requestHandler, HttpMethod.OPTIONS);
+    return this;
+  }
+
+  /**
+   * Register trace route
+   *
+   * @param path           Route path
+   * @param requestHandler Request handler
+   * @return this
+   */
+  public Aquiver trace(String path, RequestHandler requestHandler) {
+    this.routeManager.addRoute(path, requestHandler, HttpMethod.TRACE);
+    return this;
+  }
+
+  /**
    * Open an http service, which is implemented by netty by default
    *
    * @param bootClass start up class
