@@ -633,6 +633,18 @@ public final class Aquiver {
   }
 
   /**
+   * Register route
+   *
+   * @param path           Route path
+   * @param requestHandler Request handler
+   * @return this
+   */
+  public Aquiver route(String path, RequestHandler requestHandler, HttpMethod httpMethod){
+    this.routeManager.addRoute(path, requestHandler, httpMethod);
+    return this;
+  }
+
+  /**
    * Open an http service, which is implemented by netty by default
    *
    * @param bootClass start up class
