@@ -21,31 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.logger.ansi;
+package org.aquiver.logging.ansi;
 
 /**
  * @author WangYi
  * @version 1.0
  * @since 2019/1/16
  */
-public enum AnsiBackground implements AnsiElement {
-  BLACK_BACKGROUND("\u001B[40m"),
-  RED_BACKGROUND("\u001B[41m"),
-  GREEN_BACKGROUND("\u001B[42m"),
-  YELLOW_BACKGROUND("\u001B[43m"),
-  BLUE_BACKGROUND("\u001B[44m"),
-  PURPLE_BACKGROUND("\u001B[45m"),
-  CYAN_BACKGROUND("\u001B[46m"),
-  WHITE_BACKGROUND("\u001B[47m");
-
-  private final String code;
-
-  AnsiBackground(String code) {
-    this.code = code;
-  }
+public interface AnsiElement {
 
   @Override
-  public String toString() {
-    return this.code;
-  }
+  String toString();
 }

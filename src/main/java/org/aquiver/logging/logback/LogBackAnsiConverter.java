@@ -21,16 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.logger.logback;
+package org.aquiver.logging.logback;
 
-import ch.qos.logback.classic.pattern.ClassicConverter;
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import org.aquiver.utils.SystemUtils;
+import ch.qos.logback.core.pattern.color.ANSIConstants;
+import ch.qos.logback.core.pattern.color.ForegroundCompositeConverterBase;
 
-public class ProcessIdClassicConverter extends ClassicConverter {
+public class LogBackAnsiConverter extends ForegroundCompositeConverterBase<ILoggingEvent> {
 
   @Override
-  public String convert(ILoggingEvent iLoggingEvent) {
-    return SystemUtils.getPid();
+  protected String getForegroundColorCode(ILoggingEvent iLoggingEvent) {
+    switch (iLoggingEvent.getLevel().toInt()) {
+      case Level.ERROR_INT:
+        return ANSIConstants.RED_FG;
+      case Level.WARN_INT:
+        return ANSIConstants.YELLOW_FG;
+      case Level.INFO_INT:
+        return ANSIConstants.GREEN_FG;
+      case Level.DEBUG_INT:
+        return ANSIConstants.MAGENTA_FG;
+      default:
+        return null;
+    }
   }
 }
