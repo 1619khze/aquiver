@@ -25,6 +25,7 @@ package org.aquiver.mvc.route;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.aquiver.Aquiver;
 import org.aquiver.Async;
 import org.aquiver.RequestContext;
 import org.aquiver.function.AdviceManager;
@@ -58,13 +59,12 @@ public class PathRouteMatcher implements RouteMatcher<RequestContext> {
   private final ParamResolverManager resolverManager;
   private final ParamResolverContext paramResolverContext = new ParamResolverContext();
 
-  public PathRouteMatcher(Map<String, Route> routeMap, AdviceManager adviceManager,
-                          ParamResolverManager resolverManager) {
-    this.routeMap = routeMap;
+  public PathRouteMatcher(Aquiver aquiver) {
+    this.routeMap = aquiver.routeManager().getRoutes();
     this.exceptionHandler = new HttpExceptionHandler();
     this.fileServerHandler = new StaticFileServerHandler();
-    this.adviceManager = adviceManager;
-    this.resolverManager = resolverManager;
+    this.adviceManager = aquiver.adviceManager();
+    this.resolverManager = aquiver.resolverManager();
   }
 
   private void closeChannel(RequestContext context) {

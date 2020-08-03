@@ -58,11 +58,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private FullHttpRequest fullHttpRequest;
 
   public NettyServerHandler() {
-    Aquiver aquiver = Aquiver.of();
-    RouteManager routeManager = aquiver.routeManager();
-    AdviceManager adviceManager = aquiver.adviceManager();
-    ParamResolverManager paramResolverManager = aquiver.resolverManager();
-    this.matcher = new PathRouteMatcher(routeManager.getRoutes(), adviceManager, paramResolverManager);
+    this.matcher = new PathRouteMatcher(Aquiver.of());
     this.responseRenderMatcher = new ResponseRenderMatcher();
   }
 
@@ -85,9 +81,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
     if (msg instanceof HttpRequest) {
-      HttpRequest httpRequest = (HttpRequest) msg;
-      this.fullHttpRequest = new DefaultFullHttpRequest(httpRequest.protocolVersion(),
-              httpRequest.method(), httpRequest.uri());
+      HttpRequest request = (HttpRequest) msg;
+      this.fullHttpRequest = new DefaultFullHttpRequest(
+              request.protocolVersion(), request.method(), request.uri());
     }
     if (msg instanceof FullHttpRequest) {
       this.fullHttpRequest = (FullHttpRequest) msg;
