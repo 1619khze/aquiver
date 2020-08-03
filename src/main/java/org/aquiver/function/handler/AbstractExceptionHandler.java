@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.advice.handler;
+package org.aquiver.function.handler;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.advice;
+package org.aquiver.function;
 
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.resolver.ParamResolverContext;

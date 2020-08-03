@@ -23,7 +23,7 @@
  */
 package org.aquiver;
 
-import org.aquiver.advice.AdviceManager;
+import org.aquiver.function.AdviceManager;
 import org.aquiver.mvc.annotation.HttpMethod;
 import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.mvc.route.RouteManager;
