@@ -37,12 +37,12 @@ import java.util.concurrent.ThreadFactory;
  * @since 2019/6/6
  */
 public final class EventLoopKit {
+  private static EventLoopGroup bossGroup;
+  private static EventLoopGroup workerGroup;
+  private static final Class<? extends ServerChannel> epollChannel = EpollServerSocketChannel.class;
+  private static final Class<? extends ServerChannel> nioChannel = NioServerSocketChannel.class;
 
-  private static EventLoopGroup bossEventLoopGroup;
-  private static EventLoopGroup workerEventLoopGroup;
-
-  private EventLoopKit() {
-  }
+  private EventLoopKit() {}
 
   public static boolean epollIsAvailable() {
     try {
@@ -56,20 +56,20 @@ public final class EventLoopKit {
   }
 
   public static NettyServerGroup epollGroup(int threadCount, int workers) {
-    bossEventLoopGroup = new EpollEventLoopGroup(threadCount, named("epoll-boss@"));
-    workerEventLoopGroup = new EpollEventLoopGroup(workers, named("epoll-worker@"));
-    return eventLoopGroupBuilder(bossEventLoopGroup, workerEventLoopGroup, EpollServerSocketChannel.class);
+    bossGroup = new EpollEventLoopGroup(threadCount, named("epoll-boss@"));
+    workerGroup = new EpollEventLoopGroup(workers, named("epoll-worker@"));
+    return eventLoopGroupBuilder(bossGroup, workerGroup, epollChannel);
   }
 
   public static NettyServerGroup nioGroup(int threadCount, int workers) {
-    bossEventLoopGroup = new NioEventLoopGroup(threadCount, named("nio-boss@"));
-    workerEventLoopGroup = new NioEventLoopGroup(workers, named("nio-worker@"));
-    return eventLoopGroupBuilder(bossEventLoopGroup, workerEventLoopGroup, NioServerSocketChannel.class);
+    bossGroup = new NioEventLoopGroup(threadCount, named("nio-boss@"));
+    workerGroup = new NioEventLoopGroup(workers, named("nio-worker@"));
+    return eventLoopGroupBuilder(bossGroup, workerGroup, nioChannel);
   }
 
-  private static NettyServerGroup eventLoopGroupBuilder(EventLoopGroup bossEventLoopGroup,
-                                                        EventLoopGroup workerEventLoopGroup,
-                                                        Class<? extends ServerChannel> channelClass) {
+  private static NettyServerGroup eventLoopGroupBuilder(
+          EventLoopGroup bossEventLoopGroup, EventLoopGroup workerEventLoopGroup,
+          Class<? extends ServerChannel> channelClass) {
     return NettyServerGroup.builder().bossGroup(bossEventLoopGroup)
             .workGroup(workerEventLoopGroup).channelClass(channelClass).build();
   }
