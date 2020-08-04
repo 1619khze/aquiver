@@ -23,6 +23,8 @@
  */
 package org.aquiver;
 
+import org.apex.Apex;
+import org.apex.Environment;
 import org.aquiver.function.AdviceManager;
 import org.aquiver.mvc.annotation.HttpMethod;
 import org.aquiver.mvc.resolver.ParamResolverManager;
@@ -79,7 +81,7 @@ public final class Aquiver {
   private final List<Class<?>> eventPool = new LinkedList<>();
   private final CountDownLatch countDownLatch = new CountDownLatch(1);
   private final SessionManager sessionManager = new SessionManager();
-  private Environment environment = new Environment();
+  private Environment environment = Apex.of().environment();
   private String bootConfName = PATH_CONFIG_PROPERTIES;
   private String envName = "default";
 
@@ -639,7 +641,7 @@ public final class Aquiver {
    * @param requestHandler Request handler
    * @return this
    */
-  public Aquiver route(String path, RequestHandler requestHandler, HttpMethod httpMethod){
+  public Aquiver route(String path, RequestHandler requestHandler, HttpMethod httpMethod) {
     this.routeManager.addRoute(path, requestHandler, httpMethod);
     return this;
   }
