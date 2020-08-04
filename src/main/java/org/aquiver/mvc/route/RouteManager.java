@@ -111,20 +111,20 @@ public final class RouteManager {
   /**
    * add route
    *
-   * @param cls route class
+   * @param object route object
    * @param url @Path value
    */
-  public void addRoute(Class<?> cls, String url) {
+  public void addRoute(Object object, String url) {
     try {
+      Class<?> cls = object.getClass();
       Method[] methods = cls.getMethods();
       for (Method method : methods) {
         Path methodPath = method.getAnnotation(Path.class);
         if (Objects.nonNull(methodPath)) {
           String completeUrl = this.getMethodUrl(url, methodPath.value());
-          Object bean = cls.newInstance();
-          this.addRoute(cls, bean, completeUrl, method, methodPath.method());
+          this.addRoute(cls, object, completeUrl, method, methodPath.method());
         }
-        addRoute(cls, url, method);
+        addRoute(cls, object, url, method);
       }
     } catch (Throwable throwable) {
       throwable.printStackTrace();
@@ -149,7 +149,7 @@ public final class RouteManager {
    * @param method Mapping annotation annotation method
    * @throws Throwable reflection exception
    */
-  private void addRoute(Class<?> cls, String url, Method method) throws Throwable {
+  private void addRoute(Class<?> cls, Object bean, String url, Method method) throws Throwable {
     Annotation[] annotations = method.getAnnotations();
     if (annotations.length != 0) {
       for (Annotation annotation : annotations) {
@@ -167,7 +167,6 @@ public final class RouteManager {
           routeUrl = String.join(routeUrl, String.valueOf(valueInvokeResult));
         }
         String completeUrl = this.getMethodUrl(url, routeUrl);
-        Object bean = cls.newInstance();
         this.addRoute(cls, bean, completeUrl, method, httpMethod);
       }
     }

@@ -33,7 +33,6 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.ResourceLeakDetector;
 import org.apex.*;
-import org.apex.Scanner;
 import org.aquiver.Aquiver;
 import org.aquiver.function.Advice;
 import org.aquiver.function.AdviceManager;
@@ -42,8 +41,6 @@ import org.aquiver.mvc.annotation.RestPath;
 import org.aquiver.mvc.annotation.advice.ExceptionHandler;
 import org.aquiver.mvc.annotation.advice.RouteAdvice;
 import org.aquiver.mvc.resolver.ParamResolverManager;
-import org.aquiver.mvc.route.PathRouteFinder;
-import org.aquiver.mvc.route.RouteFinder;
 import org.aquiver.mvc.route.RouteManager;
 import org.aquiver.mvc.route.RouteParam;
 import org.aquiver.server.banner.Banner;
@@ -52,7 +49,6 @@ import org.aquiver.server.watcher.GlobalEnvTask;
 import org.aquiver.utils.ReflectionUtils;
 import org.aquiver.utils.SystemUtils;
 import org.aquiver.websocket.WebSocket;
-import org.aquiver.websocket.WebSocketContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,11 +58,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.nio.file.Paths;
-import java.security.Key;
 import java.security.cert.CertificateException;
-import java.util.*;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static org.aquiver.Const.*;
 
@@ -168,7 +163,7 @@ public class NettyServer implements Server {
             .scanPackages(aquiver.scanPaths()).build();
 
     final Scanner scanner = new ClassgraphScanner(classgraphOptions);
-    final ApexContext apexContext = apex.addScanAnnotation(getClasses())
+    final ApexContext apexContext = apex.addScanAnnotation(extendAnnotation())
             .options(classgraphOptions).scanner(scanner)
             .packages(scanPath).apexContext();
 
@@ -176,15 +171,14 @@ public class NettyServer implements Server {
     if (instances.isEmpty()) {
       return;
     }
-    final List<Class<?>> classes = instances.values().stream()
-            .map(Object::getClass).collect(Collectors.toList());
 
-    this.loadRoute(classes);
-    this.loadAdvice(classes);
-    this.loadWebSocket(classes);
+    this.loadRoute(instances);
+    this.loadAdvice(instances);
+    this.loadWebSocket(instances);
   }
 
-  private Class<? extends Annotation>[] getClasses() {
+  @SuppressWarnings("unchecked")
+  private Class<? extends Annotation>[] extendAnnotation() {
     return new Class[]{Path.class, RouteAdvice.class, RestPath.class, WebSocket.class};
   }
 
@@ -192,14 +186,26 @@ public class NettyServer implements Server {
    * Filter out the routing class from the scanned
    * result set and add it to the routing manager
    *
-   * @param classSet Scanned result
+   * @param instances Scanned result
    */
-  public void loadRoute(List<Class<?>> classSet) {
-    final RouteFinder routeFinder = new PathRouteFinder();
+  public void loadRoute(Map<String, Object> instances) {
     try {
-      Map<String, Class<?>> routeClsMap = routeFinder.finderRoute(classSet);
-      for (Map.Entry<String, Class<?>> entry : routeClsMap.entrySet()) {
-        this.routeManager.addRoute(entry.getValue(), entry.getKey());
+      for (Map.Entry<String, Object> entry : instances.entrySet()) {
+        Class<?> next = entry.getValue().getClass();
+        String url = "/";
+        boolean normal = ReflectionUtils.isNormal(next);
+        if (!normal) {
+          continue;
+        }
+        if (log.isDebugEnabled()) {
+          log.debug("Is this class normal: {}", next.getSimpleName());
+        }
+        if (Objects.isNull(next.getAnnotation(RestPath.class)) &&
+                Objects.isNull(next.getAnnotation(Path.class))) {
+          continue;
+        }
+        url = url(next, url);
+        this.routeManager.addRoute(entry.getValue(), url);
       }
     } catch (Throwable e) {
       log.error("An exception occurred while load route", e);
@@ -207,15 +213,37 @@ public class NettyServer implements Server {
   }
 
   /**
+   * Get path value
+   *
+   * @param cls route class
+   * @param url default url
+   * @return The complete url after stitching
+   */
+  private String url(Class<?> cls, String url) {
+    Path classPath = cls.getAnnotation(Path.class);
+    if (classPath == null) {
+      return url;
+    }
+    String className = cls.getName();
+    String value = classPath.value();
+    if (!"".equals(value)) {
+      url = value;
+    }
+    if (log.isDebugEnabled()) {
+      log.debug("Registered rest controller:[{}:{}]", url, className);
+    }
+    return url;
+  }
+
+  /**
    * Filter the Advice class from the scanned result
    * set and add it to the Advice Manager
    *
-   * @param classSet Scanned result
-   * @throws ReflectiveOperationException Exception superclass when
-   *                                      performing reflection operation
+   * @param instances Scanned result
    */
-  private void loadAdvice(List<Class<?>> classSet) throws ReflectiveOperationException {
-    for (Class<?> cls : classSet) {
+  private void loadAdvice(Map<String, Object> instances) {
+    for (Object object : instances.values()) {
+      Class<?> cls = object.getClass();
       Method[] declaredMethods = cls.getDeclaredMethods();
       if (!ReflectionUtils.isNormal(cls)
               || !cls.isAnnotationPresent(RouteAdvice.class)
@@ -233,7 +261,7 @@ public class NettyServer implements Server {
         List<RouteParam> routeParams = this.resolverManager.invokeParamResolver(parameters, paramNames);
 
         Advice advice = Advice.builder().clazz(cls).exception(declaredAnnotation.value())
-                .methodName(method.getName()).params(routeParams).target(cls.newInstance());
+                .methodName(method.getName()).params(routeParams).target(object);
         this.adviceManager.addAdvice(declaredAnnotation.value(), advice);
       }
     }
@@ -244,12 +272,13 @@ public class NettyServer implements Server {
    * from the scan result set and reduce them to the Web Socket
    * list of the routing manager
    *
-   * @param classSet Scanned result
+   * @param instances Scanned result
    * @throws ReflectiveOperationException Exception superclass when
    *                                      performing reflection operation
    */
-  private void loadWebSocket(List<Class<?>> classSet) throws ReflectiveOperationException {
-    for (Class<?> cls : classSet) {
+  private void loadWebSocket(Map<String, Object> instances) throws ReflectiveOperationException {
+    for (Object object : instances.values()) {
+      Class<?> cls = object.getClass();
       Method[] declaredMethods = cls.getDeclaredMethods();
       if (!ReflectionUtils.isNormal(cls)
               || !cls.isAnnotationPresent(WebSocket.class)
