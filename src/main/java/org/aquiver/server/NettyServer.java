@@ -32,7 +32,9 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.ResourceLeakDetector;
-import org.aquiver.*;
+import org.apex.*;
+import org.apex.Scanner;
+import org.aquiver.Aquiver;
 import org.aquiver.function.Advice;
 import org.aquiver.function.AdviceManager;
 import org.aquiver.mvc.annotation.advice.ExceptionHandler;
@@ -57,10 +59,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.nio.file.Paths;
 import java.security.cert.CertificateException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import static org.aquiver.Const.*;
 
@@ -108,7 +108,7 @@ public class NettyServer implements Server {
     long startMs = System.currentTimeMillis();
 
     this.aquiver = aquiver;
-    this.environment = aquiver.environment();
+    this.environment = Apex.of().environment();
     this.routeManager = aquiver.routeManager();
     this.adviceManager = aquiver.adviceManager();
     this.resolverManager = aquiver.resolverManager();
@@ -156,20 +156,22 @@ public class NettyServer implements Server {
    */
   private void initComponent() throws Exception {
     final String scanPath = aquiver.bootCls().getPackage().getName();
-
     final ClassgraphOptions classgraphOptions = ClassgraphOptions.builder()
-            .verbose(aquiver.verbose()).enableRealtimeLogging(aquiver.realtimeLogging())
+            .verbose(aquiver.verbose()).realtimeLogging(aquiver.realtimeLogging())
             .scanPackages(aquiver.scanPaths()).build();
 
     final Scanner scanner = new ClassgraphScanner(classgraphOptions);
-    final Set<Class<?>> classSet = scanner.scan(scanPath);
+    final List<Class<?>> classes = Apex.of().options(classgraphOptions)
+            .scanner(scanner).packages(scanPath)
+            .loadClasses();
 
-    if (classSet.isEmpty()) {
+    if (!classes.isEmpty()) {
       return;
     }
-    this.loadRoute(classSet);
-    this.loadAdvice(classSet);
-    this.loadWebSocket(classSet);
+
+    this.loadRoute(classes);
+    this.loadAdvice(classes);
+    this.loadWebSocket(classes);
   }
 
   /**
@@ -178,7 +180,7 @@ public class NettyServer implements Server {
    *
    * @param classSet Scanned result
    */
-  public void loadRoute(Set<Class<?>> classSet) {
+  public void loadRoute(List<Class<?>> classSet) {
     final RouteFinder routeFinder = new PathRouteFinder();
     try {
       Map<String, Class<?>> routeClsMap = routeFinder.finderRoute(classSet);
@@ -198,7 +200,7 @@ public class NettyServer implements Server {
    * @throws ReflectiveOperationException Exception superclass when
    *                                      performing reflection operation
    */
-  private void loadAdvice(Set<Class<?>> classSet) throws ReflectiveOperationException {
+  private void loadAdvice(List<Class<?>> classSet) throws ReflectiveOperationException {
     for (Class<?> cls : classSet) {
       Method[] declaredMethods = cls.getDeclaredMethods();
       if (!ReflectionUtils.isNormal(cls)
@@ -232,7 +234,7 @@ public class NettyServer implements Server {
    * @throws ReflectiveOperationException Exception superclass when
    *                                      performing reflection operation
    */
-  private void loadWebSocket(Set<Class<?>> classSet) throws ReflectiveOperationException {
+  private void loadWebSocket(List<Class<?>> classSet) throws ReflectiveOperationException {
     for (Class<?> cls : classSet) {
       Method[] declaredMethods = cls.getDeclaredMethods();
       if (!ReflectionUtils.isNormal(cls)
