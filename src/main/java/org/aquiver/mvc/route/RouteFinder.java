@@ -23,6 +23,7 @@
  */
 package org.aquiver.mvc.route;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,5 +39,5 @@ public interface RouteFinder {
    * @return url -> class map
    * @throws Exception common exception
    */
-  Map<String, Class<?>> finderRoute(Set<Class<?>> classSet) throws Exception;
+  Map<String, Class<?>> finderRoute(List<Class<?>> classSet) throws Exception;
 }

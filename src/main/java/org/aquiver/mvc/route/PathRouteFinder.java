@@ -29,9 +29,9 @@ import org.aquiver.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -48,7 +48,7 @@ public class PathRouteFinder implements RouteFinder {
    * @return Map<String, Class < ?>> routeClsMap
    */
   @Override
-  public Map<String, Class<?>> finderRoute(Set<Class<?>> classSet) {
+  public Map<String, Class<?>> finderRoute(List<Class<?>> classSet) {
     Map<String, Class<?>> routeClsMap = new ConcurrentHashMap<>(16);
     for (Class<?> next : classSet) {
       String url = "/";
