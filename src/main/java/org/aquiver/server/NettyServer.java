@@ -37,6 +37,8 @@ import org.apex.Scanner;
 import org.aquiver.Aquiver;
 import org.aquiver.function.Advice;
 import org.aquiver.function.AdviceManager;
+import org.aquiver.mvc.annotation.Path;
+import org.aquiver.mvc.annotation.RestPath;
 import org.aquiver.mvc.annotation.advice.ExceptionHandler;
 import org.aquiver.mvc.annotation.advice.RouteAdvice;
 import org.aquiver.mvc.resolver.ParamResolverManager;
@@ -50,17 +52,21 @@ import org.aquiver.server.watcher.GlobalEnvTask;
 import org.aquiver.utils.ReflectionUtils;
 import org.aquiver.utils.SystemUtils;
 import org.aquiver.websocket.WebSocket;
+import org.aquiver.websocket.WebSocketContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
 import java.io.File;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.nio.file.Paths;
+import java.security.Key;
 import java.security.cert.CertificateException;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Collectors;
 
 import static org.aquiver.Const.*;
 
@@ -155,23 +161,31 @@ public class NettyServer implements Server {
    * init ioc container
    */
   private void initComponent() throws Exception {
+    final Apex apex = Apex.of();
     final String scanPath = aquiver.bootCls().getPackage().getName();
     final ClassgraphOptions classgraphOptions = ClassgraphOptions.builder()
             .verbose(aquiver.verbose()).realtimeLogging(aquiver.realtimeLogging())
             .scanPackages(aquiver.scanPaths()).build();
 
     final Scanner scanner = new ClassgraphScanner(classgraphOptions);
-    final List<Class<?>> classes = Apex.of().options(classgraphOptions)
-            .scanner(scanner).packages(scanPath)
-            .loadClasses();
+    final ApexContext apexContext = apex.addScanAnnotation(getClasses())
+            .options(classgraphOptions).scanner(scanner)
+            .packages(scanPath).apexContext();
 
-    if (!classes.isEmpty()) {
+    final Map<String, Object> instances = apexContext.getInstances();
+    if (instances.isEmpty()) {
       return;
     }
+    final List<Class<?>> classes = instances.values().stream()
+            .map(Object::getClass).collect(Collectors.toList());
 
     this.loadRoute(classes);
     this.loadAdvice(classes);
     this.loadWebSocket(classes);
+  }
+
+  private Class<? extends Annotation>[] getClasses() {
+    return new Class[]{Path.class, RouteAdvice.class, RestPath.class, WebSocket.class};
   }
 
   /**
