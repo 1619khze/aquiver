@@ -17,6 +17,9 @@ jobs:
           java-version: 1.8
       - name: Build with Maven
         run: |
+          git clone https://github.com/AquiverV/apex.git
+          cd ./apex
+          mvn install
           git clone https://github.com/AquiverV/aquiver.git
           cd ./aquiver
           mvn install
