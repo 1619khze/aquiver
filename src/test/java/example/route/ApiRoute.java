@@ -60,12 +60,12 @@ public class ApiRoute {
   @Path(value = "/requestParamJson", method = HttpMethod.GET)
   public User requestParamJson(@Param String name) {
     log.info("request param:" + name);
-//    user.setUsername("hello");
-//    user.setPassword("world");
-//    user.setAge(1);
-//    user.setExt((short) 1);
-//    user.setName(name);
-//    user.user();
+    user.setUsername("hello");
+    user.setPassword("world");
+    user.setAge(1);
+    user.setExt((short) 1);
+    user.setName(name);
+    user.user();
 
     ApexContext apexContext = Apex.of().apexContext();
     User bean = apexContext.getBean(User.class);
