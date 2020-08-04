@@ -20,6 +20,7 @@
         <netty.version>4.1.50.Final</netty.version>
         <logback.version>1.2.3</logback.version>
         <pebble.version>3.1.4</pebble.version>
+        <apex.version>1.0-SNAPSHOT</apex.version>
         <java.version>8</java.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-license-plugin.version>1.9.0</maven-license-plugin.version>
@@ -94,6 +95,11 @@
             <groupId>io.pebbletemplates</groupId>
             <artifactId>pebble</artifactId>
             <version>${pebble.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apex</groupId>
+            <artifactId>apex</artifactId>
+            <version>${apex.version}</version>
         </dependency>
     </dependencies>
 
