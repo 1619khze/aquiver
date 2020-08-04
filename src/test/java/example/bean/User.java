@@ -23,17 +23,65 @@
  */
 package example.bean;
 
-import java.util.Objects;
+import example.config.ConfigProperty;
+import org.apex.annotation.Value;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+/**
+ * @author WangYi
+ * @since 2020/6/22
+ */
+@Singleton
 public class User {
-  private String  name;
+  private String name;
   private Integer age;
-  private short   ext;
+  private short ext;
+  private String username;
+  private String password;
 
-  public User(String name, Integer age, short ext) {
-    this.name = name;
-    this.age  = age;
-    this.ext  = ext;
+  @Inject
+  private User2 user2;
+
+  @Inject
+  private User3 user3;
+
+  @Value("${user.home}")
+  private String aa;
+
+  @Inject
+  private ConfigProperty configProperty;
+
+  public String getUsername() {
+    return username;
+  }
+
+  public User setUsername(String username) {
+    this.username = username;
+    return this;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public User setPassword(String password) {
+    this.password = password;
+    return this;
+  }
+
+  public void user() {
+    String aa = user2.getAa();
+    String username = user3.getUsername();
+    String password = user3.getPassword();
+
+    System.out.println(aa);
+    System.out.println(username);
+    System.out.println(password);
+    System.out.println(this.aa);
+
+    System.out.println(configProperty.toString());
   }
 
   public String getName() {
@@ -61,26 +109,17 @@ public class User {
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    User that = (User) o;
-    return ext == that.ext &&
-            Objects.equals(name, that.name) &&
-            Objects.equals(age, that.age);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(name, age, ext);
-  }
-
-  @Override
   public String toString() {
     return "User{" +
             "name='" + name + '\'' +
             ", age=" + age +
             ", ext=" + ext +
+            ", user2=" + user2 +
+            ", user3=" + user3 +
+            ", aa='" + aa + '\'' +
+            ", configProperty=" + configProperty +
+            ", username='" + username + '\'' +
+            ", password='" + password + '\'' +
             '}';
   }
 }

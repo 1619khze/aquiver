@@ -25,6 +25,8 @@ package example.route;
 
 import example.bean.User;
 import io.netty.channel.ChannelHandlerContext;
+import org.apex.Apex;
+import org.apex.ApexContext;
 import org.aquiver.ModelAndView;
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.annotation.*;
@@ -34,6 +36,7 @@ import org.aquiver.mvc.route.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +46,9 @@ import java.util.Map;
 public class ApiRoute {
 
   private static final Logger log = LoggerFactory.getLogger(ApiRoute.class);
+
+  @Inject
+  private User user;
 
   @Path(value = "/requestParam", method = HttpMethod.GET)
   public String requestParam(@Param String name) {
@@ -54,7 +60,17 @@ public class ApiRoute {
   @Path(value = "/requestParamJson", method = HttpMethod.GET)
   public User requestParamJson(@Param String name) {
     log.info("request param:" + name);
-    return new User("1", 2, (short) 3);
+//    user.setUsername("hello");
+//    user.setPassword("world");
+//    user.setAge(1);
+//    user.setExt((short) 1);
+//    user.setName(name);
+//    user.user();
+
+    ApexContext apexContext = Apex.of().apexContext();
+    User bean = apexContext.getBean(User.class);
+    bean.user();
+    return bean;
   }
 
   @Path(value = "/requestParamAlisa", method = HttpMethod.GET)
