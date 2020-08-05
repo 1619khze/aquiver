@@ -130,7 +130,7 @@ public class NettyServer implements Server {
     this.configLoadLog(aquiver, envName);
 
     this.initSsl();
-    this.initComponent();
+    this.initApex();
     this.startServer(startMs);
     this.watchEnv();
     this.shutdownHook();
@@ -155,7 +155,7 @@ public class NettyServer implements Server {
   /**
    * init ioc container
    */
-  private void initComponent() throws Exception {
+  private void initApex() throws Exception {
     final Apex apex = Apex.of();
     final String scanPath = aquiver.bootCls().getPackage().getName();
     final ClassgraphOptions classgraphOptions = ClassgraphOptions.builder()
