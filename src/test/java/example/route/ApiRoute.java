@@ -70,7 +70,7 @@ public class ApiRoute {
     ApexContext apexContext = Apex.of().apexContext();
     User bean = apexContext.getBean(User.class);
     bean.user();
-    return bean;
+    return user;
   }
 
   @Path(value = "/requestParamAlisa", method = HttpMethod.GET)

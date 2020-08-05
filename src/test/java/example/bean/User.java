@@ -53,24 +53,6 @@ public class User {
   @Inject
   private ConfigProperty configProperty;
 
-  public String getUsername() {
-    return username;
-  }
-
-  public User setUsername(String username) {
-    this.username = username;
-    return this;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public User setPassword(String password) {
-    this.password = password;
-    return this;
-  }
-
   public void user() {
     String aa = user2.getAa();
     String username = user3.getUsername();
@@ -106,6 +88,22 @@ public class User {
 
   public void setExt(short ext) {
     this.ext = ext;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public void setUsername(String username) {
+    this.username = username;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
   }
 
   @Override
