@@ -70,7 +70,7 @@ public class WebSocketWrapper implements WebSocketChannel {
       return;
     }
     final Map<Class<? extends Annotation>, WebSocketActionPair>
-            cache = new HashMap<>(3);
+            cache = new HashMap<>(4);
 
     cacheMethod(cache, methods, OnClose.class);
     cacheMethod(cache, methods, OnConnect.class);
