@@ -189,26 +189,22 @@ public class NettyServer implements Server {
    * @param instances Scanned result
    */
   public void loadRoute(Map<String, Object> instances) {
-    try {
-      for (Map.Entry<String, Object> entry : instances.entrySet()) {
-        Class<?> next = entry.getValue().getClass();
-        String url = "/";
-        boolean normal = ReflectionUtils.isNormal(next);
-        if (!normal) {
-          continue;
-        }
-        if (log.isDebugEnabled()) {
-          log.debug("Is this class normal: {}", next.getSimpleName());
-        }
-        if (Objects.isNull(next.getAnnotation(RestPath.class)) &&
-                Objects.isNull(next.getAnnotation(Path.class))) {
-          continue;
-        }
-        url = url(next, url);
-        this.routeManager.addRoute(entry.getValue(), url);
+    for (Map.Entry<String, Object> entry : instances.entrySet()) {
+      Class<?> next = entry.getValue().getClass();
+      String url = "/";
+      boolean normal = ReflectionUtils.isNormal(next);
+      if (!normal) {
+        continue;
       }
-    } catch (Throwable e) {
-      log.error("An exception occurred while load route", e);
+      if (log.isDebugEnabled()) {
+        log.debug("Is this class normal: {}", next.getSimpleName());
+      }
+      if (Objects.isNull(next.getAnnotation(RestPath.class)) &&
+              Objects.isNull(next.getAnnotation(Path.class))) {
+        continue;
+      }
+      url = url(next, url);
+      this.routeManager.addRoute(entry.getValue(), url);
     }
   }
 
