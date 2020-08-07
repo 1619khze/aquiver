@@ -1,0 +1,15 @@
+config:
+  test:
+    age: 1
+    name: wangyi
+    height: 180
+    weight: 190
+    list[0]: /root
+    list[1]: /home/user1
+    list[2]: /home/user2
+    list[3]: /home/user3
+    map:
+      key1: value1
+      key2: value2
+      key3: value3
+      key4: value4
