@@ -111,15 +111,15 @@ public class NettyServer implements Server {
 
     this.aquiver = aquiver;
     this.apex = Apex.of();
-    this.environment = Apex.of().environment();
-    this.routeManager = aquiver.routeManager();
-    this.adviceManager = aquiver.adviceManager();
-    this.resolverManager = aquiver.resolverManager();
+    this.environment = this.apex.environment();
+    this.routeManager = this.aquiver.routeManager();
+    this.adviceManager = this.aquiver.adviceManager();
+    this.resolverManager = this.aquiver.resolverManager();
     this.printBanner();
 
-    final String bootClsName = aquiver.bootClsName();
-    final String bootConfName = aquiver.bootConfName();
-    final String envName = apex.envName();
+    final String bootClsName = this.aquiver.bootClsName();
+    final String bootConfName = this.aquiver.bootConfName();
+    final String envName = this.apex.envName();
     final String deviceName = SystemUtils.getDeviceName();
     final String currentUserName = System.getProperty("user.name");
     final String pidCode = SystemUtils.getPid();
