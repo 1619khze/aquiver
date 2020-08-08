@@ -33,12 +33,10 @@ import org.aquiver.mvc.route.session.SessionManager;
 import org.aquiver.server.NettyServer;
 import org.aquiver.server.Server;
 import org.aquiver.server.banner.BannerFont;
-import org.aquiver.utils.PropertyUtils;
 import org.aquiver.websocket.WebSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.StringReader;
 import java.net.BindException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -83,16 +81,7 @@ public final class Aquiver {
   private final SessionManager sessionManager = new SessionManager();
   private Environment environment = Apex.of().environment();
   private String bootConfName = PATH_CONFIG_PROPERTIES;
-  private String envName = "default";
-
-  /** Parameters needed to read the configuration file. */
-  private boolean envConfig = false;
-  private boolean masterConfig = false;
   private boolean started = false;
-
-  /** Classgraph related configuration. */
-  private boolean verbose = false;
-  private boolean realtimeLogging = false;
 
   /** Some content that may be needed. */
   private int port;
@@ -102,6 +91,7 @@ public final class Aquiver {
   private ExecutorService reusableExecutor;
   private String sessionKey;
   private Integer sessionTimeout;
+  private String[] mainArgs;
 
   /** Thread pool setting param */
   private int corePoolSize = 5;
@@ -359,6 +349,14 @@ public final class Aquiver {
   }
 
   /**
+   * Get main method args
+   * @return main method args
+   */
+  public String[] mainArgs() {
+    return mainArgs;
+  }
+
+  /**
    * Get banner text
    *
    * @return banner text
@@ -383,39 +381,12 @@ public final class Aquiver {
   }
 
   /**
-   * Get environment config load status
-   *
-   * @return environment config load status
-   */
-  public boolean envConfig() {
-    return envConfig;
-  }
-
-  /**
-   * Get master config properties or yaml load status
-   *
-   * @return master config properties or yaml load status
-   */
-  public boolean masterConfig() {
-    return masterConfig;
-  }
-
-  /**
    * Get start up server config properties name
    *
    * @return start up server config properties name
    */
   public String bootConfName() {
     return requireNonNull(bootConfName);
-  }
-
-  /**
-   * Get environment name
-   *
-   * @return environment name
-   */
-  public String envName() {
-    return requireNonNull(envName);
   }
 
   /**
@@ -434,48 +405,6 @@ public final class Aquiver {
    */
   public List<Class<?>> eventPool() {
     return requireNonNull(this.eventPool);
-  }
-
-  /**
-   * Set Whether to start the detailed scan log of classgraph
-   *
-   * @param verbose Whether to enable detailed scan log
-   * @return Aquiver
-   */
-  public Aquiver verbose(boolean verbose) {
-    this.verbose = verbose;
-    this.environment.add(PATH_SCANNER_VERBOSE, verbose);
-    return this;
-  }
-
-  /**
-   * Get Whether to start the detailed scan log of classgraph
-   *
-   * @return Whether to enable detailed scan log
-   */
-  public boolean verbose() {
-    return requireNonNull(this.environment.getBoolean(PATH_SCANNER_VERBOSE, verbose));
-  }
-
-  /**
-   * Set Whether to enable real-time recording of classgraph
-   *
-   * @param realtimeLogging Whether to enable real-time recording of classgraph
-   * @return Aquiver
-   */
-  public Aquiver realtimeLogging(boolean realtimeLogging) {
-    this.realtimeLogging = realtimeLogging;
-    this.environment.add(PATH_SCANNER_LOGGING, realtimeLogging);
-    return this;
-  }
-
-  /**
-   * Get Whether to enable real-time recording of classgraph
-   *
-   * @return Whether to enable real-time recording of classgraph
-   */
-  public boolean realtimeLogging() {
-    return requireNonNull(this.environment.getBoolean(PATH_SCANNER_LOGGING, realtimeLogging));
   }
 
   /**
@@ -654,9 +583,9 @@ public final class Aquiver {
    */
   public void start(Class<?> bootClass, String[] args) {
     try {
-      this.loadConfig(args);
+      this.mainArgs = args;
       this.initReusableThreadPool();
-    } catch (IllegalAccessException e) {
+    } catch (Exception e) {
       log.error("An exception occurred while loading the configuration", e);
     }
     this.reusableExecutor.execute(() -> {
@@ -700,117 +629,6 @@ public final class Aquiver {
     final ThreadPoolExecutor.AbortPolicy abortPolicy = new ThreadPoolExecutor.AbortPolicy();
     this.reusableExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
             TimeUnit.MILLISECONDS, runnableQueue, aquiverThreadFactory, abortPolicy);
-  }
-
-  /**
-   * Load configuration from multiple places between startup services.
-   * Support items are: Properties are configured by default, and the
-   * properties loaded by default are application.properties If there
-   * is no properties configuration, the yaml format is used, and the
-   * default yaml loaded is application.yml Support loading
-   * configuration from args array of main function Support loading
-   * configuration from System.Property
-   *
-   * @param args main method args
-   * @throws IllegalAccessException IllegalAccessException
-   */
-  private void loadConfig(String[] args) throws IllegalAccessException {
-    String bootConf = environment().get(PATH_SERVER_BOOT_CONFIG, PATH_CONFIG_PROPERTIES);
-    Environment bootConfEnv = Environment.of(bootConf);
-
-    Map<String, String> argsMap = this.loadMainArgs(args);
-    Map<String, String> constField = PropertyUtils.confFieldMap();
-
-    this.loadPropsOrYaml(bootConfEnv, constField);
-
-    /** Support loading configuration from args array of main function. */
-    if (!requireNonNull(bootConfEnv).isEmpty()) {
-      Map<String, String> bootEnvMap = bootConfEnv.toStringMap();
-      Set<Map.Entry<String, String>> entrySet = bootEnvMap.entrySet();
-
-      entrySet.forEach(entry -> this.environment
-              .add(entry.getKey(), entry.getValue()));
-
-      this.masterConfig = true;
-    }
-
-    if (Objects.nonNull(argsMap.get(PATH_SERVER_PROFILE))) {
-      String envNameArg = argsMap.get(PATH_SERVER_PROFILE);
-      this.envConfig(envNameArg);
-      this.envName = envNameArg;
-      argsMap.remove(PATH_SERVER_PROFILE);
-      this.envConfig = true;
-    }
-
-    if (!envConfig) {
-      String profileName = this.environment.get(PATH_SERVER_PROFILE);
-      if (Objects.nonNull(profileName) && !"".equals(profileName)) {
-        envConfig(profileName);
-        this.envName = profileName;
-      }
-    }
-  }
-
-  /**
-   * load properties and yaml
-   *
-   * @param bootConfEnv Environment used when the server starts
-   * @param constField  Constant attribute map
-   */
-  private void loadPropsOrYaml(Environment bootConfEnv, Map<String, String> constField) {
-    /** Properties are configured by default, and the properties loaded
-     * by default are application.properties */
-    constField.keySet().forEach(key ->
-            Optional.ofNullable(System.getProperty(constField.get(key)))
-                    .ifPresent(property -> bootConfEnv.add(key, property)));
-
-    /** If there is no properties configuration, the yaml format is
-     * used, and the default yaml loaded is application.yml */
-    if (bootConfEnv.isEmpty()) {
-      Optional.ofNullable(PropertyUtils.yaml(PATH_CONFIG_YAML))
-              .ifPresent(yamlConfigTreeMap ->
-                      bootConfEnv.load(new StringReader(
-                              PropertyUtils.toProperties(yamlConfigTreeMap))));
-    }
-  }
-
-  /**
-   * Load main function parameters, and override if main configuration exists
-   *
-   * @param args String parameter array of main method
-   * @return Write the parameters to the map and return
-   */
-  private Map<String, String> loadMainArgs(String[] args) {
-    Map<String, String> argsMap = PropertyUtils.parseArgs(args);
-    if (argsMap.size() > 0) {
-      log.info("Entered command line:{}", argsMap.toString());
-    }
-
-    for (Map.Entry<String, String> next : argsMap.entrySet()) {
-      this.environment.add(next.getKey(), next.getValue());
-    }
-    return argsMap;
-  }
-
-  /**
-   * Load the environment configuration, if it exists in the main
-   * configuration, it will be overwritten in the environment
-   * configuration
-   *
-   * @param envName Environment name
-   */
-  private void envConfig(String envName) {
-    String envFileName = "application" + "-" + envName + ".properties";
-    Environment customerEnv = Environment.of(envFileName);
-    if (customerEnv.isEmpty()) {
-      String envYmlFileName = "application" + "-" + envName + ".yml";
-      customerEnv = Environment.of(envYmlFileName);
-    }
-    if (!customerEnv.isEmpty()) {
-      customerEnv.props().forEach((key, value) ->
-              this.environment.add(key.toString(), value));
-    }
-    this.environment.add(PATH_SERVER_PROFILE, envName);
   }
 
   /**

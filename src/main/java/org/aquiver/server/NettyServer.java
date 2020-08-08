@@ -87,6 +87,7 @@ public class NettyServer implements Server {
   private EventLoopGroup workerGroup;
   private Environment environment;
   private Aquiver aquiver;
+  private Apex apex;
   private Channel channel;
   private SslContext sslContext;
 
@@ -109,6 +110,7 @@ public class NettyServer implements Server {
     long startMs = System.currentTimeMillis();
 
     this.aquiver = aquiver;
+    this.apex = Apex.of();
     this.environment = Apex.of().environment();
     this.routeManager = aquiver.routeManager();
     this.adviceManager = aquiver.adviceManager();
@@ -117,7 +119,7 @@ public class NettyServer implements Server {
 
     final String bootClsName = aquiver.bootClsName();
     final String bootConfName = aquiver.bootConfName();
-    final String envName = aquiver.envName();
+    final String envName = apex.envName();
     final String deviceName = SystemUtils.getDeviceName();
     final String currentUserName = System.getProperty("user.name");
     final String pidCode = SystemUtils.getPid();
@@ -127,7 +129,7 @@ public class NettyServer implements Server {
     log.info("Starting Http Server: Netty/4.1.36.Final");
     log.info("The configuration file loaded by this application startup is {}", bootConfName);
 
-    this.configLoadLog(aquiver, envName);
+    this.configLoadLog(envName);
 
     this.initSsl();
     this.initApex();
@@ -139,14 +141,13 @@ public class NettyServer implements Server {
   /**
    * record the log loaded by the configuration
    *
-   * @param aquiver Aquiver
    * @param envName Enabled environment name
    */
-  private void configLoadLog(Aquiver aquiver, String envName) {
-    if (aquiver.masterConfig()) {
+  private void configLoadLog(String envName) {
+    if (apex.masterConfig()) {
       log.info("Configuration information is loaded");
     }
-    if (!aquiver.envConfig()) {
+    if (!apex.envConfig()) {
       log.info("No active profile set, falling back to default profiles: default");
     }
     log.info("The application startup env is: {}", envName);
@@ -159,13 +160,13 @@ public class NettyServer implements Server {
     final Apex apex = Apex.of();
     final String scanPath = aquiver.bootCls().getPackage().getName();
     final ClassgraphOptions classgraphOptions = ClassgraphOptions.builder()
-            .verbose(aquiver.verbose()).realtimeLogging(aquiver.realtimeLogging())
+            .verbose(apex.verbose()).realtimeLogging(apex.realtimeLogging())
             .scanPackages(aquiver.scanPaths()).build();
 
     final Scanner scanner = new ClassgraphScanner(classgraphOptions);
     final ApexContext apexContext = apex.addScanAnnotation(extendAnnotation())
-            .options(classgraphOptions).scanner(scanner)
-            .packages(scanPath).apexContext();
+            .options(classgraphOptions).scanner(scanner).packages(scanPath)
+            .mainArgs(aquiver.mainArgs()).apexContext();
 
     final Map<String, Object> instances = apexContext.getInstances();
     if (instances.isEmpty()) {
