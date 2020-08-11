@@ -6,7 +6,7 @@
    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Build Status">
    <img src="https://img.shields.io/badge/Author-1619kHz-ff69b4.svg">
  </a>
- <a target="_blank" href="https://github.com/everknwon/aquiver">
+ <a target="_blank" href="https://github.com/AquiverV/aquiver">
    <img src="https://img.shields.io/badge/Copyright%20-@Aquiver-%23ff3f59.svg" alt="Downloads"/>
  </a>
  </p>
@@ -16,6 +16,20 @@
 Create a basic `Maven` or `Gradle` project.
 
 > Do not create a `webapp` project, Aquiver does not require much trouble.
+
+```git
+git clone https://github.com/AquiverV/apex.git
+
+cd apex
+
+mvn clean install
+
+git clone https://github.com/AquiverV/aquiver.git
+
+cd aquiver
+
+mvn clean install
+```
 
 Run with `Maven`:
 
@@ -108,4 +122,4 @@ public void uploadFileS(@MultiFileUpload List<MultipartFile> files) {
 ## License
 [MIT](https://opensource.org/licenses/MIT "MIT")
 
-Copyright (c) 2018-present, Yi (Ever) Wang
+Copyright (c) 2020-present, Yi (Ever) Wang
