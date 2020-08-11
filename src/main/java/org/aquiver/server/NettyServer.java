@@ -157,7 +157,6 @@ public class NettyServer implements Server {
    * init ioc container
    */
   private void initApex() throws Exception {
-    final Apex apex = Apex.of();
     final String scanPath = aquiver.bootCls().getPackage().getName();
     final ClassgraphOptions classgraphOptions = ClassgraphOptions.builder()
             .verbose(apex.verbose()).realtimeLogging(apex.realtimeLogging())
