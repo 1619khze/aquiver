@@ -268,7 +268,7 @@ public final class Aquiver {
    */
   public Integer sessionTimeout() {
     if (sessionTimeout == null) {
-      return this.environment.getInteger(PATH_SERVER_SESSION_TIMEOUT, SERVER_SESSION_TIMEOUT);
+      return this.environment.getInt(PATH_SERVER_SESSION_TIMEOUT, SERVER_SESSION_TIMEOUT);
     }
     return sessionTimeout;
   }

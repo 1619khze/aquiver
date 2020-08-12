@@ -34,20 +34,13 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.ResourceLeakDetector;
 import org.apex.*;
 import org.aquiver.Aquiver;
-import org.aquiver.function.Advice;
-import org.aquiver.function.AdviceManager;
 import org.aquiver.loader.WebLoader;
 import org.aquiver.mvc.annotation.Path;
 import org.aquiver.mvc.annotation.RestPath;
-import org.aquiver.mvc.annotation.advice.ExceptionHandler;
 import org.aquiver.mvc.annotation.advice.RouteAdvice;
-import org.aquiver.mvc.resolver.ParamResolverManager;
-import org.aquiver.mvc.route.RouteManager;
-import org.aquiver.mvc.route.RouteParam;
 import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvTask;
-import org.aquiver.utils.ReflectionUtils;
 import org.aquiver.utils.SystemUtils;
 import org.aquiver.websocket.WebSocket;
 import org.slf4j.Logger;
@@ -56,11 +49,8 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLException;
 import java.io.File;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.nio.file.Paths;
 import java.security.cert.CertificateException;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
@@ -242,8 +232,8 @@ public class NettyServer implements Server {
 
     this.serverBootstrap.childHandler(new NettyServerInitializer(sslContext));
 
-    int acceptThreadCount = environment.getInteger(PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT, DEFAULT_ACCEPT_THREAD_COUNT);
-    int ioThreadCount = environment.getInteger(PATH_SERVER_NETTY_IO_THREAD_COUNT, DEFAULT_IO_THREAD_COUNT);
+    int acceptThreadCount = environment.getInt(PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT, DEFAULT_ACCEPT_THREAD_COUNT);
+    int ioThreadCount = environment.getInt(PATH_SERVER_NETTY_IO_THREAD_COUNT, DEFAULT_IO_THREAD_COUNT);
 
     NettyServerGroup nettyServerGroup = EventLoopKit.nioGroup(acceptThreadCount, ioThreadCount);
     this.bossGroup = nettyServerGroup.getBossGroup();
@@ -263,7 +253,7 @@ public class NettyServer implements Server {
 
     this.stop = false;
 
-    final Integer port = this.environment.getInteger(PATH_SERVER_PORT, SERVER_PORT);
+    final int port = this.environment.getInt(PATH_SERVER_PORT, SERVER_PORT);
     final String address = this.environment.get(PATH_SERVER_ADDRESS, SERVER_ADDRESS);
     this.channel = serverBootstrap.bind(address, port).sync().channel();
 

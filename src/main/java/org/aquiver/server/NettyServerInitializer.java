@@ -60,7 +60,7 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
       channelPipeline.addLast(sslCtx.newHandler(ch.alloc()));
     }
 
-    final Boolean cors = aquiver.environment()
+    final boolean cors = aquiver.environment()
             .getBoolean(PATH_SERVER_CORS, SERVER_CORS);
     if (cors) {
       CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin()
@@ -69,7 +69,7 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
       channelPipeline.addLast(new CorsHandler(corsConfig));
     }
 
-    final Boolean gzip = aquiver.environment()
+    final boolean gzip = aquiver.environment()
             .getBoolean(PATH_SERVER_CONTENT_COMPRESSOR, SERVER_CONTENT_COMPRESSOR);
     if (gzip) {
       channelPipeline.addLast(new HttpContentCompressor());
