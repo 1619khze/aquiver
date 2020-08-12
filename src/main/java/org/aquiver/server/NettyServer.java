@@ -93,11 +93,6 @@ public class NettyServer implements Server {
   private Channel channel;
   private SslContext sslContext;
 
-  /** route manager. */
-  private RouteManager routeManager;
-  private AdviceManager adviceManager;
-  private ParamResolverManager resolverManager;
-
   /** Service startup status, using volatile to ensure threads are visible. */
   private volatile boolean stop = false;
 
@@ -114,9 +109,6 @@ public class NettyServer implements Server {
     this.aquiver = aquiver;
     this.apex = Apex.of();
     this.environment = this.apex.environment();
-    this.routeManager = this.aquiver.routeManager();
-    this.adviceManager = this.aquiver.adviceManager();
-    this.resolverManager = this.aquiver.resolverManager();
     this.printBanner();
 
     final String bootClsName = this.aquiver.bootClsName();
