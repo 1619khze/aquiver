@@ -108,7 +108,7 @@ public class NettyServer implements Server {
 
     this.aquiver = aquiver;
     this.apex = Apex.of();
-    this.environment = this.apex.environment();
+    this.environment = this.aquiver.environment();
     this.printBanner();
 
     final String bootClsName = this.aquiver.bootClsName();
