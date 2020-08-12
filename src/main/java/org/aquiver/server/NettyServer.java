@@ -36,6 +36,7 @@ import org.apex.*;
 import org.aquiver.Aquiver;
 import org.aquiver.function.Advice;
 import org.aquiver.function.AdviceManager;
+import org.aquiver.loader.WebLoader;
 import org.aquiver.mvc.annotation.Path;
 import org.aquiver.mvc.annotation.RestPath;
 import org.aquiver.mvc.annotation.advice.ExceptionHandler;
@@ -62,6 +63,7 @@ import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.ServiceLoader;
 
 import static org.aquiver.Const.*;
 
@@ -172,115 +174,15 @@ public class NettyServer implements Server {
       return;
     }
 
-    this.loadRoute(instances);
-    this.loadAdvice(instances);
-    this.loadWebSocket(instances);
+    ServiceLoader<WebLoader> webLoaders = ServiceLoader.load(WebLoader.class);
+    for (WebLoader webLoader : webLoaders) {
+      webLoader.load(instances, aquiver);
+    }
   }
 
   @SuppressWarnings("unchecked")
   private Class<? extends Annotation>[] extendAnnotation() {
     return new Class[]{Path.class, RouteAdvice.class, RestPath.class, WebSocket.class};
-  }
-
-  /**
-   * Filter out the routing class from the scanned
-   * result set and add it to the routing manager
-   *
-   * @param instances Scanned result
-   */
-  public void loadRoute(Map<String, Object> instances) {
-    for (Map.Entry<String, Object> entry : instances.entrySet()) {
-      Class<?> next = entry.getValue().getClass();
-      String url = "/";
-      boolean normal = ReflectionUtils.isNormal(next);
-      if (!normal) {
-        continue;
-      }
-      if (log.isDebugEnabled()) {
-        log.debug("Is this class normal: {}", next.getSimpleName());
-      }
-      if (Objects.isNull(next.getAnnotation(RestPath.class)) &&
-              Objects.isNull(next.getAnnotation(Path.class))) {
-        continue;
-      }
-      url = url(next, url);
-      this.routeManager.addRoute(entry.getValue(), url);
-    }
-  }
-
-  /**
-   * Get path value
-   *
-   * @param cls route class
-   * @param url default url
-   * @return The complete url after stitching
-   */
-  private String url(Class<?> cls, String url) {
-    Path classPath = cls.getAnnotation(Path.class);
-    if (classPath == null) {
-      return url;
-    }
-    String className = cls.getName();
-    String value = classPath.value();
-    if (!"".equals(value)) {
-      url = value;
-    }
-    if (log.isDebugEnabled()) {
-      log.debug("Registered rest controller:[{}:{}]", url, className);
-    }
-    return url;
-  }
-
-  /**
-   * Filter the Advice class from the scanned result
-   * set and add it to the Advice Manager
-   *
-   * @param instances Scanned result
-   */
-  private void loadAdvice(Map<String, Object> instances) {
-    for (Object object : instances.values()) {
-      Class<?> cls = object.getClass();
-      Method[] declaredMethods = cls.getDeclaredMethods();
-      if (!ReflectionUtils.isNormal(cls)
-              || !cls.isAnnotationPresent(RouteAdvice.class)
-              || declaredMethods.length == 0) {
-        continue;
-      }
-      for (Method method : declaredMethods) {
-        ExceptionHandler declaredAnnotation =
-                method.getDeclaredAnnotation(ExceptionHandler.class);
-        if (Objects.isNull(declaredAnnotation)) {
-          continue;
-        }
-        Parameter[] parameters = method.getParameters();
-        String[] paramNames = ReflectionUtils.getMethodParamName(method);
-        List<RouteParam> routeParams = this.resolverManager.invokeParamResolver(parameters, paramNames);
-
-        Advice advice = Advice.builder().clazz(cls).exception(declaredAnnotation.value())
-                .methodName(method.getName()).params(routeParams).target(object);
-        this.adviceManager.addAdvice(declaredAnnotation.value(), advice);
-      }
-    }
-  }
-
-  /**
-   * Filter out the classes marked with Web Socket annotations
-   * from the scan result set and reduce them to the Web Socket
-   * list of the routing manager
-   *
-   * @param instances Scanned result
-   * @throws ReflectiveOperationException Exception superclass when
-   *                                      performing reflection operation
-   */
-  private void loadWebSocket(Map<String, Object> instances) throws ReflectiveOperationException {
-    for (Object object : instances.values()) {
-      Class<?> cls = object.getClass();
-      Method[] declaredMethods = cls.getDeclaredMethods();
-      if (!ReflectionUtils.isNormal(cls)
-              || !cls.isAnnotationPresent(WebSocket.class)
-              || declaredMethods.length == 0) continue;
-      this.routeManager.addWebSocket(cls);
-    }
   }
 
   /**
