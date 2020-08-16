@@ -477,6 +477,22 @@ public final class Aquiver {
   }
 
   /**
+   * Get CORS on status
+   * @return cors status
+   */
+  public boolean cors() {
+    return this.environment().getBoolean(PATH_SERVER_CORS, SERVER_CORS);
+  }
+
+  /**
+   * Get Gzip on status
+   * @return Gzip status
+   */
+  public boolean gzip() {
+    return this.environment().getBoolean(PATH_SERVER_CONTENT_COMPRESSOR, SERVER_CONTENT_COMPRESSOR);
+  }
+
+  /**
    * Register websocket route
    *
    * @param path             Websocket route path
