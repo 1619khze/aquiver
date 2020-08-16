@@ -32,11 +32,9 @@ import io.netty.handler.codec.http.HttpMessage;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.util.concurrent.EventExecutor;
 import org.aquiver.Aquiver;
+import org.aquiver.Const;
 import org.aquiver.RequestContext;
-import org.aquiver.function.AdviceManager;
-import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.mvc.route.PathRouteMatcher;
-import org.aquiver.mvc.route.RouteManager;
 import org.aquiver.mvc.route.RouteMatcher;
 import org.aquiver.mvc.route.render.ResponseRenderMatcher;
 import org.slf4j.Logger;
@@ -52,7 +50,6 @@ import java.util.concurrent.CompletableFuture;
 public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
 
-  private final static String FAVICON_PATH = "/favicon.ico";
   private final RouteMatcher<RequestContext> matcher;
   private final ResponseRenderMatcher responseRenderMatcher;
   private FullHttpRequest fullHttpRequest;
@@ -89,7 +86,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
       this.fullHttpRequest = (FullHttpRequest) msg;
     }
 
-    if (FAVICON_PATH.equals(fullHttpRequest.uri())) {
+    if (Const.FAVICON_PATH.equals(fullHttpRequest.uri())) {
       return;
     }
 
