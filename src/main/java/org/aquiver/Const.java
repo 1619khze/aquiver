@@ -46,6 +46,7 @@ public interface Const {
   String SERVER_THREAD_NAME = "（'-'*)";
   String SERVER_VIEW_SUFFIX = ".html";
   String SERVER_SESSION_KEY = "AQSESSION";
+  String SERVER_TEMPLATES_FOLDER = "templates";
   String PATH_SERVER_PORT = "server.port";
   String PATH_SERVER_SSL = "server.ssl";
   String PATH_SERVER_ADDRESS = "server.address";
@@ -60,6 +61,7 @@ public interface Const {
   String PATH_SERVER_SESSION_KEY = "server.session.key";
   String PATH_SERVER_SESSION_TIMEOUT = "server.session.timeout";
   String PATH_SERVER_SESSION_ENABLE = "server.session.enable";
+  String PATH_SERVER_TEMPLATES_FOLDER = "server.template.folder";
 
   // netty setting
   String PATH_SERVER_SSL_CERT = "server.ssl.cert-path";
