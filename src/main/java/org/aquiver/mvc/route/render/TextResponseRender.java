@@ -55,19 +55,13 @@ public class TextResponseRender extends AbstractResponseRender implements Respon
     FullHttpRequest httpRequest = requestContext.request().httpRequest();
     Object result = route.getInvokeResult();
 
-    if (Objects.nonNull(result)){
+    if (Objects.nonNull(result)) {
       String stringResult = String.valueOf(result);
-      if(stringResult.startsWith("redirect:/")){
+      if (stringResult.startsWith("redirect:/")) {
         String url = stringResult.replaceFirst("redirect:/", "");
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-                HttpResponseStatus.PERMANENT_REDIRECT);
-        HttpHeaders headers = response.headers();
-        headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS, "x-requested-with,content-type");
-        headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS, "POST,GET");
-        headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-        headers.set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
-        headers.set(HttpHeaderNames.LOCATION, url);
-        requestContext.request().channelHandlerContext().writeAndFlush(response)
+        FullHttpResponse response = redirectResponse(url);
+        requestContext.request().channelHandlerContext()
+                .writeAndFlush(response)
                 .addListener(ChannelFutureListener.CLOSE);
         return;
       }

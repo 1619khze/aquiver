@@ -43,6 +43,18 @@ public abstract class AbstractResponseRender {
     return new DefaultFullHttpResponse(HTTP_1_1, status, byteBuf);
   }
 
+  protected FullHttpResponse redirectResponse(String url) {
+    FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+            HttpResponseStatus.PERMANENT_REDIRECT);
+    HttpHeaders headers = response.headers();
+    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS, "x-requested-with,content-type");
+    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS, "POST,GET");
+    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+    headers.set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+    headers.set(HttpHeaderNames.LOCATION, url);
+    return response;
+  }
+
   protected void setHeader(FullHttpResponse httpResponse, FullHttpRequest httpRequest, String mediaType) {
     HttpHeaders headers = httpResponse.headers();
     headers.set(HttpHeaderNames.CONTENT_TYPE, mediaType);
