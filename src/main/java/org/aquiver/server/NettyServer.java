@@ -33,6 +33,7 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.ResourceLeakDetector;
 import org.apex.*;
+import org.apex.Scanner;
 import org.aquiver.Aquiver;
 import org.aquiver.loader.WebLoader;
 import org.aquiver.mvc.annotation.Path;
@@ -51,9 +52,7 @@ import java.io.File;
 import java.lang.annotation.Annotation;
 import java.nio.file.Paths;
 import java.security.cert.CertificateException;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ServiceLoader;
+import java.util.*;
 
 import static org.aquiver.Const.*;
 
@@ -146,8 +145,14 @@ public class NettyServer implements Server {
             .verbose(apex.verbose()).realtimeLogging(apex.realtimeLogging())
             .scanPackages(aquiver.scanPaths()).build();
 
+    final List<Class<? extends Annotation>> extendAnnotations = new ArrayList<>();
+    extendAnnotations.add(Path.class);
+    extendAnnotations.add(RouteAdvice.class);
+    extendAnnotations.add(RestPath.class);
+    extendAnnotations.add(WebSocket.class);
+
     final Scanner scanner = new ClassgraphScanner(classgraphOptions);
-    final ApexContext apexContext = apex.addScanAnnotation(extendAnnotation())
+    final ApexContext apexContext = apex.addScanAnnotation(extendAnnotations)
             .options(classgraphOptions).scanner(scanner).packages(scanPath)
             .mainArgs(aquiver.mainArgs()).apexContext();
 
@@ -160,11 +165,6 @@ public class NettyServer implements Server {
     for (WebLoader webLoader : webLoaders) {
       webLoader.load(instances, aquiver);
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  private Class<? extends Annotation>[] extendAnnotation() {
-    return new Class[]{Path.class, RouteAdvice.class, RestPath.class, WebSocket.class};
   }
 
   /**
