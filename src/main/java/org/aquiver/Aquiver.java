@@ -99,6 +99,7 @@ public final class Aquiver {
   private int keepAliveTime = 0;
 
   private String viewSuffix;
+  private String templateFolder;
 
   /** Web components that need to be initialized */
   private final AdviceManager adviceManager = new AdviceManager();
@@ -221,6 +222,29 @@ public final class Aquiver {
     this.viewSuffix = requireNonNull(viewSuffix);
     this.environment.add(PATH_SERVER_VIEW_SUFFIX, viewSuffix);
     return this;
+  }
+
+  /**
+   * Set template folder
+   *
+   * @param folder template folder
+   */
+  public Aquiver templateFolder(String folder) {
+    requireState(this.templateFolder == null, "templateFolder was already set to %s", this.templateFolder);
+    this.templateFolder = requireNonNull(folder);
+    this.environment.add(PATH_SERVER_TEMPLATES_FOLDER, folder);
+    return this;
+  }
+
+  /**
+   * Get template folder
+   * @return template folder
+   */
+  public String templateFolder() {
+    if (templateFolder == null) {
+      return this.environment.getString(PATH_SERVER_TEMPLATES_FOLDER, SERVER_TEMPLATES_FOLDER);
+    }
+    return templateFolder;
   }
 
   /**
