@@ -38,8 +38,6 @@ import org.aquiver.websocket.WebSocketServerHandler;
 
 import java.util.Objects;
 
-import static org.aquiver.Const.*;
-
 /**
  * @author WangYi
  * @since 2019/6/5
@@ -52,37 +50,30 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
     this.sslCtx = sslCtx;
   }
 
+  /**
+   * init webSocket and bind netty childHandler, Determine whether SSL needs to
+   * be enabled based on whether the incoming SSLContext is null
+   * @param ch A TCP/IP socket
+   */
   @Override
   protected void initChannel(SocketChannel ch) {
     ChannelPipeline channelPipeline = ch.pipeline();
-    /** Determine whether SSL needs to be enabled based on whether the incoming SSLContext is null */
     if (Objects.nonNull(sslCtx)) {
       channelPipeline.addLast(sslCtx.newHandler(ch.alloc()));
     }
-
-    final boolean cors = aquiver.environment()
-            .getBoolean(PATH_SERVER_CORS, SERVER_CORS);
-    if (cors) {
+    if (aquiver.cors()) {
       CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin()
               .allowNullOrigin().allowCredentials().build();
-
       channelPipeline.addLast(new CorsHandler(corsConfig));
     }
-
-    final boolean gzip = aquiver.environment()
-            .getBoolean(PATH_SERVER_CONTENT_COMPRESSOR, SERVER_CONTENT_COMPRESSOR);
-    if (gzip) {
+    if (aquiver.gzip()) {
       channelPipeline.addLast(new HttpContentCompressor());
     }
-
-    channelPipeline.addLast(new HttpServerCodec());
-    channelPipeline.addLast(new HttpServerExpectContinueHandler());
-
-    /** init webSocket and bind netty childHandler */
     if (!aquiver.routeManager().getWebSockets().isEmpty()) {
       channelPipeline.addLast(new WebSocketServerHandler());
     }
-
+    channelPipeline.addLast(new HttpServerCodec());
+    channelPipeline.addLast(new HttpServerExpectContinueHandler());
     channelPipeline.addLast(new NettyServerHandler());
   }
 }
