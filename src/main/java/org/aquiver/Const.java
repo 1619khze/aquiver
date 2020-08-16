@@ -43,6 +43,7 @@ public interface Const {
   String BANNER_TEXT = "aquiver";
   String CRISPY_FRAMEWORK = " :: Aquiver Framework :: ";
   String SPACE = " ";
+  String FAVICON_PATH = "/favicon.ico";
   String SERVER_THREAD_NAME = "（'-'*)";
   String SERVER_VIEW_SUFFIX = ".html";
   String SERVER_SESSION_KEY = "AQSESSION";
