@@ -50,5 +50,6 @@ public interface MediaType {
   String TEXT_MARKDOWN_VALUE = "text/markdown";
   String TEXT_PLAIN_VALUE = "text/plain";
   String TEXT_XML_VALUE = "text/xml";
+  String TEXT_CSS_VALUE = "text/css";
   String PARAM_QUALITY_FACTOR = "q";
 }
