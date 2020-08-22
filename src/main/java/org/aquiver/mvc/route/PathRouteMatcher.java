@@ -26,7 +26,7 @@ package org.aquiver.mvc.route;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.aquiver.Aquiver;
-import org.aquiver.Async;
+import org.aquiver.utils.Async;
 import org.aquiver.RequestContext;
 import org.aquiver.function.AdviceManager;
 import org.aquiver.function.handler.HttpExceptionHandler;
