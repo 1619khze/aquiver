@@ -30,6 +30,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.multipart.*;
+import org.aquiver.mvc.MediaType;
 import org.aquiver.mvc.route.session.Session;
 
 import java.nio.charset.StandardCharsets;
@@ -105,7 +106,7 @@ public class Request {
     return sessionKey;
   }
 
-  public String ipAddress(){
+  public String ipAddress() {
     return channelHandlerContext().channel().remoteAddress().toString();
   }
 
