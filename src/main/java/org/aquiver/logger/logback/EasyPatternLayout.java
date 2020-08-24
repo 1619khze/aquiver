@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.logging.logback;
+package org.aquiver.logger.logback;
 
 import ch.qos.logback.classic.pattern.*;
 import ch.qos.logback.classic.pattern.color.HighlightingCompositeConverter;
