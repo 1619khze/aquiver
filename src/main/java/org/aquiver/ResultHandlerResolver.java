@@ -62,7 +62,7 @@ public final class ResultHandlerResolver {
     if (log.isDebugEnabled()) {
       log.debug("register ResultHandler: {} -> {}", resultClass.getName(), resultHandlerClass.getName());
     }
-    ResultHandler<?> resultHandler = this.context.getBean(resultHandlerClass);
+    ResultHandler<?> resultHandler = this.context.addBean(resultHandlerClass);
     this.mapping.put(resultClass, resultHandler);
   }
 
