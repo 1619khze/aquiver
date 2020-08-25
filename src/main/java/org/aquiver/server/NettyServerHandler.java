@@ -27,16 +27,19 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import org.aquiver.*;
+import org.aquiver.Aquiver;
+import org.aquiver.Const;
+import org.aquiver.RequestContext;
+import org.aquiver.ResultHandlerResolver;
 import org.aquiver.function.AdviceManager;
 import org.aquiver.function.handler.HttpExceptionHandler;
-import org.aquiver.mvc.RequestResult;
 import org.aquiver.mvc.resolver.ParamResolverContext;
 import org.aquiver.mvc.resolver.ParamResolverManager;
 import org.aquiver.mvc.route.NoRouteFoundException;
 import org.aquiver.mvc.route.PathVarMatcher;
 import org.aquiver.mvc.route.Route;
 import org.aquiver.mvc.route.RouteParam;
+import org.aquiver.mvc.route.render.ResponseRenderMatcher;
 import org.aquiver.utils.Async;
 import org.aquiver.utils.ReflectionUtils;
 import org.slf4j.Logger;
@@ -66,6 +69,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private final ParamResolverContext paramResolverContext = new ParamResolverContext();
   private final ResultHandlerResolver resultHandlerResolver = new ResultHandlerResolver();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
+  private final ResponseRenderMatcher responseRenderMatcher = new ResponseRenderMatcher();
 
   public NettyServerHandler() {
     final Aquiver aquiver = Aquiver.of();
@@ -109,33 +113,27 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     final RequestContext context = this.buildRequestContext(request, ctx);
-    RequestResult result = logicExecution(context);
-    try {
-      if (result != null) {
-        ResultHandler<Object> handler = this.resultHandlerResolver.lookup(result.getResultType());
-        handler.handle(context, result.getResultObject());
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    Route route = logicExecution(context);
+    context.route(route);
+    this.responseRenderMatcher.adapter(context);
   }
 
   private void closeChannel(RequestContext context) {
     context.request().channelHandlerContext().channel().close();
   }
 
-  public RequestResult logicExecution(RequestContext context) {
+  public Route logicExecution(RequestContext context) {
     CompletableFuture<RequestContext> lookUpaFuture =
             CompletableFuture.completedFuture(context);
 
-    CompletableFuture<RequestResult> resultFuture = lookUpaFuture
+    CompletableFuture<Route> resultFuture = lookUpaFuture
             .thenApply(this::lookupRoute)
             .thenApply(this::invokeParam)
             .thenApply(route -> invokeMethod(context, route));
 
-    RequestResult result = Async.getIfReady(resultFuture);
-    resultFuture.complete(result);
-    return result;
+    Route ifReady = Async.getIfReady(resultFuture);
+    resultFuture.complete(ifReady);
+    return ifReady;
   }
 
   private Route invokeParam(RequestContext context) {
@@ -158,7 +156,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     return route;
   }
 
-  private RequestResult invokeMethod(RequestContext context, Route route) {
+  private Route invokeMethod(RequestContext context, Route route) {
     try {
       Method method = ReflectionUtils.getInvokeMethod(route.getClazz(),
               route.getMethod(), route.getParamTypes());
@@ -169,7 +167,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
       log.info("{} {} {}", context.request().ipAddress(),
               context.request().httpMethodName(), context.route().getUrl());
 
-      return new RequestResult(method.getReturnType(), result);
+      route.setInvokeResult(result);
+      return route;
     } catch (Throwable throwable) {
       log.error("An exception occurred when calling the mapping method", throwable);
       this.paramResolverContext.throwable(throwable);
