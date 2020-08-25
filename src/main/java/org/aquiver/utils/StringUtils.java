@@ -44,4 +44,12 @@ public class StringUtils {
       return str;
     }
   }
+
+  public static String removeStart(String s, String remove) {
+    if (!isEmpty(s) && !isEmpty(remove)) {
+      return s.startsWith(remove) ? s.substring(remove.length()) : s;
+    } else {
+      return s;
+    }
+  }
 }
