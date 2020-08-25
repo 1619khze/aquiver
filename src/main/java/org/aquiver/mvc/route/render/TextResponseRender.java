@@ -37,7 +37,7 @@ import java.util.Objects;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
-import static org.aquiver.MediaType.TEXT_PLAIN_VALUE;
+import static org.aquiver.mvc.MediaType.TEXT_PLAIN_VALUE;
 
 /**
  * @author WangYi

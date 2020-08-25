@@ -21,25 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.resolver;
-
-import org.aquiver.mvc.route.RouteParam;
+package org.aquiver.mvc;
 
 /**
  * @author WangYi
- * @since 2020/7/3
+ * @since 2020/8/22
  */
-public class ParamResolverManager extends AbstractParamResolver implements ParamAssignment {
-  @Override
-  public Object assignment(RouteParam handlerParam, ParamResolverContext paramResolverContext) throws Exception {
-    Object dispen = null;
-    for (ParamResolver paramResolver : getParamResolvers()) {
-      if (!paramResolver.dispenType().equals(handlerParam.getType())) {
-        continue;
-      }
-      dispen = paramResolver.dispen(handlerParam.getDataType(),
-              handlerParam.getName(), paramResolverContext);
-    }
-    return dispen;
+public class RequestResult {
+  private final Class<?> resultType;
+  private final Object resultObject;
+
+  public RequestResult(Object resultObject) {
+    this.resultType = resultObject.getClass();
+    this.resultObject = resultObject;
+  }
+
+  public RequestResult(Class<?> resultClass, Object resultObject) {
+    this.resultType = resultClass;
+    this.resultObject = resultObject;
+  }
+
+  public Class<?> getResultType() {
+    return resultType;
+  }
+
+  public Object getResultObject() {
+    return resultObject;
   }
 }

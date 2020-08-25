@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.mvc;
 
 public interface MediaType {
   String ALL_VALUE = "*/*";
@@ -39,6 +39,7 @@ public interface MediaType {
   String APPLICATION_STREAM_JSON_VALUE = "application/stream+json";
   String APPLICATION_XHTML_XML_VALUE = "application/xhtml+xml";
   String APPLICATION_XML_VALUE = "application/xml";
+  String APPLICATION_JAVASCRIPT_VALUE = "application/javascript";
   String IMAGE_GIF_VALUE = "image/gif";
   String IMAGE_JPEG_VALUE = "image/jpeg";
   String IMAGE_PNG_VALUE = "image/png";

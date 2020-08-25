@@ -28,11 +28,11 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import org.aquiver.MediaType;
 import org.aquiver.ModelAndView;
-import org.aquiver.RequestContext;
+import org.aquiver.mvc.MediaType;
 import org.aquiver.mvc.route.Route;
 import org.aquiver.mvc.route.views.ViewType;
+import org.aquiver.RequestContext;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

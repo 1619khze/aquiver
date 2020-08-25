@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.mvc.resolver;
 
 import org.aquiver.mvc.resolver.ParamResolverContext;
 import org.aquiver.mvc.route.RouteParam;
