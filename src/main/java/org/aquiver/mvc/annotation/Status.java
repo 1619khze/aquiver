@@ -21,14 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.route;
+package org.aquiver.mvc.annotation;
 
-import org.aquiver.RequestContext;
+import java.lang.annotation.*;
 
 /**
  * @author WangYi
- * @since 2020/5/26
+ * @since 2020/8/22
  */
-public interface RouteMatcher<R> {
-  R match(RequestContext context);
+@Target({ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Status {
+  int value() default 200;
 }
