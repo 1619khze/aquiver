@@ -25,20 +25,26 @@ package org.aquiver;
 
 import org.apex.ApexContext;
 import org.aquiver.result.view.*;
+import org.aquiver.utils.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author WangYi
  * @since 2020/8/22
  */
 public final class ViewHandlerResolver {
+  private static final Logger log = LoggerFactory.getLogger(ViewHandlerResolver.class);
   private final Map<String, ViewHandler> viewHandlerMap = new HashMap<>();
+  private final ApexContext context = ApexContext.of();
 
   @PostConstruct
-  public void initialize() {
+  public void init() {
     this.register(CssDataViewHandler.class);
     this.register(GifDataViewHandler.class);
     this.register(PngDataViewHandler.class);
@@ -48,10 +54,27 @@ public final class ViewHandlerResolver {
     this.register(MarkdownDataViewHandler.class);
   }
 
-  public void register(Class<?> viewHandlerClass) {
-    if (!viewHandlerClass.isAssignableFrom(ViewHandler.class)) {
-      return;
+  public void register(Class<? extends ViewHandler> viewHandlerClass) {
+    Objects.requireNonNull(viewHandlerClass, "viewHandlerClass can't be null");
+    Aquiver.requireArgument(viewHandlerClass.isAssignableFrom(ViewHandler.class),
+            "Cannot assign a %s to a %s", viewHandlerClass.getName(), ViewHandler.class.getName());
+
+    ViewHandler viewHandler = context.addBean(viewHandlerClass);
+    this.viewHandlerMap.put(viewHandler.getType(), viewHandler);
+
+    if (log.isDebugEnabled()) {
+      log.debug("register ViewHandler: {} -> {}", viewHandler.getType(), viewHandlerClass.getName());
     }
-    ApexContext context = ApexContext.of();
+    String suffix = viewHandler.getSuffix();
+    if (suffix != null) {
+      suffix = StringUtils.removeStart(suffix, ".");
+      if (viewHandlerMap.put(suffix, viewHandler) == null) {
+        log.debug("register ViewHandler: {} -> {}", suffix, viewHandlerClass.getName());
+      }
+    }
+  }
+
+  public ViewHandler lookup(String type) {
+    return viewHandlerMap.get(type);
   }
 }
