@@ -30,7 +30,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
 import io.netty.handler.codec.http.multipart.*;
-import org.aquiver.mvc.MediaType;
+import org.aquiver.mvc.http.MediaType;
 import org.aquiver.mvc.router.session.Session;
 
 import java.nio.charset.StandardCharsets;
