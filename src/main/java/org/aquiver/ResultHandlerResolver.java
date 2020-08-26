@@ -25,6 +25,7 @@ package org.aquiver;
 
 import com.alibaba.fastjson.JSONObject;
 import org.apex.ApexContext;
+import org.aquiver.mvc.http.HttpStatus;
 import org.aquiver.result.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,7 @@ public final class ResultHandlerResolver {
     this.init();
   }
 
-  public void init() {
+  private void init() {
     this.register(Void.TYPE, VoidResultHandler.class);
     this.register(String.class, StringResultHandler.class);
     this.register(Object.class, ObjectResultHandler.class);
