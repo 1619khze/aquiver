@@ -58,6 +58,7 @@ public interface Const {
   String PATH_ENV_WATCHER = "server.env.watcher";
   String PATH_SCANNER_VERBOSE = "server.scanner.verbose";
   String PATH_SCANNER_LOGGING = "server.scanner.logging";
+  String PATH_SERVER_VIEW_PREFIX = "server.view.prefix";
   String PATH_SERVER_VIEW_SUFFIX = "server.view.suffix";
   String PATH_SERVER_SESSION_KEY = "server.session.key";
   String PATH_SERVER_SESSION_TIMEOUT = "server.session.timeout";
