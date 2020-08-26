@@ -36,8 +36,8 @@ public class RequestResult {
     this.resultObject = resultObject;
   }
 
-  public RequestResult(Class<?> resultClass, Object resultObject) {
-    this.resultType = resultClass;
+  public RequestResult(Class<?> resultType, Object resultObject) {
+    this.resultType = resultType;
     this.resultObject = resultObject;
   }
 
