@@ -27,7 +27,7 @@ import org.aquiver.Aquiver;
 import org.aquiver.function.Advice;
 import org.aquiver.mvc.annotation.advice.ExceptionHandler;
 import org.aquiver.mvc.annotation.advice.RouteAdvice;
-import org.aquiver.mvc.route.RouteParam;
+import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.utils.ReflectionUtils;
 
 import java.lang.reflect.Method;

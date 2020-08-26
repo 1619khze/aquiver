@@ -26,7 +26,7 @@ package org.aquiver.websocket;
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.resolver.ParamResolverContext;
 import org.aquiver.mvc.resolver.ParamResolverManager;
-import org.aquiver.mvc.route.RouteParam;
+import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.utils.ReflectionUtils;
 import org.aquiver.websocket.action.OnClose;
 import org.aquiver.websocket.action.OnConnect;

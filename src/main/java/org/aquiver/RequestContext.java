@@ -25,8 +25,7 @@ package org.aquiver;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
-import org.aquiver.mvc.route.Route;
-import org.aquiver.websocket.WebSocketContext;
+import org.aquiver.mvc.router.Route;
 
 /**
  * @author WangYi

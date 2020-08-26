@@ -21,30 +21,82 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.route.render;
+package org.aquiver.mvc.router;
 
-import org.aquiver.RequestContext;
-import org.aquiver.mvc.route.Route;
-import org.aquiver.mvc.route.views.ViewType;
-
-/**
- * @author WangYi
- * @since 2020/6/17
- */
-public interface ResponseRender {
-  /**
-   * Determine if View Type is supported
-   *
-   * @param viewType 需要支持的View Type
-   * @return Support
-   */
-  boolean support(ViewType viewType);
+public enum RouteParamType {
 
   /**
-   * Render view
-   *
-   * @param route Routing
-   * @param requestContext request context
+   * Request Url Param
    */
-  void render(Route route, RequestContext requestContext);
+  REQUEST_PARAM,
+
+  /**
+   * Path variable
+   */
+  PATH_VARIABLE,
+
+  /**
+   * Http Request
+   */
+  HTTP_REQUEST,
+
+  /**
+   * Http Response
+   */
+  HTTP_RESPONSE,
+
+  /**
+   * 请求体
+   */
+  REQUEST_BODY,
+
+  /**
+   * X-WWW-FORM-URLENCODED
+   */
+  URL_ENCODED_FORM,
+
+  /**
+   * Cookies
+   */
+  REQUEST_COOKIES,
+
+  /**
+   * Http Request Header Param
+   */
+  REQUEST_HEADER,
+
+  /**
+   * Upload file
+   */
+  UPLOAD_FILE,
+
+  /**
+   * Multiple upload files
+   */
+  UPLOAD_FILES,
+
+  /**
+   * Request Session
+   */
+  REQUEST_SESSION,
+
+  /**
+   * File operations
+   */
+  MULTIPART_FILE,
+
+  /**
+   * Throwable
+   */
+  THROWABLE_CLASS,
+
+  /**
+   * Request Context
+   */
+  REQUEST_CONTEXT,
+
+  /**
+   * WebSocket Context
+   */
+  WEBSOCKET_CONTEXT
 }

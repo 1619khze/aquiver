@@ -23,7 +23,7 @@
  */
 package org.aquiver.function;
 
-import org.aquiver.mvc.route.RouteParam;
+import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.utils.ReflectionUtils;
 
 import java.lang.invoke.MethodHandles;

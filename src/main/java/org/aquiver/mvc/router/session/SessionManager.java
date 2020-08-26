@@ -21,9 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.route.session;
+package org.aquiver.mvc.router.session;
 
-import io.netty.channel.Channel;
 import org.aquiver.Request;
 
 import java.util.HashMap;

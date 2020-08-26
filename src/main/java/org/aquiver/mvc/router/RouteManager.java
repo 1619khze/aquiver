@@ -21,14 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.route;
+package org.aquiver.mvc.router;
 
 import org.aquiver.RequestContext;
 import org.aquiver.RequestHandler;
 import org.aquiver.mvc.annotation.*;
 import org.aquiver.mvc.resolver.ParamResolverManager;
-import org.aquiver.mvc.route.views.PebbleHTMLView;
-import org.aquiver.mvc.route.views.ViewType;
+import org.aquiver.mvc.router.views.PebbleHTMLView;
+import org.aquiver.mvc.router.views.ViewType;
 import org.aquiver.utils.ReflectionUtils;
 import org.aquiver.websocket.WebSocket;
 import org.aquiver.websocket.WebSocketChannel;

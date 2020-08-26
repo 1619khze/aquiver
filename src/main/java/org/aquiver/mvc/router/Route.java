@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.route;
+package org.aquiver.mvc.router;
 
 import org.aquiver.mvc.annotation.HttpMethod;
-import org.aquiver.mvc.route.views.HTMLView;
-import org.aquiver.mvc.route.views.ViewType;
+import org.aquiver.mvc.router.views.HTMLView;
+import org.aquiver.mvc.router.views.ViewType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

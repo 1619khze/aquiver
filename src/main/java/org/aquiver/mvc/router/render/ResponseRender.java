@@ -21,20 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.route;
+package org.aquiver.mvc.router.render;
+
+import org.aquiver.RequestContext;
+import org.aquiver.mvc.router.Route;
+import org.aquiver.mvc.router.views.ViewType;
 
 /**
  * @author WangYi
- * @since 2020/5/29
+ * @since 2020/6/17
  */
-public class NoRouteFoundException extends RuntimeException {
+public interface ResponseRender {
   /**
-   * Constructor for NoRouteFoundException.
+   * Determine if View Type is supported
    *
-   * @param httpMethod the HTTP method
-   * @param requestURL the HTTP request URL
+   * @param viewType 需要支持的View Type
+   * @return Support
    */
-  public NoRouteFoundException(String httpMethod, String requestURL) {
-    super(String.format("No handler found for %s %s", httpMethod, requestURL));
-  }
+  boolean support(ViewType viewType);
+
+  /**
+   * Render view
+   *
+   * @param route Routing
+   * @param requestContext request context
+   */
+  void render(Route route, RequestContext requestContext);
 }

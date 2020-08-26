@@ -24,9 +24,9 @@
 package org.aquiver.mvc.resolver;
 
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.route.RouteParam;
-import org.aquiver.mvc.route.RouteParamType;
-import org.aquiver.mvc.route.multipart.MultipartFile;
+import org.aquiver.mvc.router.RouteParam;
+import org.aquiver.mvc.router.RouteParamType;
+import org.aquiver.mvc.router.multipart.MultipartFile;
 
 import java.lang.reflect.Parameter;
 

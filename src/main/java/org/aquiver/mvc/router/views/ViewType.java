@@ -21,82 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.route;
+package org.aquiver.mvc.router.views;
 
-public enum RouteParamType {
-
-  /**
-   * Request Url Param
-   */
-  REQUEST_PARAM,
-
-  /**
-   * Path variable
-   */
-  PATH_VARIABLE,
-
-  /**
-   * Http Request
-   */
-  HTTP_REQUEST,
-
-  /**
-   * Http Response
-   */
-  HTTP_RESPONSE,
-
-  /**
-   * 请求体
-   */
-  REQUEST_BODY,
-
-  /**
-   * X-WWW-FORM-URLENCODED
-   */
-  URL_ENCODED_FORM,
-
-  /**
-   * Cookies
-   */
-  REQUEST_COOKIES,
-
-  /**
-   * Http Request Header Param
-   */
-  REQUEST_HEADER,
-
-  /**
-   * Upload file
-   */
-  UPLOAD_FILE,
-
-  /**
-   * Multiple upload files
-   */
-  UPLOAD_FILES,
-
-  /**
-   * Request Session
-   */
-  REQUEST_SESSION,
-
-  /**
-   * File operations
-   */
-  MULTIPART_FILE,
-
-  /**
-   * Throwable
-   */
-  THROWABLE_CLASS,
-
-  /**
-   * Request Context
-   */
-  REQUEST_CONTEXT,
-
-  /**
-   * WebSocket Context
-   */
-  WEBSOCKET_CONTEXT
+/**
+ * @author WangYi
+ * @since 2020/6/17
+ */
+public enum ViewType {
+  JSON, TEXT, HTML
 }

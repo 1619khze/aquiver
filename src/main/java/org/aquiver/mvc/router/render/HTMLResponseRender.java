@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.route.render;
+package org.aquiver.mvc.router.render;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -30,8 +30,8 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.aquiver.ModelAndView;
 import org.aquiver.mvc.MediaType;
-import org.aquiver.mvc.route.Route;
-import org.aquiver.mvc.route.views.ViewType;
+import org.aquiver.mvc.router.Route;
+import org.aquiver.mvc.router.views.ViewType;
 import org.aquiver.RequestContext;
 
 import java.io.IOException;

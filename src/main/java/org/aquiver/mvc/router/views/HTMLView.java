@@ -21,32 +21,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.route.session;
+package org.aquiver.mvc.router.views;
 
-import io.netty.channel.ChannelHandlerContext;
-
-import java.util.List;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author WangYi
- * @since 2020/6/19
+ * @since 2020/6/16
  */
-public interface Session {
-  ChannelHandlerContext channelHandlerContext();
+public interface HTMLView {
+  /**
+   * Get the support view type.
+   *
+   * @return ViewType
+   */
+  ViewType viewType();
 
-  long getCreationTime();
-
-  String getId();
-
-  String getIp();
-
-  long getLastAccessedTime();
-
-  Object getAttribute(String key);
-
-  List<String> getAttributeNames();
-
-  void setAttribute(String key, Object value);
-
-  void removeAttribute(String key);
+  /**
+   * Get the content of the returned view
+   *
+   * @param htmlPath   html path
+   * @param viewParams view render params
+   * @return the content of the returned view
+   * @throws IOException io exception
+   */
+  String renderView(String htmlPath, Map<String, Object> viewParams) throws IOException;
 }

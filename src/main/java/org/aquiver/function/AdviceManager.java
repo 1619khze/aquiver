@@ -26,7 +26,7 @@ package org.aquiver.function;
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.resolver.ParamResolverContext;
 import org.aquiver.mvc.resolver.ParamResolverManager;
-import org.aquiver.mvc.route.RouteParam;
+import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -21,10 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.route.render;
+package org.aquiver.mvc.router.render;
 
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.route.Route;
+import org.aquiver.mvc.router.Route;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

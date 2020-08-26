@@ -21,12 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.route.views;
+package org.aquiver.mvc.router.session;
+
+import io.netty.channel.ChannelHandlerContext;
+
+import java.util.List;
 
 /**
  * @author WangYi
- * @since 2020/6/17
+ * @since 2020/6/19
  */
-public enum ViewType {
-  JSON, TEXT, HTML
+public interface Session {
+  ChannelHandlerContext channelHandlerContext();
+
+  long getCreationTime();
+
+  String getId();
+
+  String getIp();
+
+  long getLastAccessedTime();
+
+  Object getAttribute(String key);
+
+  List<String> getAttributeNames();
+
+  void setAttribute(String key, Object value);
+
+  void removeAttribute(String key);
 }

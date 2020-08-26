@@ -23,8 +23,7 @@
  */
 package org.aquiver.mvc.resolver;
 
-import org.aquiver.mvc.resolver.ParamResolverContext;
-import org.aquiver.mvc.route.RouteParam;
+import org.aquiver.mvc.router.RouteParam;
 
 /**
  * @author WangYi

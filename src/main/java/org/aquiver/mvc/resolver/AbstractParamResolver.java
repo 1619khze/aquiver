@@ -25,8 +25,8 @@ package org.aquiver.mvc.resolver;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.multipart.FileUpload;
-import org.aquiver.mvc.route.RouteParam;
-import org.aquiver.mvc.route.multipart.MultipartFile;
+import org.aquiver.mvc.router.RouteParam;
+import org.aquiver.mvc.router.multipart.MultipartFile;
 
 import java.io.FileInputStream;
 import java.io.IOException;

@@ -21,30 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.route.views;
-
-import java.io.IOException;
-import java.util.Map;
+package org.aquiver.mvc.router;
 
 /**
  * @author WangYi
- * @since 2020/6/16
+ * @since 2020/5/29
  */
-public interface HTMLView {
+public class NoRouteFoundException extends RuntimeException {
   /**
-   * Get the support view type.
+   * Constructor for NoRouteFoundException.
    *
-   * @return ViewType
+   * @param httpMethod the HTTP method
+   * @param requestURL the HTTP request URL
    */
-  ViewType viewType();
-
-  /**
-   * Get the content of the returned view
-   *
-   * @param htmlPath   html path
-   * @param viewParams view render params
-   * @return the content of the returned view
-   * @throws IOException io exception
-   */
-  String renderView(String htmlPath, Map<String, Object> viewParams) throws IOException;
+  public NoRouteFoundException(String httpMethod, String requestURL) {
+    super(String.format("No handler found for %s %s", httpMethod, requestURL));
+  }
 }

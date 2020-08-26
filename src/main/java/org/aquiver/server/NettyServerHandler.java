@@ -27,20 +27,17 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import org.aquiver.Aquiver;
-import org.aquiver.Const;
-import org.aquiver.RequestContext;
-import org.aquiver.ResultHandlerResolver;
+import org.aquiver.*;
 import org.aquiver.function.AdviceManager;
 import org.aquiver.function.handler.HttpExceptionHandler;
+import org.aquiver.mvc.RequestResult;
 import org.aquiver.mvc.resolver.ParamResolverContext;
 import org.aquiver.mvc.resolver.ParamResolverManager;
-import org.aquiver.mvc.route.NoRouteFoundException;
-import org.aquiver.mvc.route.PathVarMatcher;
-import org.aquiver.mvc.route.Route;
-import org.aquiver.mvc.route.RouteParam;
-import org.aquiver.mvc.route.render.ResponseRenderMatcher;
-import org.aquiver.utils.Async;
+import org.aquiver.mvc.router.NoRouteFoundException;
+import org.aquiver.mvc.router.PathVarMatcher;
+import org.aquiver.mvc.router.Route;
+import org.aquiver.mvc.router.RouteParam;
+import org.aquiver.mvc.router.render.ResponseRenderMatcher;
 import org.aquiver.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +47,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * @author WangYi
@@ -61,14 +57,15 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
 
   private FullHttpRequest request;
+  private RequestContext requestContext;
   private final Map<String, Route> routeMap;
   private final HttpExceptionHandler exceptionHandler;
   private final StaticFileServerHandler fileServerHandler;
   private final AdviceManager adviceManager;
   private final ParamResolverManager resolverManager;
+  private final MethodHandles.Lookup lookup = MethodHandles.lookup();
   private final ParamResolverContext paramResolverContext = new ParamResolverContext();
   private final ResultHandlerResolver resultHandlerResolver = new ResultHandlerResolver();
-  private final MethodHandles.Lookup lookup = MethodHandles.lookup();
   private final ResponseRenderMatcher responseRenderMatcher = new ResponseRenderMatcher();
 
   public NettyServerHandler() {
@@ -92,12 +89,17 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-    log.error("HttpRequestHandler error", cause);
-    ctx.close();
+    log.error("An exception occurred when calling the mapping method", cause);
+    this.paramResolverContext.throwable(cause);
+    final Object handlerExceptionResult = this.adviceManager
+            .handlerException(cause, resolverManager, paramResolverContext);
+    if (Objects.nonNull(handlerExceptionResult)) {
+      return;
+    }
   }
 
   @Override
-  protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
+  protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
     if (msg instanceof HttpRequest) {
       HttpRequest request = (HttpRequest) msg;
       this.request = new DefaultFullHttpRequest(
@@ -112,74 +114,41 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
       return;
     }
 
-    final RequestContext context = this.buildRequestContext(request, ctx);
-    Route route = logicExecution(context);
-    context.route(route);
-    this.responseRenderMatcher.adapter(context);
+    this.requestContext = this.buildRequestContext(request, ctx);
+    RequestResult result = logicExecution(requestContext);
+    if (Objects.nonNull(result)) {
+      ResultHandler<Object> handler = resultHandlerResolver.lookup(result.getResultType());
+      handler.handle(requestContext, result.getResultObject());
+    }
+    this.responseRenderMatcher.adapter(requestContext);
   }
 
   private void closeChannel(RequestContext context) {
     context.request().channelHandlerContext().channel().close();
   }
 
-  public Route logicExecution(RequestContext context) {
-    CompletableFuture<RequestContext> lookUpaFuture =
-            CompletableFuture.completedFuture(context);
-
-    CompletableFuture<Route> resultFuture = lookUpaFuture
-            .thenApply(this::lookupRoute)
-            .thenApply(this::invokeParam)
-            .thenApply(route -> invokeMethod(context, route));
-
-    Route ifReady = Async.getIfReady(resultFuture);
-    resultFuture.complete(ifReady);
-    return ifReady;
+  public RequestResult logicExecution(RequestContext context) throws Exception {
+    RequestContext requestContext = lookupRoute(context);
+    return null;
   }
 
-  private Route invokeParam(RequestContext context) {
-    Route route = context.route();
-    List<RouteParam> params = route.getParams();
-
-    Object[] paramValues = new Object[params.size()];
-    Class<?>[] paramTypes = new Class[params.size()];
-
-    try {
-      this.paramResolverContext.requestContext(context);
-      ReflectionUtils.invokeParam(paramResolverContext, route.getParams(),
-              paramValues, paramTypes, resolverManager);
-    } catch (Exception e) {
-      log.error("An exception occurred when obtaining invoke param");
-      closeChannel(context);
+  private RequestContext lookupRoute(RequestContext context) throws Exception {
+    String lookupPath = lookupPath(context.request().uri());
+    int paramStartIndex = lookupPath.indexOf("?");
+    if (paramStartIndex > 0) {
+      lookupPath = lookupPath.substring(0, paramStartIndex);
     }
-    route.setParamValues(paramValues);
-    route.setParamTypes(paramTypes);
-    return route;
-  }
 
-  private Route invokeMethod(RequestContext context, Route route) {
-    try {
-      Method method = ReflectionUtils.getInvokeMethod(route.getClazz(),
-              route.getMethod(), route.getParamTypes());
+    if (lookupPath.equals("")) {
+      lookupPath = "/";
+    }
 
-      Object result = lookup.unreflect(method).bindTo(route.getBean())
-              .invokeWithArguments(route.getParamValues());
-
-      log.info("{} {} {}", context.request().ipAddress(),
-              context.request().httpMethodName(), context.route().getUrl());
-
-      route.setInvokeResult(result);
-      return route;
-    } catch (Throwable throwable) {
-      log.error("An exception occurred when calling the mapping method", throwable);
-      this.paramResolverContext.throwable(throwable);
-
-      final Object handlerExceptionResult = this.adviceManager
-              .handlerException(throwable, resolverManager, paramResolverContext);
-
-      if (Objects.nonNull(handlerExceptionResult)) {
-        route.setInvokeResult(handlerExceptionResult);
-      }
-      return null;
+    Route route = loopLookUp(lookupPath);
+    if (Objects.nonNull(route)) {
+      context.route(route);
+      return context;
+    } else {
+      return lookupStaticFile(context);
     }
   }
 
@@ -201,33 +170,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     return null;
   }
 
-  private RequestContext lookupRoute(RequestContext context) {
-    String lookupPath = lookupPath(context.request().uri());
-    int paramStartIndex = lookupPath.indexOf("?");
-    if (paramStartIndex > 0) {
-      lookupPath = lookupPath.substring(0, paramStartIndex);
-    }
-
-    if (lookupPath.equals("")) {
-      lookupPath = "/";
-    }
-
-    Route route = loopLookUp(lookupPath);
-
-    try {
-      if (Objects.nonNull(route)) {
-        context.route(route);
-        return context;
-      } else {
-        return lookupStaticFile(context);
-      }
-    } catch (Exception e) {
-      log.error("An exception occurred when calling the lookup route", e);
-      closeChannel(context);
-      return null;
-    }
-  }
-
   private String lookupPath(String uri) {
     return uri.endsWith("/") ? uri.substring(0, uri.length() - 1) : uri;
   }
@@ -239,6 +181,33 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
       throw new NoRouteFoundException(context.request().httpMethodName(), context.request().uri());
     }
     return context;
+  }
+
+  private Route invokeParam(RequestContext context) throws Exception {
+    Route route = context.route();
+    List<RouteParam> params = route.getParams();
+
+    Object[] paramValues = new Object[params.size()];
+    Class<?>[] paramTypes = new Class[params.size()];
+
+    this.paramResolverContext.requestContext(context);
+    ReflectionUtils.invokeParam(paramResolverContext, route.getParams(),
+            paramValues, paramTypes, resolverManager);
+    route.setParamValues(paramValues);
+    route.setParamTypes(paramTypes);
+    return route;
+  }
+
+  private RequestResult invokeMethod(Route route) throws Throwable {
+    final Method method = ReflectionUtils.getInvokeMethod(route.getClazz()
+            , route.getMethod(), route.getParamTypes());
+
+    final Object result = lookup.unreflect(method).bindTo(route.getBean())
+            .invokeWithArguments(route.getParamValues());
+
+    log.info("{} {} {}", requestContext.request().ipAddress(),
+            requestContext.request().httpMethodName(), requestContext.route().getUrl());
+    return new RequestResult(method.getReturnType(), result);
   }
 
   private void handlerNoRouteFoundException(RequestContext requestContext) {

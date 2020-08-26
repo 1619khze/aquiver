@@ -25,7 +25,7 @@ package org.aquiver.websocket;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import org.aquiver.mvc.route.session.Session;
+import org.aquiver.mvc.router.session.Session;
 
 import java.util.*;
 
