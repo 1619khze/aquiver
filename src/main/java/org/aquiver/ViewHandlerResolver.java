@@ -29,7 +29,6 @@ import org.aquiver.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -43,8 +42,11 @@ public final class ViewHandlerResolver {
   private final Map<String, ViewHandler> viewHandlerMap = new HashMap<>();
   private final ApexContext context = ApexContext.of();
 
-  @PostConstruct
-  public void init() {
+  public ViewHandlerResolver() {
+    this.init();
+  }
+
+  private void init() {
     this.register(CssDataViewHandler.class);
     this.register(GifDataViewHandler.class);
     this.register(PngDataViewHandler.class);
