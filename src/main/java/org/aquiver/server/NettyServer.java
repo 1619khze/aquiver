@@ -35,6 +35,7 @@ import io.netty.util.ResourceLeakDetector;
 import org.apex.*;
 import org.apex.Scanner;
 import org.aquiver.Aquiver;
+import org.aquiver.WebInitializer;
 import org.aquiver.loader.WebLoader;
 import org.aquiver.mvc.annotation.Path;
 import org.aquiver.mvc.annotation.RestPath;
@@ -157,14 +158,7 @@ public class NettyServer implements Server {
             .mainArgs(aquiver.mainArgs()).apexContext();
 
     final Map<String, Object> instances = apexContext.getInstances();
-    if (instances.isEmpty()) {
-      return;
-    }
-
-    ServiceLoader<WebLoader> webLoaders = ServiceLoader.load(WebLoader.class);
-    for (WebLoader webLoader : webLoaders) {
-      webLoader.load(instances, aquiver);
-    }
+    WebInitializer.initialize(instances, aquiver);
   }
 
   /**
@@ -283,7 +277,8 @@ public class NettyServer implements Server {
         this.workerGroup.shutdownGracefully();
       }
       log.info("The netty service is gracefully closed");
-    } catch (Exception e) {
+    }
+    catch(Exception e) {
       log.error("An exception occurred while the Netty Http service was down", e);
     }
   }
@@ -292,7 +287,8 @@ public class NettyServer implements Server {
   public void join() {
     try {
       this.channel.closeFuture().sync();
-    } catch (InterruptedException e) {
+    }
+    catch(InterruptedException e) {
       log.error("Channel close future fail", e);
     }
   }
