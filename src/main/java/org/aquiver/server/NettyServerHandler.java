@@ -66,7 +66,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
   private final ArgumentGetterContext argumentGetterContext = new ArgumentGetterContext();
   private final ResultHandlerResolver resultHandlerResolver = new ResultHandlerResolver();
-  private final ResponseRenderMatcher responseRenderMatcher = new ResponseRenderMatcher();
 
   public NettyServerHandler() {
     final Aquiver aquiver = Aquiver.of();
@@ -121,10 +120,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
         ResultHandler<Object> handler = resultHandlerResolver.lookup(result.getResultType());
         handler.handle(requestContext, result.getResultObject());
       }
-      this.responseRenderMatcher.adapter(requestContext);
     }
     catch(Throwable throwable) {
-      throwable.printStackTrace();
+      exceptionCaught(ctx,throwable);
     }
   }
 
@@ -203,7 +201,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
             .invokeWithArguments(routeInfo.getParamValues());
 
     log.info("{} {} {}", requestContext.request().ipAddress(),
-            requestContext.request().httpMethodName(), requestContext.route().getUrl());
+            requestContext.request().httpMethodName(), routeInfo.getUrl());
     return new RequestResult(method.getReturnType(), result);
   }
 
