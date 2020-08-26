@@ -33,10 +33,8 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.ResourceLeakDetector;
 import org.apex.*;
-import org.apex.Scanner;
 import org.aquiver.Aquiver;
 import org.aquiver.WebInitializer;
-import org.aquiver.loader.WebLoader;
 import org.aquiver.mvc.annotation.Path;
 import org.aquiver.mvc.annotation.RestPath;
 import org.aquiver.mvc.annotation.advice.RouteAdvice;
@@ -53,7 +51,10 @@ import java.io.File;
 import java.lang.annotation.Annotation;
 import java.nio.file.Paths;
 import java.security.cert.CertificateException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static org.aquiver.Const.*;
 
