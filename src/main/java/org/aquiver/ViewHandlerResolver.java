@@ -59,8 +59,6 @@ public final class ViewHandlerResolver {
 
   public void register(Class<? extends ViewHandler> viewHandlerClass) {
     Objects.requireNonNull(viewHandlerClass, "viewHandlerClass can't be null");
-    Aquiver.requireArgument(viewHandlerClass.isAssignableFrom(ViewHandler.class),
-            "Cannot assign a %s to a %s", viewHandlerClass.getName(), ViewHandler.class.getName());
 
     ViewHandler viewHandler = context.addBean(viewHandlerClass);
     this.viewHandlerMap.put(viewHandler.getType(), viewHandler);
