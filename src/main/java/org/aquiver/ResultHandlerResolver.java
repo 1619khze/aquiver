@@ -53,6 +53,7 @@ public final class ResultHandlerResolver {
     this.register(Object.class, ObjectResultHandler.class);
     this.register(JSONObject.class, JsonResultHandler.class);
     this.register(Document.class, XMLDocumentResultHandler.class);
+    this.register(HttpStatus.class, HttpStatusResultHandler.class);
   }
 
   public void register(Class<?> resultClass, Class<? extends ResultHandler<?>> resultHandlerClass) {
