@@ -27,7 +27,7 @@ import org.apex.Apex;
 import org.apex.Environment;
 import org.aquiver.function.AdviceManager;
 import org.aquiver.mvc.annotation.HttpMethod;
-import org.aquiver.mvc.resolver.ArgumentResolverManager;
+import org.aquiver.mvc.argument.ArgumentResolverManager;
 import org.aquiver.mvc.router.RouteManager;
 import org.aquiver.mvc.router.session.SessionManager;
 import org.aquiver.server.NettyServer;

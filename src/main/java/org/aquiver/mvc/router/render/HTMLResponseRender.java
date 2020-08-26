@@ -30,7 +30,7 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.aquiver.ModelAndView;
 import org.aquiver.mvc.http.MediaType;
-import org.aquiver.mvc.router.Route;
+import org.aquiver.mvc.router.RouteInfo;
 import org.aquiver.mvc.router.views.ViewType;
 import org.aquiver.RequestContext;
 
@@ -57,11 +57,11 @@ public class HTMLResponseRender extends AbstractResponseRender implements Respon
   }
 
   @Override
-  public void render(Route route, RequestContext requestContext) {
+  public void render(RouteInfo routeInfo, RequestContext requestContext) {
     Map<String, Object> params = new HashMap<>();
 
     final String viewSuffix = aquiver.environment().getString(PATH_SERVER_VIEW_SUFFIX, SERVER_VIEW_SUFFIX);
-    final Object invokeResult = route.getInvokeResult();
+    final Object invokeResult = routeInfo.getInvokeResult();
 
     String fullHtmlPath = "templates/";
 
@@ -87,7 +87,7 @@ public class HTMLResponseRender extends AbstractResponseRender implements Respon
     fullHtmlPath = fullHtmlPath.replace("//", "/");
 
     try {
-      final String renderView = route.getHtmlView().renderView(fullHtmlPath, params);
+      final String renderView = routeInfo.getHtmlView().renderView(fullHtmlPath, params);
       FullHttpRequest httpRequest = requestContext.request().httpRequest();
       HttpResponseStatus status = httpRequest.decoderResult().isSuccess() ? OK : BAD_REQUEST;
       ByteBuf byteBuf = Unpooled.copiedBuffer(renderView.getBytes(StandardCharsets.UTF_8));

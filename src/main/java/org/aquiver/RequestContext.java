@@ -25,14 +25,14 @@ package org.aquiver;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
-import org.aquiver.mvc.router.Route;
+import org.aquiver.mvc.router.RouteInfo;
 
 /**
  * @author WangYi
  * @since 2020/6/27
  */
 public class RequestContext {
-  private Route route;
+  private RouteInfo routeInfo;
   private final Request request;
   private final Response response;
 
@@ -41,12 +41,12 @@ public class RequestContext {
     this.response = new Response();
   }
 
-  public Route route() {
-    return route;
+  public RouteInfo route() {
+    return routeInfo;
   }
 
-  public void route(Route route) {
-    this.route = route;
+  public void route(RouteInfo routeInfo) {
+    this.routeInfo = routeInfo;
   }
 
   public Request request() {

@@ -26,17 +26,13 @@ package org.aquiver.mvc.router;
 import org.aquiver.mvc.annotation.HttpMethod;
 import org.aquiver.mvc.router.views.HTMLView;
 import org.aquiver.mvc.router.views.ViewType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class Route {
-  private static final Logger log = LoggerFactory.getLogger(Route.class);
-
+public class RouteInfo {
   private String url;
   private Class<?> clazz;
   private String method;
@@ -50,7 +46,7 @@ public class Route {
 
   private List<RouteParam> params = new ArrayList<>();
 
-  private Route(String url, Class<?> clazz, Object bean, String method, HttpMethod httpMethod) {
+  private RouteInfo(String url, Class<?> clazz, Object bean, String method, HttpMethod httpMethod) {
     this.url = url;
     this.clazz = clazz;
     this.method = method;
@@ -58,12 +54,12 @@ public class Route {
     this.bean = bean;
   }
 
-  public static Route of(String url, Class<?> clazz, Object bean, String method, HttpMethod httpMethod) {
+  public static RouteInfo of(String url, Class<?> clazz, Object bean, String method, HttpMethod httpMethod) {
     Objects.requireNonNull(url, "url must not be null");
     Objects.requireNonNull(clazz, "clazz must not be null");
     Objects.requireNonNull(method, "method must not be null");
     Objects.requireNonNull(httpMethod, "pathMethod must not be null");
-    return new Route(url, clazz, bean, method, httpMethod);
+    return new RouteInfo(url, clazz, bean, method, httpMethod);
   }
 
   public String getUrl() {

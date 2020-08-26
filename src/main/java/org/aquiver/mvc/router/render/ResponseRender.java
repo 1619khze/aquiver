@@ -24,7 +24,7 @@
 package org.aquiver.mvc.router.render;
 
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.router.Route;
+import org.aquiver.mvc.router.RouteInfo;
 import org.aquiver.mvc.router.views.ViewType;
 
 /**
@@ -43,8 +43,8 @@ public interface ResponseRender {
   /**
    * Render view
    *
-   * @param route Routing
+   * @param routeInfo Routing
    * @param requestContext request context
    */
-  void render(Route route, RequestContext requestContext);
+  void render(RouteInfo routeInfo, RequestContext requestContext);
 }

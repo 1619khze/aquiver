@@ -26,7 +26,7 @@ package org.aquiver.mvc.router;
 import org.aquiver.RequestContext;
 import org.aquiver.RequestHandler;
 import org.aquiver.mvc.annotation.*;
-import org.aquiver.mvc.resolver.ArgumentResolverManager;
+import org.aquiver.mvc.argument.ArgumentResolverManager;
 import org.aquiver.mvc.router.views.PebbleHTMLView;
 import org.aquiver.mvc.router.views.ViewType;
 import org.aquiver.utils.ReflectionUtils;
@@ -54,7 +54,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public final class RouteManager {
   private static final Logger log = LoggerFactory.getLogger(RouteManager.class);
 
-  private final Map<String, Route> routes = new ConcurrentHashMap<>(64);
+  private final Map<String, RouteInfo> routes = new ConcurrentHashMap<>(64);
   private final Map<String, WebSocketChannel> webSockets = new ConcurrentHashMap<>(4);
   private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
@@ -99,7 +99,7 @@ public final class RouteManager {
    *
    * @return Route Map
    */
-  public Map<String, Route> getRoutes() {
+  public Map<String, RouteInfo> getRoutes() {
     readLock().lock();
     try {
       return this.routes;
@@ -183,13 +183,13 @@ public final class RouteManager {
     if (completeUrl.trim().isEmpty()) {
       return;
     }
-    Route route = createRoute(clazz, bean, method, httpMethod, completeUrl);
+    RouteInfo routeInfo = createRoute(clazz, bean, method, httpMethod, completeUrl);
 
     Parameter[] parameters = method.getParameters();
     String[] paramNames = ReflectionUtils.getMethodParamName(method);
 
     List<RouteParam> routeParams = resolverManager.invokeParamResolver(parameters, paramNames);
-    route.setParams(routeParams);
+    routeInfo.setParams(routeParams);
 
     if (this.whetherRouteIsDuplicated(completeUrl)) {
       if (log.isDebugEnabled()) {
@@ -197,7 +197,7 @@ public final class RouteManager {
       }
       throw new RouteRepeatException("Registered request route URL is duplicated : " + completeUrl);
     } else {
-      this.addRoute(completeUrl, route);
+      this.addRoute(completeUrl, routeInfo);
     }
   }
 
@@ -210,36 +210,36 @@ public final class RouteManager {
    * @param completeUrl Complete route path
    * @return Route
    */
-  private Route createRoute(Class<?> clazz, Object bean, Method method, HttpMethod httpMethod, String completeUrl) {
-    Route route = Route.of(completeUrl, clazz, bean, method.getName(), httpMethod);
+  private RouteInfo createRoute(Class<?> clazz, Object bean, Method method, HttpMethod httpMethod, String completeUrl) {
+    RouteInfo routeInfo = RouteInfo.of(completeUrl, clazz, bean, method.getName(), httpMethod);
 
     boolean isAllJsonResponse = Objects.isNull(clazz.getAnnotation(RestPath.class));
     boolean isJsonResponse = Objects.isNull(method.getAnnotation(JSON.class));
     boolean isViewResponse = Objects.isNull(method.getAnnotation(View.class));
 
     if (isJsonResponse || (isAllJsonResponse && isViewResponse)) {
-      route.setViewType(ViewType.JSON);
+      routeInfo.setViewType(ViewType.JSON);
     }
     if (!isViewResponse) {
-      route.setViewType(ViewType.HTML);
-      route.setHtmlView(new PebbleHTMLView());
+      routeInfo.setViewType(ViewType.HTML);
+      routeInfo.setHtmlView(new PebbleHTMLView());
     }
     if (isAllJsonResponse && isJsonResponse && isViewResponse) {
-      route.setViewType(ViewType.TEXT);
+      routeInfo.setViewType(ViewType.TEXT);
     }
-    return route;
+    return routeInfo;
   }
 
   /**
    * add route
    *
    * @param url   url
-   * @param route Route info
+   * @param routeInfo Route info
    */
-  protected void addRoute(String url, Route route) {
+  protected void addRoute(String url, RouteInfo routeInfo) {
     this.writeLock().lock();
     try {
-      this.routes.put(url, route);
+      this.routes.put(url, routeInfo);
     } finally {
       this.writeLock().unlock();
     }

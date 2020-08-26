@@ -24,7 +24,7 @@
 package org.aquiver.mvc.router.render;
 
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.router.Route;
+import org.aquiver.mvc.router.RouteInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,16 +58,16 @@ public class ResponseRenderMatcher {
   public void adapter(RequestContext requestContext) {
     requireNonNull(requestContext, "RequestContext cant't be null");
 
-    Route route = requestContext.route();
+    RouteInfo routeInfo = requestContext.route();
 
     if (responseRenders.isEmpty()) {
       throw new RuntimeException("No available ResponseRender found");
     }
     for (ResponseRender responseRender : responseRenders) {
-      if (!responseRender.support(route.getViewType())) {
+      if (!responseRender.support(routeInfo.getViewType())) {
         continue;
       }
-      responseRender.render(route, requestContext);
+      responseRender.render(routeInfo, requestContext);
     }
   }
 

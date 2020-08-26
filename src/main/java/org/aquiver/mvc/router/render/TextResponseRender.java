@@ -29,7 +29,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.router.Route;
+import org.aquiver.mvc.router.RouteInfo;
 import org.aquiver.mvc.router.views.ViewType;
 
 import java.nio.charset.StandardCharsets;
@@ -51,9 +51,9 @@ public class TextResponseRender extends AbstractResponseRender implements Respon
   }
 
   @Override
-  public void render(Route route, RequestContext requestContext) {
+  public void render(RouteInfo routeInfo, RequestContext requestContext) {
     FullHttpRequest httpRequest = requestContext.request().httpRequest();
-    Object result = route.getInvokeResult();
+    Object result = routeInfo.getInvokeResult();
 
     if (Objects.nonNull(result)) {
       String stringResult = String.valueOf(result);

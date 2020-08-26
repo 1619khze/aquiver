@@ -31,7 +31,7 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.CharsetUtil;
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.router.Route;
+import org.aquiver.mvc.router.RouteInfo;
 import org.aquiver.mvc.router.views.ViewType;
 
 import java.nio.charset.StandardCharsets;
@@ -53,9 +53,9 @@ public class JSONResponseRender extends AbstractResponseRender implements Respon
   }
 
   @Override
-  public void render(Route route, RequestContext requestContext) {
+  public void render(RouteInfo routeInfo, RequestContext requestContext) {
     FullHttpRequest httpRequest = requestContext.request().httpRequest();
-    Object result = route.getInvokeResult();
+    Object result = routeInfo.getInvokeResult();
     ByteBuf byteBuf = Unpooled.copiedBuffer(Objects.isNull(result) ? "".getBytes(CharsetUtil.UTF_8)
             : JSONObject.toJSONString(result).getBytes(StandardCharsets.UTF_8));
 
