@@ -45,7 +45,7 @@ public interface Const {
   String SPACE = " ";
   String FAVICON_PATH = "/favicon.ico";
   String SERVER_THREAD_NAME = "（'-'*)";
-  String SERVER_VIEW_SUFFIX = ".html";
+  String SERVER_VIEW_SUFFIX = "html";
   String SERVER_SESSION_KEY = "AQSESSION";
   String SERVER_TEMPLATES_FOLDER = "templates";
   String PATH_SERVER_PORT = "server.port";
