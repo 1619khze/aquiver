@@ -31,8 +31,8 @@ import org.aquiver.*;
 import org.aquiver.function.AdviceManager;
 import org.aquiver.function.handler.HttpExceptionHandler;
 import org.aquiver.mvc.RequestResult;
-import org.aquiver.mvc.resolver.ParamResolverContext;
-import org.aquiver.mvc.resolver.ParamResolverManager;
+import org.aquiver.mvc.resolver.ArgumentResolverContext;
+import org.aquiver.mvc.resolver.ArgumentResolverManager;
 import org.aquiver.mvc.router.NoRouteFoundException;
 import org.aquiver.mvc.router.PathVarMatcher;
 import org.aquiver.mvc.router.Route;
@@ -62,9 +62,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private final HttpExceptionHandler exceptionHandler;
   private final StaticFileServerHandler fileServerHandler;
   private final AdviceManager adviceManager;
-  private final ParamResolverManager resolverManager;
+  private final ArgumentResolverManager resolverManager;
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-  private final ParamResolverContext paramResolverContext = new ParamResolverContext();
+  private final ArgumentResolverContext argumentResolverContext = new ArgumentResolverContext();
   private final ResultHandlerResolver resultHandlerResolver = new ResultHandlerResolver();
   private final ResponseRenderMatcher responseRenderMatcher = new ResponseRenderMatcher();
 
@@ -90,12 +90,13 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     log.error("An exception occurred when calling the mapping method", cause);
-    this.paramResolverContext.throwable(cause);
+    this.argumentResolverContext.throwable(cause);
     final Object handlerExceptionResult = this.adviceManager
-            .handlerException(cause, resolverManager, paramResolverContext);
+            .handlerException(cause, resolverManager, argumentResolverContext);
     if (Objects.nonNull(handlerExceptionResult)) {
       return;
     }
+    ctx.close();
   }
 
   @Override
@@ -190,8 +191,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     Object[] paramValues = new Object[params.size()];
     Class<?>[] paramTypes = new Class[params.size()];
 
-    this.paramResolverContext.requestContext(context);
-    ReflectionUtils.invokeParam(paramResolverContext, route.getParams(),
+    this.argumentResolverContext.requestContext(context);
+    ReflectionUtils.invokeParam(argumentResolverContext, route.getParams(),
             paramValues, paramTypes, resolverManager);
     route.setParamValues(paramValues);
     route.setParamTypes(paramTypes);

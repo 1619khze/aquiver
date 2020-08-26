@@ -23,44 +23,39 @@
  */
 package org.aquiver.mvc.resolver;
 
-import org.aquiver.mvc.router.RouteParam;
-import org.aquiver.mvc.router.RouteParamType;
+import org.aquiver.RequestContext;
+import org.aquiver.websocket.WebSocketContext;
 
-import java.lang.reflect.Parameter;
+/**
+ * @author WangYi
+ * @since 2020/7/20
+ */
+public class ArgumentResolverContext {
+  private RequestContext requestContext;
+  private WebSocketContext webSocketContext;
+  private Throwable throwable;
 
-public interface ParamResolver {
-  /**
-   * Determine whether the parameter type is supported
-   *
-   * @param parameter Information about method parameters.
-   * @return support
-   */
-  boolean support(Parameter parameter);
+  public void requestContext(RequestContext requestContext) {
+    this.requestContext = requestContext;
+  }
 
-  /**
-   * Parse parameters into RouteParam
-   *
-   * @param parameter Information about method parameters
-   * @param paramName method parameter name
-   * @return route param
-   */
-  RouteParam resolve(Parameter parameter, String paramName);
+  public RequestContext requestContext() {
+    return requestContext;
+  }
 
-  /**
-   * Assign parameters in advance according to the amount
-   * of methods called by reflection
-   *
-   * @param paramType       param type class
-   * @param paramName       param name
-   * @param resolverContext resolver context
-   * @return Assigned parameters
-   */
-  Object dispen(Class<?> paramType, String paramName, ParamResolverContext resolverContext) throws Exception;
+  public void webSocketContext(WebSocketContext webSocketContext) {
+    this.webSocketContext = webSocketContext;
+  }
 
-  /**
-   * Get the parameter type to be assigned
-   *
-   * @return Routing parameter type
-   */
-  RouteParamType dispenType();
+  public WebSocketContext webSocketContext() {
+    return webSocketContext;
+  }
+
+  public Throwable throwable() {
+    return throwable;
+  }
+
+  public void throwable(Throwable throwable) {
+    this.throwable = throwable;
+  }
 }

@@ -23,42 +23,44 @@
  */
 package org.aquiver.mvc.resolver;
 
-import org.aquiver.RequestContext;
-import org.aquiver.mvc.annotation.bind.Param;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.mvc.router.RouteParamType;
 
 import java.lang.reflect.Parameter;
 
-public class RequestParamParamResolver extends AbstractParamResolver implements ParamResolver {
+public interface ArgumentResolver {
+  /**
+   * Determine whether the parameter type is supported
+   *
+   * @param parameter Information about method parameters.
+   * @return support
+   */
+  boolean support(Parameter parameter);
 
-  @Override
-  public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(Param.class);
-  }
+  /**
+   * Parse parameters into RouteParam
+   *
+   * @param parameter Information about method parameters
+   * @param paramName method parameter name
+   * @return route param
+   */
+  RouteParam resolve(Parameter parameter, String paramName);
 
-  @Override
-  public RouteParam resolve(Parameter parameter, String paramName) {
-    RouteParam handlerParam = new RouteParam();
-    Param param = parameter.getAnnotation(Param.class);
-    handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(param.value()) ? paramName : param.value());
-    handlerParam.setRequired(param.required());
-    handlerParam.setType(RouteParamType.REQUEST_PARAM);
-    return handlerParam;
-  }
+  /**
+   * Assign parameters in advance according to the amount
+   * of methods called by reflection
+   *
+   * @param paramType       param type class
+   * @param paramName       param name
+   * @param resolverContext resolver context
+   * @return Assigned parameters
+   */
+  Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext resolverContext) throws Exception;
 
-  @Override
-  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
-    RequestContext requestContext = paramResolverContext.requestContext();
-    if (isMap(paramType)) {
-      return requestContext.request().queryStrings();
-    }
-    return paramType.cast(requestContext.request().queryStrings().get(paramName));
-  }
-
-  @Override
-  public RouteParamType dispenType() {
-    return RouteParamType.REQUEST_PARAM;
-  }
+  /**
+   * Get the parameter type to be assigned
+   *
+   * @return Routing parameter type
+   */
+  RouteParamType dispenType();
 }

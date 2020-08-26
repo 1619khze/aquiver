@@ -26,19 +26,19 @@ package org.aquiver.mvc.resolver;
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.mvc.router.RouteParamType;
-import org.aquiver.mvc.router.session.Session;
+import org.aquiver.mvc.router.multipart.MultipartFile;
 
 import java.lang.reflect.Parameter;
 
 /**
  * @author WangYi
- * @since 2020/6/28
+ * @since 2020/7/2
  */
-public class SessionParamResolver extends AbstractParamResolver implements ParamResolver {
+public class MultipartFileArgumentResolver extends AbstractParamResolver implements ArgumentResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.getType().isAssignableFrom(Session.class);
+    return parameter.getType().isAssignableFrom(MultipartFile.class);
   }
 
   @Override
@@ -47,18 +47,20 @@ public class SessionParamResolver extends AbstractParamResolver implements Param
     handlerParam.setDataType(parameter.getType());
     handlerParam.setName(paramName);
     handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.REQUEST_SESSION);
+    handlerParam.setType(RouteParamType.MULTIPART_FILE);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
-    RequestContext requestContext = paramResolverContext.requestContext();
-    return paramType.cast(requestContext.request().session());
+  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext resolverContext) {
+    RequestContext requestContext = resolverContext.requestContext();
+    final MultipartFile multipartFile = new MultipartFile();
+    multipartFile.channelContext(requestContext.request().channelHandlerContext());
+    return paramType.cast(multipartFile);
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.REQUEST_SESSION;
+    return RouteParamType.MULTIPART_FILE;
   }
 }

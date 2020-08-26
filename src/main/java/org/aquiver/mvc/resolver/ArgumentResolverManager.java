@@ -29,16 +29,16 @@ import org.aquiver.mvc.router.RouteParam;
  * @author WangYi
  * @since 2020/7/3
  */
-public class ParamResolverManager extends AbstractParamResolver implements ParamAssignment {
+public class ArgumentResolverManager extends AbstractParamResolver implements ArgumentAssignment {
   @Override
-  public Object assignment(RouteParam handlerParam, ParamResolverContext paramResolverContext) throws Exception {
+  public Object assignment(RouteParam handlerParam, ArgumentResolverContext argumentResolverContext) throws Exception {
     Object dispen = null;
-    for (ParamResolver paramResolver : getParamResolvers()) {
-      if (!paramResolver.dispenType().equals(handlerParam.getType())) {
+    for (ArgumentResolver argumentResolver : getArgumentResolvers()) {
+      if (!argumentResolver.dispenType().equals(handlerParam.getType())) {
         continue;
       }
-      dispen = paramResolver.dispen(handlerParam.getDataType(),
-              handlerParam.getName(), paramResolverContext);
+      dispen = argumentResolver.dispen(handlerParam.getDataType(),
+              handlerParam.getName(), argumentResolverContext);
     }
     return dispen;
   }

@@ -23,51 +23,42 @@
  */
 package org.aquiver.mvc.resolver;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.annotation.bind.Body;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.mvc.router.RouteParamType;
+import org.aquiver.mvc.router.session.Session;
 
 import java.lang.reflect.Parameter;
-import java.util.Map;
 
 /**
  * @author WangYi
- * @since 2020/5/28
+ * @since 2020/6/28
  */
-public class RequestBodyParamResolver extends AbstractParamResolver implements ParamResolver {
+public class SessionArgumentResolver extends AbstractParamResolver implements ArgumentResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(Body.class);
+    return parameter.getType().isAssignableFrom(Session.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
-    Body body = parameter.getAnnotation(Body.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(body.value()) ? paramName : body.value());
+    handlerParam.setName(paramName);
     handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.REQUEST_BODY);
+    handlerParam.setType(RouteParamType.REQUEST_SESSION);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
-    RequestContext requestContext = paramResolverContext.requestContext();
-    Map<String, Object> jsonData = requestContext.request().formData();
-    String jsonString = JSON.toJSONString(jsonData);
-    if (jsonData.isEmpty() || !JSONObject.isValid(jsonString)) {
-      return null;
-    }
-    return JSONObject.parseObject(jsonString, paramType);
+  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext argumentResolverContext) {
+    RequestContext requestContext = argumentResolverContext.requestContext();
+    return paramType.cast(requestContext.request().session());
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.REQUEST_BODY;
+    return RouteParamType.REQUEST_SESSION;
   }
 }

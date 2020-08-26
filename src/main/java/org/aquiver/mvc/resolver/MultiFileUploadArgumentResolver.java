@@ -23,39 +23,58 @@
  */
 package org.aquiver.mvc.resolver;
 
+import io.netty.handler.codec.http.multipart.FileUpload;
+import org.aquiver.RequestContext;
+import org.aquiver.mvc.annotation.bind.MultiFileUpload;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.mvc.router.RouteParamType;
-import org.aquiver.websocket.WebSocketContext;
+import org.aquiver.mvc.router.multipart.MultipartFile;
 
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author WangYi
- * @since 2020/7/13
+ * @since 2020/6/14
  */
-public class WebSocketContextParamResolver implements ParamResolver {
+public class MultiFileUploadArgumentResolver extends AbstractParamResolver implements ArgumentResolver {
+
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.getType().isAssignableFrom(WebSocketContext.class);
+    return parameter.isAnnotationPresent(MultiFileUpload.class) &&
+            parameter.getType().isAssignableFrom(List.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
+    MultiFileUpload param = parameter.getAnnotation(MultiFileUpload.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName(paramName);
-    handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.WEBSOCKET_CONTEXT);
+    handlerParam.setName("".equals(param.value()) ? paramName : param.value());
+    handlerParam.setType(RouteParamType.UPLOAD_FILES);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
-    return paramResolverContext.webSocketContext();
+  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext resolverContext) throws Exception {
+    RequestContext requestContext = resolverContext.requestContext();
+    Map<String, FileUpload> fileUploads = requestContext.request().fileUpload();
+    List<MultipartFile> multipartFiles = new ArrayList<>();
+    if (List.class.isAssignableFrom(paramType)) {
+      for (Map.Entry<String, FileUpload> entry : fileUploads.entrySet()) {
+        FileUpload value = entry.getValue();
+        MultipartFile multipartFile = buildMultipartFile(
+                value, requestContext.request().channelHandlerContext());
+        multipartFiles.add(multipartFile);
+      }
+    }
+    return multipartFiles;
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.WEBSOCKET_CONTEXT;
+    return RouteParamType.UPLOAD_FILES;
   }
 }

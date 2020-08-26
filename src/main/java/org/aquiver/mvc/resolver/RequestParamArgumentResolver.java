@@ -24,43 +24,41 @@
 package org.aquiver.mvc.resolver;
 
 import org.aquiver.RequestContext;
+import org.aquiver.mvc.annotation.bind.Param;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.mvc.router.RouteParamType;
-import org.aquiver.mvc.router.multipart.MultipartFile;
 
 import java.lang.reflect.Parameter;
 
-/**
- * @author WangYi
- * @since 2020/7/2
- */
-public class MultipartFileParamResolver extends AbstractParamResolver implements ParamResolver {
+public class RequestParamArgumentResolver extends AbstractParamResolver implements ArgumentResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.getType().isAssignableFrom(MultipartFile.class);
+    return parameter.isAnnotationPresent(Param.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
+    Param param = parameter.getAnnotation(Param.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName(paramName);
-    handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.MULTIPART_FILE);
+    handlerParam.setName("".equals(param.value()) ? paramName : param.value());
+    handlerParam.setRequired(param.required());
+    handlerParam.setType(RouteParamType.REQUEST_PARAM);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext resolverContext) {
-    RequestContext requestContext = resolverContext.requestContext();
-    final MultipartFile multipartFile = new MultipartFile();
-    multipartFile.channelContext(requestContext.request().channelHandlerContext());
-    return paramType.cast(multipartFile);
+  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext argumentResolverContext) {
+    RequestContext requestContext = argumentResolverContext.requestContext();
+    if (isMap(paramType)) {
+      return requestContext.request().queryStrings();
+    }
+    return paramType.cast(requestContext.request().queryStrings().get(paramName));
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.MULTIPART_FILE;
+    return RouteParamType.REQUEST_PARAM;
   }
 }

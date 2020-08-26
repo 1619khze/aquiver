@@ -24,39 +24,43 @@
 package org.aquiver.mvc.resolver;
 
 import org.aquiver.RequestContext;
+import org.aquiver.mvc.annotation.bind.Cookies;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.mvc.router.RouteParamType;
 
 import java.lang.reflect.Parameter;
+import java.util.Map;
 
-/**
- * @author WangYi
- * @since 2020/7/4
- */
-public class RequestContextParamResolver implements ParamResolver {
+public class RequestCookiesArgumentResolver extends AbstractParamResolver implements ArgumentResolver {
+
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.getType().isAssignableFrom(RequestContext.class);
+    return parameter.isAnnotationPresent(Cookies.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
+    Cookies cookies = parameter.getAnnotation(Cookies.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName(paramName);
+    handlerParam.setName("".equals(cookies.value()) ? paramName : cookies.value());
     handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.REQUEST_CONTEXT);
+    handlerParam.setType(RouteParamType.REQUEST_COOKIES);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
-    RequestContext requestContext = paramResolverContext.requestContext();
-    return paramType.cast(requestContext);
+  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext argumentResolverContext) {
+    RequestContext requestContext = argumentResolverContext.requestContext();
+    Map<String, Object> cookies = requestContext.request().cookies();
+    if (isMap(paramType)) {
+      return cookies;
+    }
+    return paramType.cast(cookies.get(paramName));
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.REQUEST_CONTEXT;
+    return RouteParamType.REQUEST_COOKIES;
   }
 }

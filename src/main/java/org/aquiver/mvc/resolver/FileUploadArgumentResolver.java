@@ -24,41 +24,49 @@
 package org.aquiver.mvc.resolver;
 
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.annotation.bind.Header;
+import org.aquiver.mvc.annotation.bind.FileUpload;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.mvc.router.RouteParamType;
+import org.aquiver.mvc.router.multipart.MultipartFile;
 
 import java.lang.reflect.Parameter;
+import java.util.Map;
 
-public class RequestHeadersParamResolver extends AbstractParamResolver implements ParamResolver {
+/**
+ * @author WangYi
+ * @since 2020/6/14
+ */
+public class FileUploadArgumentResolver extends AbstractParamResolver implements ArgumentResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(Header.class);
+    return parameter.isAnnotationPresent(FileUpload.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
-    Header header = parameter.getAnnotation(Header.class);
+    FileUpload param = parameter.getAnnotation(FileUpload.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(header.value()) ? paramName : header.value());
-    handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.REQUEST_HEADER);
+    handlerParam.setName("".equals(param.value()) ? paramName : param.value());
+    handlerParam.setType(RouteParamType.UPLOAD_FILE);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
-    RequestContext requestContext = paramResolverContext.requestContext();
-    if (isMap(paramType)) {
-      return requestContext.request().headers();
+  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext resolverContext) throws Exception {
+    RequestContext requestContext = resolverContext.requestContext();
+    Map<String, io.netty.handler.codec.http.multipart.FileUpload> fileUploads = requestContext.request().fileUpload();
+    if (MultipartFile.class.isAssignableFrom(paramType) &&
+            fileUploads.containsKey(paramName)) {
+      io.netty.handler.codec.http.multipart.FileUpload fileUpload = fileUploads.get(paramName);
+      return buildMultipartFile(fileUpload, requestContext.request().channelHandlerContext());
     }
-    return paramType.cast(requestContext.request().headers().get(paramName));
+    return null;
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.REQUEST_HEADER;
+    return RouteParamType.UPLOAD_FILE;
   }
 }

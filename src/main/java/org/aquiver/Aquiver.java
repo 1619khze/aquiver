@@ -27,7 +27,7 @@ import org.apex.Apex;
 import org.apex.Environment;
 import org.aquiver.function.AdviceManager;
 import org.aquiver.mvc.annotation.HttpMethod;
-import org.aquiver.mvc.resolver.ParamResolverManager;
+import org.aquiver.mvc.resolver.ArgumentResolverManager;
 import org.aquiver.mvc.router.RouteManager;
 import org.aquiver.mvc.router.session.SessionManager;
 import org.aquiver.server.NettyServer;
@@ -104,7 +104,7 @@ public final class Aquiver {
   /** Web components that need to be initialized */
   private final AdviceManager adviceManager = new AdviceManager();
   private final RouteManager routeManager;
-  private final ParamResolverManager resolverManager;
+  private final ArgumentResolverManager resolverManager;
 
   public RouteManager routeManager() {
     return routeManager;
@@ -114,13 +114,13 @@ public final class Aquiver {
     return adviceManager;
   }
 
-  public ParamResolverManager resolverManager() {
+  public ArgumentResolverManager resolverManager() {
     return resolverManager;
   }
 
   private Aquiver() {
     this.routeManager = new RouteManager();
-    this.resolverManager = new ParamResolverManager();
+    this.resolverManager = new ArgumentResolverManager();
     try {
       this.resolverManager.initialize();
       this.routeManager.setResolverManager(resolverManager);

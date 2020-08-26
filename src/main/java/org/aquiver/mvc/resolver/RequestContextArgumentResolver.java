@@ -24,42 +24,39 @@
 package org.aquiver.mvc.resolver;
 
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.annotation.bind.PathVar;
-import org.aquiver.mvc.router.PathVarMatcher;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.mvc.router.RouteParamType;
 
 import java.lang.reflect.Parameter;
 
-public class PathVariableParamResolver extends AbstractParamResolver implements ParamResolver {
-
+/**
+ * @author WangYi
+ * @since 2020/7/4
+ */
+public class RequestContextArgumentResolver implements ArgumentResolver {
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(PathVar.class);
+    return parameter.getType().isAssignableFrom(RequestContext.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
-    PathVar pathVar = parameter.getAnnotation(PathVar.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName((!"".equals(pathVar.value()) && !pathVar.value().trim().isEmpty()) ?
-            pathVar.value().trim() : paramName);
+    handlerParam.setName(paramName);
     handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.PATH_VARIABLE);
+    handlerParam.setType(RouteParamType.REQUEST_CONTEXT);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
-    RequestContext requestContext = paramResolverContext.requestContext();
-    return paramType.cast(
-            PathVarMatcher.getPathVariable(requestContext.request().uri(),
-                    requestContext.route().getUrl(), paramName));
+  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext argumentResolverContext) {
+    RequestContext requestContext = argumentResolverContext.requestContext();
+    return paramType.cast(requestContext);
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.PATH_VARIABLE;
+    return RouteParamType.REQUEST_CONTEXT;
   }
 }

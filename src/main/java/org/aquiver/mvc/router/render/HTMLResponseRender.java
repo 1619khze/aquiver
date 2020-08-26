@@ -29,7 +29,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.aquiver.ModelAndView;
-import org.aquiver.mvc.MediaType;
+import org.aquiver.mvc.http.MediaType;
 import org.aquiver.mvc.router.Route;
 import org.aquiver.mvc.router.views.ViewType;
 import org.aquiver.RequestContext;

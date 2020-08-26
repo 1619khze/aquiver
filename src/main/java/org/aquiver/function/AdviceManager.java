@@ -24,8 +24,8 @@
 package org.aquiver.function;
 
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.resolver.ParamResolverContext;
-import org.aquiver.mvc.resolver.ParamResolverManager;
+import org.aquiver.mvc.resolver.ArgumentResolverContext;
+import org.aquiver.mvc.resolver.ArgumentResolverManager;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.utils.ReflectionUtils;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ public class AdviceManager {
     this.adviceMap.put(throwableCls, advice);
   }
 
-  public Object handlerException(Throwable throwable, ParamResolverManager resolverManager, ParamResolverContext context) {
+  public Object handlerException(Throwable throwable, ArgumentResolverManager resolverManager, ArgumentResolverContext context) {
     if (adviceMap.isEmpty()) {
       RequestContext requestContext = context.requestContext();
       requestContext.request().channelHandlerContext().channel().close();

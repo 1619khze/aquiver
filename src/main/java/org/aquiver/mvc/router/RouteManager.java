@@ -26,7 +26,7 @@ package org.aquiver.mvc.router;
 import org.aquiver.RequestContext;
 import org.aquiver.RequestHandler;
 import org.aquiver.mvc.annotation.*;
-import org.aquiver.mvc.resolver.ParamResolverManager;
+import org.aquiver.mvc.resolver.ArgumentResolverManager;
 import org.aquiver.mvc.router.views.PebbleHTMLView;
 import org.aquiver.mvc.router.views.ViewType;
 import org.aquiver.utils.ReflectionUtils;
@@ -58,9 +58,9 @@ public final class RouteManager {
   private final Map<String, WebSocketChannel> webSockets = new ConcurrentHashMap<>(4);
   private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-  private ParamResolverManager resolverManager;
+  private ArgumentResolverManager resolverManager;
 
-  public void setResolverManager(ParamResolverManager resolverManager) {
+  public void setResolverManager(ArgumentResolverManager resolverManager) {
     this.resolverManager = resolverManager;
   }
 

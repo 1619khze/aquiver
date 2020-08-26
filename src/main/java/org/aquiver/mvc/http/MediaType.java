@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc;
+package org.aquiver.mvc.http;
 
 public interface MediaType {
   String ALL_VALUE = "*/*";

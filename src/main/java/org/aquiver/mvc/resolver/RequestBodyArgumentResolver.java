@@ -23,43 +23,51 @@
  */
 package org.aquiver.mvc.resolver;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.aquiver.RequestContext;
+import org.aquiver.mvc.annotation.bind.Body;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.mvc.router.RouteParamType;
 
 import java.lang.reflect.Parameter;
+import java.util.Map;
 
 /**
  * @author WangYi
- * @since 2020/7/4
+ * @since 2020/5/28
  */
-public class ThrowableParamResolver implements ParamResolver {
+public class RequestBodyArgumentResolver extends AbstractParamResolver implements ArgumentResolver {
+
   @Override
   public boolean support(Parameter parameter) {
-    try {
-      return parameter.getType().newInstance() instanceof Throwable;
-    } catch (InstantiationException | IllegalAccessException e) {
-      return false;
-    }
+    return parameter.isAnnotationPresent(Body.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
+    Body body = parameter.getAnnotation(Body.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName(paramName);
+    handlerParam.setName("".equals(body.value()) ? paramName : body.value());
     handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.THROWABLE_CLASS);
+    handlerParam.setType(RouteParamType.REQUEST_BODY);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext paramResolverContext) {
-    Throwable throwable = paramResolverContext.throwable();
-    return paramType.cast(throwable);
+  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext argumentResolverContext) {
+    RequestContext requestContext = argumentResolverContext.requestContext();
+    Map<String, Object> jsonData = requestContext.request().formData();
+    String jsonString = JSON.toJSONString(jsonData);
+    if (jsonData.isEmpty() || !JSONObject.isValid(jsonString)) {
+      return null;
+    }
+    return JSONObject.parseObject(jsonString, paramType);
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.THROWABLE_CLASS;
+    return RouteParamType.REQUEST_BODY;
   }
 }

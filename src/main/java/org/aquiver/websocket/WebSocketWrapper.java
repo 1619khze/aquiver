@@ -24,8 +24,8 @@
 package org.aquiver.websocket;
 
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.resolver.ParamResolverContext;
-import org.aquiver.mvc.resolver.ParamResolverManager;
+import org.aquiver.mvc.resolver.ArgumentResolverContext;
+import org.aquiver.mvc.resolver.ArgumentResolverManager;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.utils.ReflectionUtils;
 import org.aquiver.websocket.action.OnClose;
@@ -55,10 +55,10 @@ public class WebSocketWrapper implements WebSocketChannel {
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
   private final Map<Class<? extends Annotation>, WebSocketActionPair> methodCache;
 
-  private final ParamResolverManager resolver;
+  private final ArgumentResolverManager resolver;
   private Class<?> webSocketClass;
 
-  public WebSocketWrapper(ParamResolverManager resolver) {
+  public WebSocketWrapper(ArgumentResolverManager resolver) {
     this.resolver = resolver;
     this.methodCache = new HashMap<>();
   }
@@ -134,7 +134,7 @@ public class WebSocketWrapper implements WebSocketChannel {
     Class<?>[] paramTypes = new Class[params.size()];
     try {
       final RequestContext requestContext = webSocketContext.requestContext();
-      final ParamResolverContext context = new ParamResolverContext();
+      final ArgumentResolverContext context = new ArgumentResolverContext();
       context.requestContext(requestContext);
       context.webSocketContext(webSocketContext);
       ReflectionUtils.invokeParam(context,

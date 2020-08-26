@@ -42,7 +42,7 @@ import java.util.*;
  * @since 2020/6/27
  */
 public abstract class AbstractParamResolver {
-  private final List<ParamResolver> paramResolvers = new ArrayList<>();
+  private final List<ArgumentResolver> argumentResolvers = new ArrayList<>();
 
   /**
    * Build Multipart File
@@ -95,23 +95,23 @@ public abstract class AbstractParamResolver {
   }
 
   public void initialize() throws Exception {
-    ServiceLoader<ParamResolver> paramResolverLoad = ServiceLoader.load(ParamResolver.class);
-    for (ParamResolver ser : paramResolverLoad) {
-      ParamResolver paramResolver = ser.getClass().getDeclaredConstructor().newInstance();
-      getParamResolvers().add(paramResolver);
+    ServiceLoader<ArgumentResolver> paramResolverLoad = ServiceLoader.load(ArgumentResolver.class);
+    for (ArgumentResolver ser : paramResolverLoad) {
+      ArgumentResolver argumentResolver = ser.getClass().getDeclaredConstructor().newInstance();
+      getArgumentResolvers().add(argumentResolver);
     }
   }
 
   public List<RouteParam> invokeParamResolver(Parameter[] ps, String[] paramNames) {
     List<RouteParam> routeParams = new ArrayList<>();
     for (int i = 0; i < ps.length; i++) {
-      List<ParamResolver> paramResolvers = getParamResolvers();
-      if (paramResolvers.isEmpty()) {
+      List<ArgumentResolver> argumentResolvers = getArgumentResolvers();
+      if (argumentResolvers.isEmpty()) {
         break;
       }
-      for (ParamResolver paramResolver : paramResolvers) {
-        if (!paramResolver.support(ps[i])) continue;
-        RouteParam param = paramResolver.resolve(ps[i], paramNames[i]);
+      for (ArgumentResolver argumentResolver : argumentResolvers) {
+        if (!argumentResolver.support(ps[i])) continue;
+        RouteParam param = argumentResolver.resolve(ps[i], paramNames[i]);
         if (Objects.nonNull(param)) {
           routeParams.add(param);
         }
@@ -120,7 +120,7 @@ public abstract class AbstractParamResolver {
     return routeParams;
   }
 
-  public List<ParamResolver> getParamResolvers() {
-    return paramResolvers;
+  public List<ArgumentResolver> getArgumentResolvers() {
+    return argumentResolvers;
   }
 }

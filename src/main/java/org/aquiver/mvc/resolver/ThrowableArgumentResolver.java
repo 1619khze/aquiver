@@ -23,50 +23,43 @@
  */
 package org.aquiver.mvc.resolver;
 
-import org.aquiver.RequestContext;
-import org.aquiver.mvc.annotation.bind.FileUpload;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.mvc.router.RouteParamType;
-import org.aquiver.mvc.router.multipart.MultipartFile;
 
 import java.lang.reflect.Parameter;
-import java.util.Map;
 
 /**
  * @author WangYi
- * @since 2020/6/14
+ * @since 2020/7/4
  */
-public class FileUploadParamResolver extends AbstractParamResolver implements ParamResolver {
-
+public class ThrowableArgumentResolver implements ArgumentResolver {
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(FileUpload.class);
+    try {
+      return parameter.getType().newInstance() instanceof Throwable;
+    } catch (InstantiationException | IllegalAccessException e) {
+      return false;
+    }
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
-    FileUpload param = parameter.getAnnotation(FileUpload.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(param.value()) ? paramName : param.value());
-    handlerParam.setType(RouteParamType.UPLOAD_FILE);
+    handlerParam.setName(paramName);
+    handlerParam.setRequired(true);
+    handlerParam.setType(RouteParamType.THROWABLE_CLASS);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, ParamResolverContext resolverContext) throws Exception {
-    RequestContext requestContext = resolverContext.requestContext();
-    Map<String, io.netty.handler.codec.http.multipart.FileUpload> fileUploads = requestContext.request().fileUpload();
-    if (MultipartFile.class.isAssignableFrom(paramType) &&
-            fileUploads.containsKey(paramName)) {
-      io.netty.handler.codec.http.multipart.FileUpload fileUpload = fileUploads.get(paramName);
-      return buildMultipartFile(fileUpload, requestContext.request().channelHandlerContext());
-    }
-    return null;
+  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext argumentResolverContext) {
+    Throwable throwable = argumentResolverContext.throwable();
+    return paramType.cast(throwable);
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.UPLOAD_FILE;
+    return RouteParamType.THROWABLE_CLASS;
   }
 }
