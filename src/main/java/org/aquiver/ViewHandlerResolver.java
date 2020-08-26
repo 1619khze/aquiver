@@ -54,6 +54,7 @@ public final class ViewHandlerResolver {
     this.register(HtmlDataViewHandler.class);
     this.register(JpegDataViewHandler.class);
     this.register(MarkdownDataViewHandler.class);
+    this.register(PebbleTemplateViewHandler.class);
   }
 
   public void register(Class<? extends ViewHandler> viewHandlerClass) {
