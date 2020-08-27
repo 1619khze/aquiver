@@ -115,6 +115,12 @@ public class ApiRoute {
   }
 
   @View
+  @GET(value = "/getPeb")
+  public String getPeb() {
+    return "/index.peb";
+  }
+
+  @View
   @GET(value = "/get")
   public String get() {
     return "/index";
@@ -128,7 +134,7 @@ public class ApiRoute {
     Map<String, Object> paramMap = new HashMap<>();
     paramMap.put("name", "Mitchell");
 
-    modelAndView.htmlPath("/index.html");
+    modelAndView.htmlPath("index.html");
     modelAndView.params(paramMap);
     return modelAndView;
   }
