@@ -23,35 +23,43 @@
  */
 package org.aquiver.result.view;
 
-import org.apex.annotation.Value;
+import io.netty.handler.codec.http.FullHttpResponse;
+import org.aquiver.Const;
 import org.aquiver.RequestContext;
+import org.aquiver.mvc.router.views.HTMLView;
+import org.aquiver.mvc.router.views.PebbleHTMLView;
+import org.aquiver.result.ResultUtils;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * @author WangYi
  * @since 2020/8/23
  */
 public final class PebbleTemplateViewHandler extends AbstractTemplateViewHandler {
-  @Value(value = "${server.view.prefix}")
-  private String prefix;
+  private final HTMLView htmlView = new PebbleHTMLView();
 
   @Override
   public String getPrefix() {
-    return null;
+    return environment.get(Const.PATH_SERVER_VIEW_PREFIX, "");
   }
 
   @Override
-  protected void doRender(RequestContext ctx, String viewPathName) throws Exception {
-
+  protected void doRender(RequestContext ctx, String viewPathName) throws IOException {
+    String renderView = this.htmlView.renderView(viewPathName, new HashMap<>());
+    final FullHttpResponse responseView = ResultUtils.contentResponse(renderView);
+    ctx.writeAndFlush(responseView);
   }
 
   @Override
   public String getSuffix() {
-    return ".jsp";
+    return ".peb";
   }
 
   @Override
   public String getType() {
-    return "jsp";
+    return "peb";
   }
 
   @Override

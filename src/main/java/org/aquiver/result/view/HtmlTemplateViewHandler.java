@@ -1,10 +1,8 @@
 package org.aquiver.result.view;
 
 import io.netty.handler.codec.http.FullHttpResponse;
-import org.apex.Environment;
 import org.apex.io.FileBaseResource;
 import org.apex.io.Resource;
-import org.aquiver.Aquiver;
 import org.aquiver.Const;
 import org.aquiver.RequestContext;
 import org.aquiver.result.ResultUtils;
@@ -18,7 +16,6 @@ import java.nio.file.Paths;
  * @since 2020/8/27
  */
 public class HtmlTemplateViewHandler extends AbstractTemplateViewHandler {
-  private final Environment environment = Aquiver.of().environment();
 
   @Override
   public String getPrefix() {
@@ -32,7 +29,9 @@ public class HtmlTemplateViewHandler extends AbstractTemplateViewHandler {
 
   @Override
   protected void doRender(RequestContext ctx, String viewPathName) throws Exception {
-    viewPathName = viewPathName + "." + getSuffix();
+    if (!viewPathName.endsWith(getSuffix())) {
+      viewPathName = viewPathName + "." + getSuffix();
+    }
     URL viewUrl = this.getClass().getClassLoader().getResource(viewPathName);
     Resource resource = new FileBaseResource(Paths.get(viewUrl.toURI()));
     String htmlContent = new String(Files.readAllBytes(resource.getPath()));

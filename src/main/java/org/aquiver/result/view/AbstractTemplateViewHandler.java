@@ -23,6 +23,8 @@
  */
 package org.aquiver.result.view;
 
+import org.apex.Environment;
+import org.aquiver.Aquiver;
 import org.aquiver.Const;
 import org.aquiver.RequestContext;
 import org.aquiver.ViewHandler;
@@ -32,6 +34,8 @@ import org.aquiver.ViewHandler;
  * @since 2020/8/22
  */
 public abstract class AbstractTemplateViewHandler implements ViewHandler {
+  protected final Environment environment = Aquiver.of().environment();
+
   public abstract String getPrefix();
 
   @Override
