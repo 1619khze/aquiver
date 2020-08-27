@@ -24,6 +24,7 @@
 package org.aquiver;
 
 import org.apex.ApexContext;
+import org.aquiver.result.ModelAndViewResultHandler;
 import org.aquiver.result.StringResultHandler;
 import org.aquiver.result.VoidResultHandler;
 import org.slf4j.Logger;
@@ -49,6 +50,7 @@ public final class ResultHandlerResolver {
   private void init() {
     this.register(Void.TYPE, VoidResultHandler.class);
     this.register(String.class, StringResultHandler.class);
+    this.register(ModelAndView.class, ModelAndViewResultHandler.class);
   }
 
   public void register(Class<?> resultClass, Class<? extends ResultHandler<?>> resultHandlerClass) {

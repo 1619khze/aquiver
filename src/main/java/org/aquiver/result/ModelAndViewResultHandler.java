@@ -23,17 +23,26 @@
  */
 package org.aquiver.result;
 
+import io.netty.handler.codec.http.FullHttpResponse;
 import org.aquiver.ModelAndView;
 import org.aquiver.RequestContext;
 import org.aquiver.ResultHandler;
+import org.aquiver.mvc.router.views.HTMLView;
+import org.aquiver.mvc.router.views.PebbleHTMLView;
+
+import java.io.IOException;
 
 /**
  * @author WangYi
  * @since 2020/8/25
  */
 public final class ModelAndViewResultHandler implements ResultHandler<ModelAndView> {
-  @Override
-  public void handle(RequestContext ctx, ModelAndView result) {
+  private final HTMLView htmlView = new PebbleHTMLView();
 
+  @Override
+  public void handle(RequestContext ctx, ModelAndView result) throws IOException {
+    String renderView = this.htmlView.renderView(result.htmlPath(), result.params());
+    final FullHttpResponse responseView = ResultUtils.contentResponse(renderView);
+    ctx.writeAndFlush(responseView);
   }
 }
