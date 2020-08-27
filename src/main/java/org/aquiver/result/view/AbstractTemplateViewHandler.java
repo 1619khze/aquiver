@@ -23,6 +23,7 @@
  */
 package org.aquiver.result.view;
 
+import org.aquiver.Const;
 import org.aquiver.RequestContext;
 import org.aquiver.ViewHandler;
 
@@ -35,7 +36,11 @@ public abstract class AbstractTemplateViewHandler implements ViewHandler {
 
   @Override
   public void render(RequestContext ctx, String viewPathName) throws Exception {
-    this.doRender(ctx, viewPathName);
+    if (!getPrefix().equals("")) {
+      viewPathName = "/" + getPrefix() + viewPathName;
+    }
+    viewPathName = Const.SERVER_TEMPLATES_FOLDER + viewPathName;
+    doRender(ctx, viewPathName);
   }
 
   protected abstract void doRender(RequestContext ctx, String viewPathName) throws Exception;
