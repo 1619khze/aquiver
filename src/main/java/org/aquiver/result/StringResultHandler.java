@@ -57,7 +57,8 @@ public final class StringResultHandler implements ResultHandler<String> {
         url = result.substring(idx + 1);
         viewHandler = viewHandlerResolver.lookup(type);
         if (viewHandler == null) {
-          throw new RuntimeException("Can't find view resolver for path: " + result);
+          ctx.writeAndFlush(ResultUtils.emptyResponse());
+          return;
         }
       } else {
         url = result;
@@ -70,7 +71,8 @@ public final class StringResultHandler implements ResultHandler<String> {
       if (suffix != null) {
         viewHandler = viewHandlerResolver.lookup(suffix);
         if (viewHandler == null) {
-          throw new RuntimeException("Can't find view resolver for path: " + result);
+          ctx.writeAndFlush(ResultUtils.emptyResponse());
+          return;
         }
       }
     }
@@ -80,7 +82,8 @@ public final class StringResultHandler implements ResultHandler<String> {
       if (defaultViewHandler == null) {
         defaultViewHandler = viewHandlerResolver.lookup(SERVER_VIEW_SUFFIX);
         if (defaultViewHandler == null) {
-          throw new IllegalStateException("Cannot find the default view resolver: " + SERVER_VIEW_SUFFIX);
+          ctx.writeAndFlush(ResultUtils.emptyResponse());
+          return;
         }
       }
       viewHandler = defaultViewHandler;
