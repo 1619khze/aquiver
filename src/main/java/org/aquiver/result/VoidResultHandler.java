@@ -34,12 +34,7 @@ import org.aquiver.ResultHandler;
 public final class VoidResultHandler implements ResultHandler<Void> {
   @Override
   public void handle(RequestContext ctx, Void result) {
-    FullHttpResponse voidResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-    HttpHeaders headers = voidResponse.headers();
-    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS, "x-requested-with,content-type");
-    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS, "POST,GET");
-    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-    headers.set(HttpHeaderNames.CONTENT_LENGTH, voidResponse.content().readableBytes());
+    FullHttpResponse voidResponse = ResultUtils.emptyResponse();
     ctx.writeAndFlush(voidResponse);
   }
 }
