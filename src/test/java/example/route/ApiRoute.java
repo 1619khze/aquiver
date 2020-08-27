@@ -35,8 +35,13 @@ import org.aquiver.mvc.router.multipart.MultipartFile;
 import org.aquiver.mvc.router.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import javax.inject.Inject;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -135,9 +140,45 @@ public class ApiRoute {
 
   @GET(value = "/redirectaaaa")
   public String redirect() {
-    return "redirect:/http://www.baidu.com";
+    return "redirect:http://www.baidu.com";
   }
 
+  @GET(value = "/forwardaaaa")
+  public String forward() {
+    return "forward:http://localhost:9999/controller/void";
+  }
+
+  @GET(value = "/doc.xml")
+  public Document document() {
+    DocumentBuilder builder;
+    try {
+      builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    }
+    catch(ParserConfigurationException e) {
+      throw new IllegalStateException(e);
+    }
+    Document doc = builder.newDocument();
+    Element users = doc.createElement("users");
+    users.setAttribute("department", "XX");
+    doc.appendChild(users);
+
+    Element user = doc.createElement("user");
+    user.setAttribute("id", "3");
+    user.setAttribute("name", "张三");
+    users.appendChild(user);
+
+    user = doc.createElement("user");
+    user.setAttribute("id", "4");
+    user.setAttribute("name", "李四");
+    users.appendChild(user);
+
+    return doc;
+  }
+
+  @GET(value = "xml")
+  public String xml() {
+    return "xml:<node/>";
+  }
 
   @GET(value = "/session")
   public void session(Session session) {
