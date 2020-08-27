@@ -21,46 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.resolver;
+package org.aquiver.mvc.argument;
 
 import org.aquiver.mvc.router.RouteParam;
-import org.aquiver.mvc.router.RouteParamType;
 
-import java.lang.reflect.Parameter;
-
-public interface ArgumentResolver {
-  /**
-   * Determine whether the parameter type is supported
-   *
-   * @param parameter Information about method parameters.
-   * @return support
-   */
-  boolean support(Parameter parameter);
-
-  /**
-   * Parse parameters into RouteParam
-   *
-   * @param parameter Information about method parameters
-   * @param paramName method parameter name
-   * @return route param
-   */
-  RouteParam resolve(Parameter parameter, String paramName);
-
-  /**
-   * Assign parameters in advance according to the amount
-   * of methods called by reflection
-   *
-   * @param paramType       param type class
-   * @param paramName       param name
-   * @param resolverContext resolver context
-   * @return Assigned parameters
-   */
-  Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext resolverContext) throws Exception;
-
-  /**
-   * Get the parameter type to be assigned
-   *
-   * @return Routing parameter type
-   */
-  RouteParamType dispenType();
+/**
+ * @author WangYi
+ * @since 2020/7/3
+ */
+@FunctionalInterface
+public interface ArgumentAssignment {
+  Object assignment(RouteParam handlerParam, ArgumentGetterContext argumentGetterContext) throws Exception;
 }

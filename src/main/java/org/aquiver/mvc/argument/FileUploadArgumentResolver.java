@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.resolver;
+package org.aquiver.mvc.argument;
 
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.annotation.bind.FileUpload;
@@ -36,7 +36,7 @@ import java.util.Map;
  * @author WangYi
  * @since 2020/6/14
  */
-public class FileUploadArgumentResolver extends AbstractParamResolver implements ArgumentResolver {
+public class FileUploadArgumentResolver extends AbstractArgumentResolver implements ArgumentResolver {
 
   @Override
   public boolean support(Parameter parameter) {
@@ -54,7 +54,7 @@ public class FileUploadArgumentResolver extends AbstractParamResolver implements
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext resolverContext) throws Exception {
+  public Object dispen(Class<?> paramType, String paramName, ArgumentGetterContext resolverContext) throws Exception {
     RequestContext requestContext = resolverContext.requestContext();
     Map<String, io.netty.handler.codec.http.multipart.FileUpload> fileUploads = requestContext.request().fileUpload();
     if (MultipartFile.class.isAssignableFrom(paramType) &&

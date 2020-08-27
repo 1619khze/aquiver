@@ -21,44 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.resolver;
+package org.aquiver.mvc.argument;
 
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.annotation.bind.Param;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.mvc.router.RouteParamType;
+import org.aquiver.mvc.router.session.Session;
 
 import java.lang.reflect.Parameter;
 
-public class RequestParamArgumentResolver extends AbstractParamResolver implements ArgumentResolver {
+/**
+ * @author WangYi
+ * @since 2020/6/28
+ */
+public class SessionArgumentResolver extends AbstractArgumentResolver implements ArgumentResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(Param.class);
+    return parameter.getType().isAssignableFrom(Session.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
-    Param param = parameter.getAnnotation(Param.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(param.value()) ? paramName : param.value());
-    handlerParam.setRequired(param.required());
-    handlerParam.setType(RouteParamType.REQUEST_PARAM);
+    handlerParam.setName(paramName);
+    handlerParam.setRequired(true);
+    handlerParam.setType(RouteParamType.REQUEST_SESSION);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext argumentResolverContext) {
-    RequestContext requestContext = argumentResolverContext.requestContext();
-    if (isMap(paramType)) {
-      return requestContext.request().queryStrings();
-    }
-    return paramType.cast(requestContext.request().queryStrings().get(paramName));
+  public Object dispen(Class<?> paramType, String paramName, ArgumentGetterContext argumentGetterContext) {
+    RequestContext requestContext = argumentGetterContext.requestContext();
+    return paramType.cast(requestContext.request().session());
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.REQUEST_PARAM;
+    return RouteParamType.REQUEST_SESSION;
   }
 }

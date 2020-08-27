@@ -21,25 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.resolver;
+package org.aquiver.mvc.argument;
 
+import org.aquiver.RequestContext;
 import org.aquiver.mvc.router.RouteParam;
+import org.aquiver.mvc.router.RouteParamType;
+
+import java.lang.reflect.Parameter;
 
 /**
  * @author WangYi
- * @since 2020/7/3
+ * @since 2020/7/4
  */
-public class ArgumentResolverManager extends AbstractParamResolver implements ArgumentAssignment {
+public class RequestContextArgumentResolver implements ArgumentResolver {
   @Override
-  public Object assignment(RouteParam handlerParam, ArgumentResolverContext argumentResolverContext) throws Exception {
-    Object dispen = null;
-    for (ArgumentResolver argumentResolver : getArgumentResolvers()) {
-      if (!argumentResolver.dispenType().equals(handlerParam.getType())) {
-        continue;
-      }
-      dispen = argumentResolver.dispen(handlerParam.getDataType(),
-              handlerParam.getName(), argumentResolverContext);
-    }
-    return dispen;
+  public boolean support(Parameter parameter) {
+    return parameter.getType().isAssignableFrom(RequestContext.class);
+  }
+
+  @Override
+  public RouteParam resolve(Parameter parameter, String paramName) {
+    RouteParam handlerParam = new RouteParam();
+    handlerParam.setDataType(parameter.getType());
+    handlerParam.setName(paramName);
+    handlerParam.setRequired(true);
+    handlerParam.setType(RouteParamType.REQUEST_CONTEXT);
+    return handlerParam;
+  }
+
+  @Override
+  public Object dispen(Class<?> paramType, String paramName, ArgumentGetterContext argumentGetterContext) {
+    RequestContext requestContext = argumentGetterContext.requestContext();
+    return paramType.cast(requestContext);
+  }
+
+  @Override
+  public RouteParamType dispenType() {
+    return RouteParamType.REQUEST_CONTEXT;
   }
 }

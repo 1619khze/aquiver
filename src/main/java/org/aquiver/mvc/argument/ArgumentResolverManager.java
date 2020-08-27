@@ -21,45 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.resolver;
+package org.aquiver.mvc.argument;
 
 import org.aquiver.mvc.router.RouteParam;
-import org.aquiver.mvc.router.RouteParamType;
-
-import java.lang.reflect.Parameter;
 
 /**
  * @author WangYi
- * @since 2020/7/4
+ * @since 2020/7/3
  */
-public class ThrowableArgumentResolver implements ArgumentResolver {
+public class ArgumentResolverManager extends AbstractArgumentResolver implements ArgumentAssignment {
   @Override
-  public boolean support(Parameter parameter) {
-    try {
-      return parameter.getType().newInstance() instanceof Throwable;
-    } catch (InstantiationException | IllegalAccessException e) {
-      return false;
+  public Object assignment(RouteParam handlerParam, ArgumentGetterContext argumentGetterContext) throws Exception {
+    Object dispen = null;
+    for (ArgumentResolver argumentResolver : getArgumentResolvers()) {
+      if (!argumentResolver.dispenType().equals(handlerParam.getType())) {
+        continue;
+      }
+      dispen = argumentResolver.dispen(handlerParam.getDataType(),
+              handlerParam.getName(), argumentGetterContext);
     }
-  }
-
-  @Override
-  public RouteParam resolve(Parameter parameter, String paramName) {
-    RouteParam handlerParam = new RouteParam();
-    handlerParam.setDataType(parameter.getType());
-    handlerParam.setName(paramName);
-    handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.THROWABLE_CLASS);
-    return handlerParam;
-  }
-
-  @Override
-  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext argumentResolverContext) {
-    Throwable throwable = argumentResolverContext.throwable();
-    return paramType.cast(throwable);
-  }
-
-  @Override
-  public RouteParamType dispenType() {
-    return RouteParamType.THROWABLE_CLASS;
+    return dispen;
   }
 }

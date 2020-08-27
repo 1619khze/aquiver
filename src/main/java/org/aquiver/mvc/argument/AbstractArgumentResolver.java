@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.resolver;
+package org.aquiver.mvc.argument;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.multipart.FileUpload;
@@ -41,7 +41,7 @@ import java.util.*;
  * @author WangYi
  * @since 2020/6/27
  */
-public abstract class AbstractParamResolver {
+public abstract class AbstractArgumentResolver {
   private final List<ArgumentResolver> argumentResolvers = new ArrayList<>();
 
   /**

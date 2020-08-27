@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.resolver;
+package org.aquiver.mvc.argument;
 
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.annotation.bind.Cookies;
@@ -31,7 +31,7 @@ import org.aquiver.mvc.router.RouteParamType;
 import java.lang.reflect.Parameter;
 import java.util.Map;
 
-public class RequestCookiesArgumentResolver extends AbstractParamResolver implements ArgumentResolver {
+public class RequestCookiesArgumentResolver extends AbstractArgumentResolver implements ArgumentResolver {
 
   @Override
   public boolean support(Parameter parameter) {
@@ -50,8 +50,8 @@ public class RequestCookiesArgumentResolver extends AbstractParamResolver implem
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext argumentResolverContext) {
-    RequestContext requestContext = argumentResolverContext.requestContext();
+  public Object dispen(Class<?> paramType, String paramName, ArgumentGetterContext argumentGetterContext) {
+    RequestContext requestContext = argumentGetterContext.requestContext();
     Map<String, Object> cookies = requestContext.request().cookies();
     if (isMap(paramType)) {
       return cookies;

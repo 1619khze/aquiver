@@ -21,44 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.resolver;
+package org.aquiver.mvc.argument;
 
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.annotation.bind.Header;
+import org.aquiver.mvc.annotation.bind.Param;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.mvc.router.RouteParamType;
 
 import java.lang.reflect.Parameter;
 
-public class RequestHeadersArgumentResolver extends AbstractParamResolver implements ArgumentResolver {
+public class RequestParamArgumentResolver extends AbstractArgumentResolver implements ArgumentResolver {
 
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(Header.class);
+    return parameter.isAnnotationPresent(Param.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
-    Header header = parameter.getAnnotation(Header.class);
+    Param param = parameter.getAnnotation(Param.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(header.value()) ? paramName : header.value());
-    handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.REQUEST_HEADER);
+    handlerParam.setName("".equals(param.value()) ? paramName : param.value());
+    handlerParam.setRequired(param.required());
+    handlerParam.setType(RouteParamType.REQUEST_PARAM);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext argumentResolverContext) {
-    RequestContext requestContext = argumentResolverContext.requestContext();
+  public Object dispen(Class<?> paramType, String paramName, ArgumentGetterContext argumentGetterContext) {
+    RequestContext requestContext = argumentGetterContext.requestContext();
     if (isMap(paramType)) {
-      return requestContext.request().headers();
+      return requestContext.request().queryStrings();
     }
-    return paramType.cast(requestContext.request().headers().get(paramName));
+    return paramType.cast(requestContext.request().queryStrings().get(paramName));
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.REQUEST_HEADER;
+    return RouteParamType.REQUEST_PARAM;
   }
 }

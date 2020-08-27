@@ -21,46 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.resolver;
+package org.aquiver.mvc.argument;
 
-import org.aquiver.RequestContext;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.mvc.router.RouteParamType;
-import org.aquiver.mvc.router.multipart.MultipartFile;
 
 import java.lang.reflect.Parameter;
 
-/**
- * @author WangYi
- * @since 2020/7/2
- */
-public class MultipartFileArgumentResolver extends AbstractParamResolver implements ArgumentResolver {
+public interface ArgumentResolver {
+  /**
+   * Determine whether the parameter type is supported
+   *
+   * @param parameter Information about method parameters.
+   * @return support
+   */
+  boolean support(Parameter parameter);
 
-  @Override
-  public boolean support(Parameter parameter) {
-    return parameter.getType().isAssignableFrom(MultipartFile.class);
-  }
+  /**
+   * Parse parameters into RouteParam
+   *
+   * @param parameter Information about method parameters
+   * @param paramName method parameter name
+   * @return route param
+   */
+  RouteParam resolve(Parameter parameter, String paramName);
 
-  @Override
-  public RouteParam resolve(Parameter parameter, String paramName) {
-    RouteParam handlerParam = new RouteParam();
-    handlerParam.setDataType(parameter.getType());
-    handlerParam.setName(paramName);
-    handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.MULTIPART_FILE);
-    return handlerParam;
-  }
+  /**
+   * Assign parameters in advance according to the amount
+   * of methods called by reflection
+   *
+   * @param paramType       param type class
+   * @param paramName       param name
+   * @param resolverContext resolver context
+   * @return Assigned parameters
+   */
+  Object dispen(Class<?> paramType, String paramName, ArgumentGetterContext resolverContext) throws Exception;
 
-  @Override
-  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext resolverContext) {
-    RequestContext requestContext = resolverContext.requestContext();
-    final MultipartFile multipartFile = new MultipartFile();
-    multipartFile.channelContext(requestContext.request().channelHandlerContext());
-    return paramType.cast(multipartFile);
-  }
-
-  @Override
-  public RouteParamType dispenType() {
-    return RouteParamType.MULTIPART_FILE;
-  }
+  /**
+   * Get the parameter type to be assigned
+   *
+   * @return Routing parameter type
+   */
+  RouteParamType dispenType();
 }

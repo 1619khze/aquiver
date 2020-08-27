@@ -21,41 +21,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.resolver;
+package org.aquiver.mvc.argument;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.aquiver.RequestContext;
+import org.aquiver.mvc.annotation.bind.Body;
 import org.aquiver.mvc.router.RouteParam;
 import org.aquiver.mvc.router.RouteParamType;
-import org.aquiver.websocket.WebSocketContext;
 
 import java.lang.reflect.Parameter;
+import java.util.Map;
 
 /**
  * @author WangYi
- * @since 2020/7/13
+ * @since 2020/5/28
  */
-public class WebSocketContextArgumentResolver implements ArgumentResolver {
+public class RequestBodyArgumentResolver extends AbstractArgumentResolver implements ArgumentResolver {
+
   @Override
   public boolean support(Parameter parameter) {
-    return parameter.getType().isAssignableFrom(WebSocketContext.class);
+    return parameter.isAnnotationPresent(Body.class);
   }
 
   @Override
   public RouteParam resolve(Parameter parameter, String paramName) {
     RouteParam handlerParam = new RouteParam();
+    Body body = parameter.getAnnotation(Body.class);
     handlerParam.setDataType(parameter.getType());
-    handlerParam.setName(paramName);
+    handlerParam.setName("".equals(body.value()) ? paramName : body.value());
     handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.WEBSOCKET_CONTEXT);
+    handlerParam.setType(RouteParamType.REQUEST_BODY);
     return handlerParam;
   }
 
   @Override
-  public Object dispen(Class<?> paramType, String paramName, ArgumentResolverContext argumentResolverContext) {
-    return argumentResolverContext.webSocketContext();
+  public Object dispen(Class<?> paramType, String paramName, ArgumentGetterContext argumentGetterContext) {
+    RequestContext requestContext = argumentGetterContext.requestContext();
+    Map<String, Object> jsonData = requestContext.request().formData();
+    String jsonString = JSON.toJSONString(jsonData);
+    if (jsonData.isEmpty() || !JSONObject.isValid(jsonString)) {
+      return null;
+    }
+    return JSONObject.parseObject(jsonString, paramType);
   }
 
   @Override
   public RouteParamType dispenType() {
-    return RouteParamType.WEBSOCKET_CONTEXT;
+    return RouteParamType.REQUEST_BODY;
   }
 }
