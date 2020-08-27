@@ -23,13 +23,11 @@
  */
 package org.aquiver;
 
-import com.alibaba.fastjson.JSONObject;
 import org.apex.ApexContext;
-import org.aquiver.mvc.http.HttpStatus;
-import org.aquiver.result.*;
+import org.aquiver.result.StringResultHandler;
+import org.aquiver.result.VoidResultHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -51,10 +49,6 @@ public final class ResultHandlerResolver {
   private void init() {
     this.register(Void.TYPE, VoidResultHandler.class);
     this.register(String.class, StringResultHandler.class);
-    this.register(Object.class, ObjectResultHandler.class);
-    this.register(JSONObject.class, JsonResultHandler.class);
-    this.register(Document.class, XMLDocumentResultHandler.class);
-    this.register(HttpStatus.class, HttpStatusResultHandler.class);
   }
 
   public void register(Class<?> resultClass, Class<? extends ResultHandler<?>> resultHandlerClass) {
