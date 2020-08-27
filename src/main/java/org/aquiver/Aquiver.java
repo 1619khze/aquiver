@@ -25,9 +25,8 @@ package org.aquiver;
 
 import org.apex.Apex;
 import org.apex.Environment;
-import org.aquiver.function.AdviceManager;
+import org.aquiver.handler.AdviceManager;
 import org.aquiver.mvc.annotation.HttpMethod;
-import org.aquiver.mvc.argument.ArgumentResolverManager;
 import org.aquiver.mvc.router.RouteManager;
 import org.aquiver.mvc.router.session.SessionManager;
 import org.aquiver.server.NettyServer;
@@ -103,8 +102,7 @@ public final class Aquiver {
 
   /** Web components that need to be initialized */
   private final AdviceManager adviceManager = new AdviceManager();
-  private final RouteManager routeManager;
-  private final ArgumentResolverManager resolverManager;
+  private final RouteManager routeManager = new RouteManager();
 
   public RouteManager routeManager() {
     return routeManager;
@@ -114,20 +112,7 @@ public final class Aquiver {
     return adviceManager;
   }
 
-  public ArgumentResolverManager resolverManager() {
-    return resolverManager;
-  }
-
-  private Aquiver() {
-    this.routeManager = new RouteManager();
-    this.resolverManager = new ArgumentResolverManager();
-    try {
-      this.resolverManager.initialize();
-      this.routeManager.setResolverManager(resolverManager);
-    } catch (Exception e) {
-      log.error("An exception occurred when Aquiver was instantiated", e);
-    }
-  }
+  private Aquiver() {}
 
   /** Ensures that the argument expression is true. */
   static void requireArgument(boolean expression) {
