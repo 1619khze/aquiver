@@ -21,26 +21,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.result;
+
+import io.netty.handler.codec.http.*;
+import org.aquiver.RequestContext;
+import org.aquiver.ResultHandler;
 
 /**
  * @author WangYi
  * @since 2020/8/22
  */
-public interface ViewHandler {
-  String getType();
-
-  void render(RequestContext ctx, String viewPathName) throws Exception;
-
-  default String getSuffix() {
-    return null;
-  }
-
-  default ViewHandlerType getHandlerType() {
-    return ViewHandlerType.DATA_VIEW;
-  }
-
-  enum ViewHandlerType {
-    TEMPLATE_VIEW, DATA_VIEW
+public final class VoidResultHandler implements ResultHandler<Void> {
+  @Override
+  public void handle(RequestContext ctx, Void result) {
+    FullHttpResponse voidResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+    HttpHeaders headers = voidResponse.headers();
+    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS, "x-requested-with,content-type");
+    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS, "POST,GET");
+    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+    headers.set(HttpHeaderNames.CONTENT_LENGTH, voidResponse.content().readableBytes());
+    ctx.writeAndFlush(voidResponse);
   }
 }

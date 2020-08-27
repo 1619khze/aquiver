@@ -42,6 +42,10 @@ public final class ViewHandlerResolver {
   private final Map<String, ViewHandler> viewHandlerMap = new HashMap<>();
   private final ApexContext context = ApexContext.of();
 
+  protected String dataViewMark() {
+    return ":";
+  }
+
   public ViewHandlerResolver() {
     this.init();
   }
@@ -53,7 +57,9 @@ public final class ViewHandlerResolver {
     this.register(XmlDataViewHandler.class);
     this.register(HtmlDataViewHandler.class);
     this.register(JpegDataViewHandler.class);
+    this.register(RedirectViewHandler.class);
     this.register(MarkdownDataViewHandler.class);
+    this.register(HtmlTemplateViewHandler.class);
     this.register(PebbleTemplateViewHandler.class);
   }
 
@@ -61,7 +67,11 @@ public final class ViewHandlerResolver {
     Objects.requireNonNull(viewHandlerClass, "viewHandlerClass can't be null");
 
     ViewHandler viewHandler = context.addBean(viewHandlerClass);
-    this.viewHandlerMap.put(viewHandler.getType(), viewHandler);
+    String type = viewHandler.getType();
+    if (viewHandler.getHandlerType().equals(ViewHandler.ViewHandlerType.DATA_VIEW)) {
+      type = type + dataViewMark();
+    }
+    this.viewHandlerMap.put(type, viewHandler);
 
     if (log.isDebugEnabled()) {
       log.debug("register ViewHandler: {} -> {}", viewHandler.getType(), viewHandlerClass.getName());
