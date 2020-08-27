@@ -23,42 +23,29 @@
  */
 package org.aquiver.mvc.argument;
 
+import io.netty.handler.codec.http.multipart.FileUpload;
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.router.RouteParam;
-import org.aquiver.mvc.router.RouteParamType;
-import org.aquiver.mvc.router.session.Session;
+import org.aquiver.mvc.router.multipart.MultipartFile;
+import org.aquiver.mvc.router.multipart.MultipartFileUtils;
 
 import java.lang.reflect.Parameter;
+import java.util.Map;
 
 /**
  * @author WangYi
- * @since 2020/6/28
+ * @since 2020/8/26
  */
-public class SessionArgumentResolver extends AbstractArgumentResolver implements ArgumentResolver {
-
+public final class FileUploadArgumentGetter implements AnnotationArgumentGetter {
   @Override
-  public boolean support(Parameter parameter) {
-    return parameter.getType().isAssignableFrom(Session.class);
-  }
-
-  @Override
-  public RouteParam resolve(Parameter parameter, String paramName) {
-    RouteParam handlerParam = new RouteParam();
-    handlerParam.setDataType(parameter.getType());
-    handlerParam.setName(paramName);
-    handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.REQUEST_SESSION);
-    return handlerParam;
-  }
-
-  @Override
-  public Object dispen(Class<?> paramType, String paramName, ArgumentGetterContext argumentGetterContext) {
-    RequestContext requestContext = argumentGetterContext.requestContext();
-    return paramType.cast(requestContext.request().session());
-  }
-
-  @Override
-  public RouteParamType dispenType() {
-    return RouteParamType.REQUEST_SESSION;
+  public Object get(ArgumentContext context) throws Exception {
+    RequestContext requestContext = context.getContext().requestContext();
+    Map<String, FileUpload> fileUploads = requestContext.request().fileUpload();
+    Parameter parameter = context.getParameter();
+    String name = parameter.getName();
+    if (MultipartFile.class.isAssignableFrom(parameter.getType()) && fileUploads.containsKey(name)) {
+      io.netty.handler.codec.http.multipart.FileUpload fileUpload = fileUploads.get(name);
+      return MultipartFileUtils.createMultipartFile(fileUpload, requestContext.request().channelHandlerContext());
+    }
+    return null;
   }
 }

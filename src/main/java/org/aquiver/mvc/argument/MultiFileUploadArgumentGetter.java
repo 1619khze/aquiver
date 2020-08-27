@@ -21,30 +21,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.router.render;
+package org.aquiver.mvc.argument;
 
+import io.netty.handler.codec.http.multipart.FileUpload;
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.router.RouteInfo;
-import org.aquiver.mvc.router.views.ViewType;
+import org.aquiver.mvc.router.multipart.MultipartFile;
+import org.aquiver.mvc.router.multipart.MultipartFileUtils;
+
+import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author WangYi
- * @since 2020/6/17
+ * @since 2020/8/26
  */
-public interface ResponseRender {
-  /**
-   * Determine if View Type is supported
-   *
-   * @param viewType 需要支持的View Type
-   * @return Support
-   */
-  boolean support(ViewType viewType);
-
-  /**
-   * Render view
-   *
-   * @param routeInfo Routing
-   * @param requestContext request context
-   */
-  void render(RouteInfo routeInfo, RequestContext requestContext);
+public final class MultiFileUploadArgumentGetter implements AnnotationArgumentGetter {
+  @Override
+  public Object get(ArgumentContext context) throws Exception {
+    RequestContext requestContext = context.getContext().requestContext();
+    Map<String, FileUpload> fileUploads = requestContext.request().fileUpload();
+    List<MultipartFile> multipartFiles = new ArrayList<>();
+    Parameter parameter = context.getParameter();
+    if (List.class.isAssignableFrom(parameter.getType())) {
+      for (Map.Entry<String, FileUpload> entry : fileUploads.entrySet()) {
+        FileUpload value = entry.getValue();
+        MultipartFile multipartFile = MultipartFileUtils.createMultipartFile(
+                value, requestContext.request().channelHandlerContext());
+        multipartFiles.add(multipartFile);
+      }
+    }
+    return multipartFiles;
+  }
 }

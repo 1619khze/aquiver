@@ -21,41 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.resolver;
-
-import org.aquiver.RequestContext;
-import org.aquiver.websocket.WebSocketContext;
+package org.aquiver.mvc.argument;
 
 /**
  * @author WangYi
- * @since 2020/7/20
+ * @since 2020/8/26
  */
-public class ArgumentResolverContext {
-  private RequestContext requestContext;
-  private WebSocketContext webSocketContext;
-  private Throwable throwable;
-
-  public void requestContext(RequestContext requestContext) {
-    this.requestContext = requestContext;
-  }
-
-  public RequestContext requestContext() {
-    return requestContext;
-  }
-
-  public void webSocketContext(WebSocketContext webSocketContext) {
-    this.webSocketContext = webSocketContext;
-  }
-
-  public WebSocketContext webSocketContext() {
-    return webSocketContext;
-  }
-
-  public Throwable throwable() {
-    return throwable;
-  }
-
-  public void throwable(Throwable throwable) {
-    this.throwable = throwable;
-  }
+public interface AnnotationArgumentGetter {
+  Object get(ArgumentContext context) throws Exception;
 }

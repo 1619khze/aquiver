@@ -23,13 +23,15 @@
  */
 package org.aquiver.mvc.argument;
 
-import org.aquiver.mvc.router.RouteParam;
+import org.aquiver.Response;
 
 /**
  * @author WangYi
- * @since 2020/7/3
+ * @since 2020/8/26
  */
-@FunctionalInterface
-public interface ArgumentAssignment {
-  Object assignment(RouteParam handlerParam, ArgumentGetterContext argumentGetterContext) throws Exception;
+public final class ResponseArgumentGetter implements TypeArgumentGetter<Response> {
+  @Override
+  public Response get(ArgumentGetterContext context) {
+    return context.requestContext().response();
+  }
 }

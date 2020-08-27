@@ -24,43 +24,14 @@
 package org.aquiver.mvc.argument;
 
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.router.RouteParam;
-import org.aquiver.mvc.router.RouteParamType;
-import org.aquiver.mvc.router.multipart.MultipartFile;
-
-import java.lang.reflect.Parameter;
 
 /**
  * @author WangYi
- * @since 2020/7/2
+ * @since 2020/8/26
  */
-public class MultipartFileArgumentResolver extends AbstractArgumentResolver implements ArgumentResolver {
-
+public final class RequestContextArgumentGetter implements TypeArgumentGetter<RequestContext> {
   @Override
-  public boolean support(Parameter parameter) {
-    return parameter.getType().isAssignableFrom(MultipartFile.class);
-  }
-
-  @Override
-  public RouteParam resolve(Parameter parameter, String paramName) {
-    RouteParam handlerParam = new RouteParam();
-    handlerParam.setDataType(parameter.getType());
-    handlerParam.setName(paramName);
-    handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.MULTIPART_FILE);
-    return handlerParam;
-  }
-
-  @Override
-  public Object dispen(Class<?> paramType, String paramName, ArgumentGetterContext resolverContext) {
-    RequestContext requestContext = resolverContext.requestContext();
-    final MultipartFile multipartFile = new MultipartFile();
-    multipartFile.channelContext(requestContext.request().channelHandlerContext());
-    return paramType.cast(multipartFile);
-  }
-
-  @Override
-  public RouteParamType dispenType() {
-    return RouteParamType.MULTIPART_FILE;
+  public RequestContext get(ArgumentGetterContext context) {
+    return context.requestContext();
   }
 }

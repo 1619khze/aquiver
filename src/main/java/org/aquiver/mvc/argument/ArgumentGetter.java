@@ -23,43 +23,10 @@
  */
 package org.aquiver.mvc.argument;
 
-import org.aquiver.mvc.router.RouteParam;
-import org.aquiver.mvc.router.RouteParamType;
-
-import java.lang.reflect.Parameter;
-
 /**
  * @author WangYi
- * @since 2020/7/4
+ * @since 2020/8/26
  */
-public class ThrowableArgumentResolver implements ArgumentResolver {
-  @Override
-  public boolean support(Parameter parameter) {
-    try {
-      return parameter.getType().newInstance() instanceof Throwable;
-    } catch (InstantiationException | IllegalAccessException e) {
-      return false;
-    }
-  }
-
-  @Override
-  public RouteParam resolve(Parameter parameter, String paramName) {
-    RouteParam handlerParam = new RouteParam();
-    handlerParam.setDataType(parameter.getType());
-    handlerParam.setName(paramName);
-    handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.THROWABLE_CLASS);
-    return handlerParam;
-  }
-
-  @Override
-  public Object dispen(Class<?> paramType, String paramName, ArgumentGetterContext argumentGetterContext) {
-    Throwable throwable = argumentGetterContext.throwable();
-    return paramType.cast(throwable);
-  }
-
-  @Override
-  public RouteParamType dispenType() {
-    return RouteParamType.THROWABLE_CLASS;
-  }
+public interface ArgumentGetter<T> {
+  T get(ArgumentGetterContext context) throws Exception;
 }

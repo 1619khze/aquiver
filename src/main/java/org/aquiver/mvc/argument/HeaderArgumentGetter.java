@@ -23,23 +23,19 @@
  */
 package org.aquiver.mvc.argument;
 
-import org.aquiver.mvc.router.RouteParam;
+import org.aquiver.RequestContext;
+
+import java.lang.reflect.Parameter;
 
 /**
  * @author WangYi
- * @since 2020/7/3
+ * @since 2020/8/26
  */
-public class ArgumentResolverManager extends AbstractArgumentResolver implements ArgumentAssignment {
+public final class HeaderArgumentGetter implements AnnotationArgumentGetter {
   @Override
-  public Object assignment(RouteParam handlerParam, ArgumentGetterContext argumentGetterContext) throws Exception {
-    Object dispen = null;
-    for (ArgumentResolver argumentResolver : getArgumentResolvers()) {
-      if (!argumentResolver.dispenType().equals(handlerParam.getType())) {
-        continue;
-      }
-      dispen = argumentResolver.dispen(handlerParam.getDataType(),
-              handlerParam.getName(), argumentGetterContext);
-    }
-    return dispen;
+  public Object get(ArgumentContext context) throws Exception {
+    RequestContext requestContext = context.getContext().requestContext();
+    Parameter parameter = context.getParameter();
+    return parameter.getType().cast(requestContext.request().headers().get(parameter.getName()));
   }
 }

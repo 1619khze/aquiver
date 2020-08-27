@@ -26,48 +26,22 @@ package org.aquiver.mvc.argument;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.annotation.bind.Body;
-import org.aquiver.mvc.router.RouteParam;
-import org.aquiver.mvc.router.RouteParamType;
 
-import java.lang.reflect.Parameter;
 import java.util.Map;
 
 /**
  * @author WangYi
- * @since 2020/5/28
+ * @since 2020/8/26
  */
-public class RequestBodyArgumentResolver extends AbstractArgumentResolver implements ArgumentResolver {
-
+public final class BodyArgumentGetter implements AnnotationArgumentGetter {
   @Override
-  public boolean support(Parameter parameter) {
-    return parameter.isAnnotationPresent(Body.class);
-  }
-
-  @Override
-  public RouteParam resolve(Parameter parameter, String paramName) {
-    RouteParam handlerParam = new RouteParam();
-    Body body = parameter.getAnnotation(Body.class);
-    handlerParam.setDataType(parameter.getType());
-    handlerParam.setName("".equals(body.value()) ? paramName : body.value());
-    handlerParam.setRequired(true);
-    handlerParam.setType(RouteParamType.REQUEST_BODY);
-    return handlerParam;
-  }
-
-  @Override
-  public Object dispen(Class<?> paramType, String paramName, ArgumentGetterContext argumentGetterContext) {
-    RequestContext requestContext = argumentGetterContext.requestContext();
+  public Object get(ArgumentContext context) throws Exception {
+    RequestContext requestContext = context.getContext().requestContext();
     Map<String, Object> jsonData = requestContext.request().formData();
     String jsonString = JSON.toJSONString(jsonData);
     if (jsonData.isEmpty() || !JSONObject.isValid(jsonString)) {
       return null;
     }
-    return JSONObject.parseObject(jsonString, paramType);
-  }
-
-  @Override
-  public RouteParamType dispenType() {
-    return RouteParamType.REQUEST_BODY;
+    return JSONObject.parseObject(jsonString, context.getParameter().getType());
   }
 }
