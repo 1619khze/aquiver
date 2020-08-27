@@ -23,8 +23,9 @@
  */
 package org.aquiver;
 
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.*;
 import org.aquiver.mvc.router.RouteInfo;
 
 /**
@@ -55,5 +56,21 @@ public class RequestContext {
 
   public Response response() {
     return response;
+  }
+
+  public void redirect(String redirectUrl) {
+    FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+            HttpResponseStatus.PERMANENT_REDIRECT);
+    HttpHeaders headers = response.headers();
+    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS, "x-requested-with,content-type");
+    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS, "POST,GET");
+    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
+    headers.set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+    headers.set(HttpHeaderNames.LOCATION, redirectUrl);
+    this.writeAndFlush(response);
+  }
+
+  public void writeAndFlush(FullHttpResponse fullHttpResponse) {
+    request().channelHandlerContext().writeAndFlush(fullHttpResponse).addListener(ChannelFutureListener.CLOSE);
   }
 }
