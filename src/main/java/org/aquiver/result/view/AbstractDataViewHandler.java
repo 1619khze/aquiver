@@ -23,13 +23,11 @@
  */
 package org.aquiver.result.view;
 
-import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import org.aquiver.Request;
 import org.aquiver.RequestContext;
 import org.aquiver.ViewHandler;
-
-import java.nio.charset.StandardCharsets;
+import org.aquiver.result.ResultUtils;
 
 /**
  * @author WangYi
@@ -40,16 +38,9 @@ public abstract class AbstractDataViewHandler implements ViewHandler {
 
   @Override
   public void render(RequestContext ctx, String viewPathName) {
-    FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-            HttpResponseStatus.OK, Unpooled.copiedBuffer(
-            viewPathName.getBytes(StandardCharsets.UTF_8)));
-
-    HttpHeaders headers = response.headers();
-    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS, "x-requested-with,content-type");
-    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS, "POST,GET");
-    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-    headers.set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
-    headers.set(HttpHeaderNames.CONTENT_TYPE, getMimeType(ctx.request()));
+    final HttpHeaders httpHeaders = new DefaultHttpHeaders();
+    httpHeaders.add(HttpHeaderNames.CONTENT_TYPE, getMimeType(ctx.request()));
+    final FullHttpResponse response = ResultUtils.contentResponse(viewPathName, httpHeaders);
     ctx.writeAndFlush(response);
   }
 }

@@ -26,4 +26,11 @@ public final class ResultUtils {
   public static FullHttpResponse emptyResponse() {
     return contentResponse("");
   }
+
+  public static FullHttpResponse contentResponse(String content, HttpHeaders httpHeaders) {
+    FullHttpResponse response = contentResponse(content);
+    HttpHeaders headers = response.headers();
+    headers.add(httpHeaders);
+    return response;
+  }
 }
