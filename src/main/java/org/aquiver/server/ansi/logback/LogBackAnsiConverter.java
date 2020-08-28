@@ -21,15 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.logger.ansi;
+package org.aquiver.server.ansi.logback;
 
-/**
- * @author WangYi
- * @version 1.0
- * @since 2019/1/16
- */
-public interface AnsiElement {
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.pattern.color.ANSIConstants;
+import ch.qos.logback.core.pattern.color.ForegroundCompositeConverterBase;
+
+public class LogBackAnsiConverter extends ForegroundCompositeConverterBase<ILoggingEvent> {
 
   @Override
-  String toString();
+  protected String getForegroundColorCode(ILoggingEvent iLoggingEvent) {
+    switch (iLoggingEvent.getLevel().toInt()) {
+      case Level.ERROR_INT:
+        return ANSIConstants.RED_FG;
+      case Level.WARN_INT:
+        return ANSIConstants.YELLOW_FG;
+      case Level.INFO_INT:
+        return ANSIConstants.GREEN_FG;
+      case Level.DEBUG_INT:
+        return ANSIConstants.MAGENTA_FG;
+      default:
+        return null;
+    }
+  }
 }
