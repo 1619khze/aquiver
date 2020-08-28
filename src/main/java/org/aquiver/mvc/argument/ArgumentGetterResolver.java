@@ -50,6 +50,7 @@ public final class ArgumentGetterResolver implements GetterResolver<ArgumentGett
     this.init();
   }
 
+  @Override
   public void init() {
     // Register all Getters that inject parameters by type
     this.registerArgumentGetter(Request.class, RequestArgumentGetter.class);

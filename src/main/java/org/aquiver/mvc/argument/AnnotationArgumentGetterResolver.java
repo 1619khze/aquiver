@@ -44,6 +44,7 @@ public final class AnnotationArgumentGetterResolver implements GetterResolver<An
     init();
   }
 
+  @Override
   public void init() {
     // Register all Getters that inject parameters through annotations
     this.registerArgumentGetter(Param.class, ParamArgumentGetter.class);
