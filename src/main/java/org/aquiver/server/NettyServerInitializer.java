@@ -34,7 +34,7 @@ import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.cors.CorsHandler;
 import io.netty.handler.ssl.SslContext;
 import org.aquiver.Aquiver;
-import org.aquiver.websocket.WebSocketServerHandler;
+import org.aquiver.websocket.WebSocketHandler;
 
 import java.util.Objects;
 
@@ -69,9 +69,7 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
     if (aquiver.gzip()) {
       channelPipeline.addLast(new HttpContentCompressor());
     }
-    if (!aquiver.routeManager().getWebSockets().isEmpty()) {
-      channelPipeline.addLast(new WebSocketServerHandler());
-    }
+    channelPipeline.addLast(new WebSocketHandler());
     channelPipeline.addLast(new HttpServerCodec());
     channelPipeline.addLast(new HttpServerExpectContinueHandler());
     channelPipeline.addLast(new NettyServerHandler());

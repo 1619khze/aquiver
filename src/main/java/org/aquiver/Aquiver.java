@@ -24,15 +24,18 @@
 package org.aquiver;
 
 import org.apex.Apex;
+import org.apex.ApexContext;
 import org.apex.Environment;
-import org.aquiver.handler.AdviceManager;
+import org.aquiver.handler.Advice;
+import org.aquiver.handler.ExceptionHandlerResolver;
 import org.aquiver.mvc.annotation.HttpMethod;
-import org.aquiver.mvc.router.RouteManager;
+import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.session.SessionManager;
 import org.aquiver.server.NettyServer;
 import org.aquiver.server.Server;
 import org.aquiver.server.banner.BannerFont;
 import org.aquiver.websocket.WebSocketChannel;
+import org.aquiver.websocket.WebSocketResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,10 +72,10 @@ import static org.aquiver.Const.*;
  * @author WangYi
  * @since 2019/6/5
  */
-public final class Aquiver {
+public class Aquiver {
   private static final Logger log = LoggerFactory.getLogger(Aquiver.class);
 
-  /** Components needed to start the service. */
+  // Components needed to start the service.
   private final Server nettyServer = new NettyServer();
   private final Set<String> packages = new LinkedHashSet<>();
   private final List<Class<?>> eventPool = new LinkedList<>();
@@ -82,7 +85,7 @@ public final class Aquiver {
   private String bootConfName = PATH_CONFIG_PROPERTIES;
   private boolean started = false;
 
-  /** Some content that may be needed. */
+  // Some content that may be needed.
   private int port;
   private Class<?> bootCls;
   private String bannerText;
@@ -92,7 +95,7 @@ public final class Aquiver {
   private Integer sessionTimeout;
   private String[] mainArgs;
 
-  /** Thread pool setting param */
+  // Thread pool setting param
   private int corePoolSize = 5;
   private int maximumPoolSize = 200;
   private int keepAliveTime = 0;
@@ -100,17 +103,14 @@ public final class Aquiver {
   private String viewSuffix;
   private String templateFolder;
 
-  /** Web components that need to be initialized */
-  private final AdviceManager adviceManager = new AdviceManager();
-  private final RouteManager routeManager = new RouteManager();
+  // Components needed for dependency injection
+  public final Apex apex = Apex.of();
+  public final ApexContext apexContext = ApexContext.of();
 
-  public RouteManager routeManager() {
-    return routeManager;
-  }
-
-  public AdviceManager adviceManager() {
-    return adviceManager;
-  }
+  // A series of components used
+  private final RestfulRouter restfulRouter = apexContext.addBean(RestfulRouter.class);
+  private final WebSocketResolver webSocketResolver = apexContext.addBean(WebSocketResolver.class);
+  private final ExceptionHandlerResolver exceptionHandlerResolver = apexContext.addBean(ExceptionHandlerResolver.class);
 
   private Aquiver() {}
 
@@ -273,7 +273,7 @@ public final class Aquiver {
   /**
    * Get session time out
    *
-   * @return
+   * @return session time out
    */
   public Integer sessionTimeout() {
     if (sessionTimeout == null) {
@@ -487,8 +487,7 @@ public final class Aquiver {
   public Aquiver websocket(String path, WebSocketChannel webSocketChannel) {
     requireNonNull(path, "WebSocket url path can't be null");
     requireNonNull(webSocketChannel, "WebSocketChannel can't be null");
-
-    this.routeManager.addWebSocket(path, webSocketChannel);
+    this.webSocketResolver.registerWebSocket(path, webSocketChannel);
     return this;
   }
 
@@ -500,7 +499,7 @@ public final class Aquiver {
    * @return this
    */
   public Aquiver get(String path, RequestHandler requestHandler) {
-    this.routeManager.addRoute(path, requestHandler, HttpMethod.GET);
+    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.GET);
     return this;
   }
 
@@ -512,7 +511,7 @@ public final class Aquiver {
    * @return this
    */
   public Aquiver post(String path, RequestHandler requestHandler) {
-    this.routeManager.addRoute(path, requestHandler, HttpMethod.POST);
+    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.POST);
     return this;
   }
 
@@ -524,7 +523,7 @@ public final class Aquiver {
    * @return this
    */
   public Aquiver head(String path, RequestHandler requestHandler) {
-    this.routeManager.addRoute(path, requestHandler, HttpMethod.HEAD);
+    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.HEAD);
     return this;
   }
 
@@ -536,7 +535,7 @@ public final class Aquiver {
    * @return this
    */
   public Aquiver put(String path, RequestHandler requestHandler) {
-    this.routeManager.addRoute(path, requestHandler, HttpMethod.PUT);
+    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.PUT);
     return this;
   }
 
@@ -548,7 +547,7 @@ public final class Aquiver {
    * @return this
    */
   public Aquiver patch(String path, RequestHandler requestHandler) {
-    this.routeManager.addRoute(path, requestHandler, HttpMethod.PATCH);
+    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.PATCH);
     return this;
   }
 
@@ -560,7 +559,7 @@ public final class Aquiver {
    * @return this
    */
   public Aquiver delete(String path, RequestHandler requestHandler) {
-    this.routeManager.addRoute(path, requestHandler, HttpMethod.DELETE);
+    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.DELETE);
     return this;
   }
 
@@ -572,7 +571,7 @@ public final class Aquiver {
    * @return this
    */
   public Aquiver options(String path, RequestHandler requestHandler) {
-    this.routeManager.addRoute(path, requestHandler, HttpMethod.OPTIONS);
+    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.OPTIONS);
     return this;
   }
 
@@ -584,7 +583,7 @@ public final class Aquiver {
    * @return this
    */
   public Aquiver trace(String path, RequestHandler requestHandler) {
-    this.routeManager.addRoute(path, requestHandler, HttpMethod.TRACE);
+    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.TRACE);
     return this;
   }
 
@@ -596,7 +595,18 @@ public final class Aquiver {
    * @return this
    */
   public Aquiver route(String path, RequestHandler requestHandler, HttpMethod httpMethod) {
-    this.routeManager.addRoute(path, requestHandler, httpMethod);
+    this.restfulRouter.registerRoute(path, requestHandler, httpMethod);
+    return this;
+  }
+
+  /**
+   * Register exception advice
+   * @param throwableCls exception
+   * @param advice exception handler
+   * @return this
+   */
+  public Aquiver advice(Class<? extends Throwable> throwableCls, Advice advice) {
+    this.exceptionHandlerResolver.addAdvice(throwableCls, advice);
     return this;
   }
 
@@ -610,7 +620,7 @@ public final class Aquiver {
     try {
       this.mainArgs = args;
       this.initReusableThreadPool();
-    } catch (Exception e) {
+    } catch(Exception e) {
       log.error("An exception occurred while loading the configuration", e);
     }
     this.reusableExecutor.execute(() -> {
@@ -619,9 +629,9 @@ public final class Aquiver {
         this.nettyServer.start(this);
         this.countDownLatch.countDown();
         this.nettyServer.join();
-      } catch (BindException e) {
+      } catch(BindException e) {
         log.error("Bind port is exception:", e);
-      } catch (Exception e) {
+      } catch(Exception e) {
         log.error("An exception occurred while the service started", e);
       } finally {
         log.info("SingleExecutor graceful shutdown");
@@ -668,7 +678,7 @@ public final class Aquiver {
     }
     try {
       this.countDownLatch.await();
-    } catch (Exception e) {
+    } catch(Exception e) {
       log.error("Server start await error", e);
       Thread.currentThread().interrupt();
     }

@@ -34,10 +34,15 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.ResourceLeakDetector;
 import org.apex.*;
 import org.aquiver.Aquiver;
+import org.aquiver.ResultHandlerResolver;
+import org.aquiver.ViewHandlerResolver;
 import org.aquiver.WebInitializer;
 import org.aquiver.mvc.annotation.Path;
 import org.aquiver.mvc.annotation.RestPath;
 import org.aquiver.mvc.annotation.advice.RouteAdvice;
+import org.aquiver.mvc.argument.AnnotationArgumentGetterResolver;
+import org.aquiver.mvc.argument.ArgumentGetterResolver;
+import org.aquiver.mvc.argument.MethodArgumentGetter;
 import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvTask;
@@ -98,7 +103,7 @@ public class NettyServer implements Server {
     long startMs = System.currentTimeMillis();
 
     this.aquiver = aquiver;
-    this.apex = Apex.of();
+    this.apex = aquiver.apex;
     this.environment = this.aquiver.environment();
     this.printBanner();
 
@@ -154,10 +159,18 @@ public class NettyServer implements Server {
     extendAnnotations.add(WebSocket.class);
 
     final Scanner scanner = new ClassgraphScanner(classgraphOptions);
-    final ApexContext apexContext = apex.addScanAnnotation(extendAnnotations)
+    Map<String, BeanDefinition> loadResult = apex.addScanAnnotation(extendAnnotations)
             .options(classgraphOptions).scanner(scanner).packages(scanPath)
-            .mainArgs(aquiver.mainArgs()).apexContext();
+            .mainArgs(aquiver.mainArgs()).load();
 
+    final ApexContext apexContext = aquiver.apexContext;
+    apexContext.addBean(ResultHandlerResolver.class);
+    apexContext.addBean(ViewHandlerResolver.class);
+    apexContext.addBean(MethodArgumentGetter.class);
+    apexContext.addBean(ArgumentGetterResolver.class);
+    apexContext.addBean(AnnotationArgumentGetterResolver.class);
+
+    apexContext.registerBeanDefinitions(loadResult);
     final Map<String, Object> instances = apexContext.getInstances();
     WebInitializer.initialize(instances, aquiver);
   }
@@ -278,8 +291,7 @@ public class NettyServer implements Server {
         this.workerGroup.shutdownGracefully();
       }
       log.info("The netty service is gracefully closed");
-    }
-    catch(Exception e) {
+    } catch(Exception e) {
       log.error("An exception occurred while the Netty Http service was down", e);
     }
   }
@@ -288,8 +300,7 @@ public class NettyServer implements Server {
   public void join() {
     try {
       this.channel.closeFuture().sync();
-    }
-    catch(InterruptedException e) {
+    } catch(InterruptedException e) {
       log.error("Channel close future fail", e);
     }
   }

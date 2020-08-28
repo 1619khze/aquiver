@@ -27,13 +27,18 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import org.aquiver.*;
-import org.aquiver.function.AdviceManager;
-import org.aquiver.function.handler.HttpExceptionHandler;
+import org.apex.ApexContext;
+import org.aquiver.Const;
+import org.aquiver.RequestContext;
+import org.aquiver.ResultHandler;
+import org.aquiver.ResultHandlerResolver;
+import org.aquiver.exception.NoRouteFoundException;
+import org.aquiver.handler.ExceptionHandlerResolver;
+import org.aquiver.handler.HttpExceptionHandler;
 import org.aquiver.mvc.RequestResult;
 import org.aquiver.mvc.argument.*;
-import org.aquiver.mvc.router.NoRouteFoundException;
 import org.aquiver.mvc.router.PathVarMatcher;
+import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.RouteInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,10 +61,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
 
   private FullHttpRequest request;
-  private final Map<String, RouteInfo> routeMap;
   private final HttpExceptionHandler exceptionHandler;
   private final StaticFileServerHandler fileServerHandler;
-  private final AdviceManager adviceManager;
+  private final RestfulRouter restfulRouter;
+  private final ExceptionHandlerResolver exceptionHandlerResolver;
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
   private final ArgumentGetterContext argumentGetterContext = new ArgumentGetterContext();
   private final ResultHandlerResolver resultHandlerResolver = new ResultHandlerResolver();
@@ -67,11 +72,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private final AnnotationArgumentGetterResolver annotationResolver = new AnnotationArgumentGetterResolver();
 
   public NettyServerHandler() {
-    final Aquiver aquiver = Aquiver.of();
-    this.routeMap = aquiver.routeManager().getRoutes();
+    final ApexContext context = ApexContext.of();
     this.exceptionHandler = new HttpExceptionHandler();
     this.fileServerHandler = new StaticFileServerHandler();
-    this.adviceManager = aquiver.adviceManager();
+    this.exceptionHandlerResolver = context.getBean(ExceptionHandlerResolver.class);
+    this.restfulRouter = context.getBean(RestfulRouter.class);
   }
 
   @Override
@@ -88,7 +93,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     log.error("An exception occurred when calling the mapping method", cause);
     this.argumentGetterContext.throwable(cause);
-    final Object handlerExceptionResult = this.adviceManager
+    final Object handlerExceptionResult = this.exceptionHandlerResolver
             .handlerException(cause, argumentGetterContext);
     if (Objects.nonNull(handlerExceptionResult)) {
       return;
@@ -119,8 +124,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
         ResultHandler<Object> handler = resultHandlerResolver.lookup(result.getResultType());
         handler.handle(requestContext, result.getResultObject());
       }
-    }
-    catch(Throwable throwable) {
+    } catch(Throwable throwable) {
       exceptionCaught(ctx, throwable);
     }
   }
@@ -170,10 +174,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   }
 
   private RouteInfo loopLookUp(String lookupPath) {
-    if (routeMap.containsKey(lookupPath)) {
-      return this.routeMap.get(lookupPath);
+    RouteInfo lookup = restfulRouter.lookup(lookupPath);
+    if (Objects.nonNull(lookup)) {
+      return lookup;
     }
-    for (Map.Entry<String, RouteInfo> entry : routeMap.entrySet()) {
+    for (Map.Entry<String, RouteInfo> entry : restfulRouter.getRoutes().entrySet()) {
       String[] lookupPathSplit = lookupPath.split("/");
       String[] mappingUrlSplit = entry.getKey().split("/");
       String matcher = PathVarMatcher.getMatch(entry.getKey());
