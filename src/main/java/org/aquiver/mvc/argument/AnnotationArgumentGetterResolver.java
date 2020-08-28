@@ -24,8 +24,6 @@
 package org.aquiver.mvc.argument;
 
 import org.aquiver.mvc.annotation.bind.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
@@ -37,7 +35,6 @@ import java.util.Objects;
  * @since 2020/8/26
  */
 public final class AnnotationArgumentGetterResolver implements GetterResolver<AnnotationArgumentGetter> {
-  private static final Logger log = LoggerFactory.getLogger(AnnotationArgumentGetterResolver.class);
   private final Map<Class<?>, AnnotationArgumentGetter> mapping = new HashMap<>();
 
   public AnnotationArgumentGetterResolver() {
