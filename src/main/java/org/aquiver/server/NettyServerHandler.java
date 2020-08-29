@@ -23,6 +23,7 @@
  */
 package org.aquiver.server;
 
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -56,7 +57,7 @@ import java.util.Objects;
  * @author WangYi
  * @since 2020/5/26
  */
-@Sharable
+@ChannelHandler.Sharable
 public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
 
@@ -65,11 +66,12 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private final StaticFileServerHandler fileServerHandler;
   private final RestfulRouter restfulRouter;
   private final ExceptionHandlerResolver exceptionHandlerResolver;
+  private final ResultHandlerResolver resultHandlerResolver;
+  private final ArgumentGetterResolver argumentGetterResolver;
+  private final AnnotationArgumentGetterResolver annotationResolver;
+
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
   private final ArgumentGetterContext argumentGetterContext = new ArgumentGetterContext();
-  private final ResultHandlerResolver resultHandlerResolver = new ResultHandlerResolver();
-  private final ArgumentGetterResolver argumentGetterResolver = new ArgumentGetterResolver();
-  private final AnnotationArgumentGetterResolver annotationResolver = new AnnotationArgumentGetterResolver();
 
   public NettyServerHandler() {
     final ApexContext context = ApexContext.of();
@@ -77,6 +79,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     this.fileServerHandler = new StaticFileServerHandler();
     this.exceptionHandlerResolver = context.getBean(ExceptionHandlerResolver.class);
     this.restfulRouter = context.getBean(RestfulRouter.class);
+    this.resultHandlerResolver = context.getBean(ResultHandlerResolver.class);
+    this.argumentGetterResolver = context.getBean(ArgumentGetterResolver.class);
+    this.annotationResolver = context.getBean(AnnotationArgumentGetterResolver.class);
   }
 
   @Override
@@ -93,11 +98,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     log.error("An exception occurred when calling the mapping method", cause);
     this.argumentGetterContext.throwable(cause);
-    final Object handlerExceptionResult = this.exceptionHandlerResolver
-            .handlerException(cause, argumentGetterContext);
-    if (Objects.nonNull(handlerExceptionResult)) {
-      return;
-    }
+    this.exceptionHandlerResolver.handlerException(cause, argumentGetterContext);
     ctx.close();
   }
 
@@ -166,14 +167,14 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
       lookupPath = "/";
     }
 
-    RouteInfo routeInfo = loopLookUp(lookupPath);
+    RouteInfo routeInfo = lookupRoute(lookupPath);
     if (Objects.isNull(routeInfo)) {
       lookupStaticFile(context);
     }
     return routeInfo;
   }
 
-  private RouteInfo loopLookUp(String lookupPath) {
+  private RouteInfo lookupRoute(String lookupPath) {
     RouteInfo lookup = restfulRouter.lookup(lookupPath);
     if (Objects.nonNull(lookup)) {
       return lookup;
