@@ -26,7 +26,7 @@ package org.aquiver;
 import org.apex.Apex;
 import org.apex.ApexContext;
 import org.apex.Environment;
-import org.aquiver.function.Advice;
+import org.aquiver.function.ExceptionHandler;
 import org.aquiver.function.ExceptionHandlerResolver;
 import org.aquiver.mvc.annotation.HttpMethod;
 import org.aquiver.mvc.router.RestfulRouter;
@@ -112,7 +112,8 @@ public class Aquiver {
   private final WebSocketResolver webSocketResolver = apexContext.addBean(WebSocketResolver.class);
   private final ExceptionHandlerResolver exceptionHandlerResolver = apexContext.addBean(ExceptionHandlerResolver.class);
 
-  private Aquiver() {}
+  private Aquiver() {
+  }
 
   /** Ensures that the argument expression is true. */
   static void requireArgument(boolean expression) {
@@ -602,11 +603,11 @@ public class Aquiver {
   /**
    * Register exception advice
    * @param throwableCls exception
-   * @param advice exception handler
+   * @param exceptionHandler exception handler
    * @return this
    */
-  public Aquiver advice(Class<? extends Throwable> throwableCls, Advice advice) {
-    this.exceptionHandlerResolver.addAdvice(throwableCls, advice);
+  public Aquiver exceptionHandler(Class<? extends Throwable> throwableCls, ExceptionHandler exceptionHandler) {
+    this.exceptionHandlerResolver.addAdvice(throwableCls, exceptionHandler);
     return this;
   }
 
