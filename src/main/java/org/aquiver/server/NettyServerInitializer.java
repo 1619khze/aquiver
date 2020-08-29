@@ -69,9 +69,9 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
     if (aquiver.gzip()) {
       channelPipeline.addLast(new HttpContentCompressor());
     }
-    channelPipeline.addLast(new WebSocketHandler());
     channelPipeline.addLast(new HttpServerCodec());
     channelPipeline.addLast(new HttpServerExpectContinueHandler());
+    channelPipeline.addLast(new WebSocketHandler());
     channelPipeline.addLast(new NettyServerHandler());
   }
 }
