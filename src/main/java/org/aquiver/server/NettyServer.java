@@ -166,9 +166,9 @@ public class NettyServer implements Server {
     final ApexContext apexContext = aquiver.apexContext;
     apexContext.addBean(ResultHandlerResolver.class);
     apexContext.addBean(ViewHandlerResolver.class);
-    apexContext.addBean(MethodArgumentGetter.class);
     apexContext.addBean(ArgumentGetterResolver.class);
     apexContext.addBean(AnnotationArgumentGetterResolver.class);
+    apexContext.addBean(MethodArgumentGetter.class);
 
     apexContext.registerBeanDefinitions(loadResult);
     final Map<String, Object> instances = apexContext.getInstances();
