@@ -29,7 +29,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import org.apex.ApexContext;
 import org.aquiver.*;
-import org.aquiver.handler.ExceptionHandlerResolver;
+import org.aquiver.handler.ErrorHandlerResolver;
 import org.aquiver.mvc.RequestResult;
 import org.aquiver.mvc.argument.*;
 import org.aquiver.mvc.router.PathVarMatcher;
@@ -59,7 +59,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private FullHttpRequest request;
   private final StaticFileServerHandler fileServerHandler;
   private final RestfulRouter restfulRouter;
-  private final ExceptionHandlerResolver exceptionHandlerResolver;
+  private final ErrorHandlerResolver errorHandlerResolver;
   private final ResultHandlerResolver resultHandlerResolver;
   private final ArgumentGetterResolver argumentGetterResolver;
   private final AnnotationArgumentGetterResolver annotationResolver;
@@ -70,7 +70,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   public NettyServerHandler() {
     final ApexContext context = ApexContext.of();
     this.fileServerHandler = new StaticFileServerHandler();
-    this.exceptionHandlerResolver = context.getBean(ExceptionHandlerResolver.class);
+    this.errorHandlerResolver = context.getBean(ErrorHandlerResolver.class);
     this.restfulRouter = context.getBean(RestfulRouter.class);
     this.resultHandlerResolver = context.getBean(ResultHandlerResolver.class);
     this.argumentGetterResolver = context.getBean(ArgumentGetterResolver.class);
@@ -91,7 +91,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     log.error("An exception occurred when calling the mapping method", cause);
     this.argumentGetterContext.throwable(cause);
-    this.exceptionHandlerResolver.handlerException(cause, argumentGetterContext);
+    this.errorHandlerResolver.handlerException(cause, argumentGetterContext);
     ctx.close();
   }
 

@@ -26,8 +26,8 @@ package org.aquiver;
 import org.apex.Apex;
 import org.apex.ApexContext;
 import org.apex.Environment;
-import org.aquiver.handler.ExceptionHandler;
-import org.aquiver.handler.ExceptionHandlerResolver;
+import org.aquiver.handler.ErrorHandler;
+import org.aquiver.handler.ErrorHandlerResolver;
 import org.aquiver.mvc.annotation.HttpMethod;
 import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.session.SessionManager;
@@ -110,7 +110,7 @@ public class Aquiver {
   // A series of components used
   private final RestfulRouter restfulRouter = apexContext.addBean(RestfulRouter.class);
   private final WebSocketResolver webSocketResolver = apexContext.addBean(WebSocketResolver.class);
-  private final ExceptionHandlerResolver exceptionHandlerResolver = apexContext.addBean(ExceptionHandlerResolver.class);
+  private final ErrorHandlerResolver errorHandlerResolver = apexContext.addBean(ErrorHandlerResolver.class);
 
   private Aquiver() {
   }
@@ -603,11 +603,11 @@ public class Aquiver {
   /**
    * Register exception advice
    * @param throwableCls exception
-   * @param exceptionHandler exception handler
+   * @param errorHandler exception handler
    * @return this
    */
-  public Aquiver exceptionHandler(Class<? extends Throwable> throwableCls, ExceptionHandler exceptionHandler) {
-    this.exceptionHandlerResolver.registerExceptionHandler(throwableCls, exceptionHandler);
+  public Aquiver errorHandler(Class<? extends Throwable> throwableCls, ErrorHandler errorHandler) {
+    this.errorHandlerResolver.registerErrorHandler(throwableCls, errorHandler);
     return this;
   }
 
