@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.annotation.advice;
+package org.aquiver.handler.annotation;
 
 import java.lang.annotation.*;
 
@@ -32,6 +32,6 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ExceptionHandler {
+public @interface ErrorHandler {
   Class<? extends Throwable> value();
 }

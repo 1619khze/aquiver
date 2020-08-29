@@ -26,8 +26,8 @@ package org.aquiver;
 import org.apex.Apex;
 import org.apex.ApexContext;
 import org.apex.Environment;
-import org.aquiver.function.ExceptionHandler;
-import org.aquiver.function.ExceptionHandlerResolver;
+import org.aquiver.handler.ExceptionHandler;
+import org.aquiver.handler.ExceptionHandlerResolver;
 import org.aquiver.mvc.annotation.HttpMethod;
 import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.session.SessionManager;
@@ -607,7 +607,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver exceptionHandler(Class<? extends Throwable> throwableCls, ExceptionHandler exceptionHandler) {
-    this.exceptionHandlerResolver.addAdvice(throwableCls, exceptionHandler);
+    this.exceptionHandlerResolver.registerExceptionHandler(throwableCls, exceptionHandler);
     return this;
   }
 
