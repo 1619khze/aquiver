@@ -34,4 +34,9 @@ public final class SessionArgumentGetter implements TypeArgumentGetter<Session> 
   public Session get(ArgumentGetterContext context) {
     return context.requestContext().request().session();
   }
+
+  @Override
+  public boolean support(Class<?> cls) {
+    return cls.isAssignableFrom(Session.class);
+  }
 }

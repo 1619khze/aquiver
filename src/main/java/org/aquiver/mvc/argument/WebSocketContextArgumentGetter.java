@@ -34,4 +34,9 @@ public final class WebSocketContextArgumentGetter implements TypeArgumentGetter<
   public WebSocketContext get(ArgumentGetterContext argumentGetterContext) {
     return argumentGetterContext.webSocketContext();
   }
+
+  @Override
+  public boolean support(Class<?> cls) {
+    return cls.isAssignableFrom(WebSocketContext.class);
+  }
 }

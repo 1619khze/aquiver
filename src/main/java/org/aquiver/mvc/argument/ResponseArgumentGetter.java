@@ -34,4 +34,9 @@ public final class ResponseArgumentGetter implements TypeArgumentGetter<Response
   public Response get(ArgumentGetterContext context) {
     return context.requestContext().response();
   }
+
+  @Override
+  public boolean support(Class<?> cls) {
+    return cls.isAssignableFrom(Response.class);
+  }
 }

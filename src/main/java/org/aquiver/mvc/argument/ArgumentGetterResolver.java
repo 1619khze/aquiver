@@ -43,7 +43,7 @@ import java.util.Objects;
  */
 public final class ArgumentGetterResolver implements GetterResolver<ArgumentGetter<?>> {
   private static final Logger log = LoggerFactory.getLogger(ArgumentGetterResolver.class);
-  private final Map<Class<?>, ArgumentGetter<?>> mapping = new HashMap<>();
+  private final Map<Class<?>, TypeArgumentGetter<?>> mapping = new HashMap<>();
   private final ApexContext context = ApexContext.of();
 
   public ArgumentGetterResolver() {
@@ -67,20 +67,30 @@ public final class ArgumentGetterResolver implements GetterResolver<ArgumentGett
     Objects.requireNonNull(bindClass, "bindClass can't be null");
     Objects.requireNonNull(argumentClass, "argumentClass can't be null");
 
-    if (!ArgumentGetter.class.isAssignableFrom(argumentClass)) {
-      throw new IllegalArgumentException(argumentClass.getName() + "can't assignable from ArgumentGetter");
+    if (!TypeArgumentGetter.class.isAssignableFrom(argumentClass)) {
+      throw new IllegalArgumentException(argumentClass.getName() + "can't assignable from TypeArgumentGetter");
     }
 
     if (log.isDebugEnabled()) {
       log.debug("register ArgumentGetter: {} -> {}", bindClass.getName(), argumentClass.getName());
     }
 
-    final ArgumentGetter<?> argumentGetter = (ArgumentGetter<?>) this.context.addBean(argumentClass);
+    final TypeArgumentGetter<?> argumentGetter = (TypeArgumentGetter<?>) this.context.addBean(argumentClass);
     this.mapping.put(bindClass, argumentGetter);
   }
 
   @Override
   public ArgumentGetter<?> lookup(Class<?> bindClass) {
-    return mapping.getOrDefault(bindClass, null);
+    ArgumentGetter<?> argumentGetter = mapping.get(bindClass);
+    if (Objects.nonNull(argumentGetter)) {
+      return argumentGetter;
+    }
+    for (Map.Entry<Class<?>, TypeArgumentGetter<?>> entry : mapping.entrySet()) {
+      TypeArgumentGetter<?> typeArgumentGetter = entry.getValue();
+      if (typeArgumentGetter.support(bindClass)) {
+        return typeArgumentGetter;
+      }
+    }
+    return null;
   }
 }

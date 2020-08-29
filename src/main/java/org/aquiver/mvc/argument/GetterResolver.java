@@ -34,7 +34,7 @@ public interface GetterResolver<R> {
 
   void registerArgumentGetter(Class<?> bindClass, Class<?> argumentClass);
 
-  R lookup(Class<?> bindClass);
+  R lookup(Class<?> bindClass) throws IllegalAccessException, InstantiationException;
 
   default ApexContext apexContext() {
     return ApexContext.of();

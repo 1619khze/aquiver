@@ -32,4 +32,13 @@ public final class ThrowableArgumentGetter implements TypeArgumentGetter<Throwab
   public Throwable get(ArgumentGetterContext argumentGetterContext) {
     return argumentGetterContext.throwable();
   }
+
+  @Override
+  public boolean support(Class<?> cls) {
+    try {
+      return cls.newInstance() instanceof Throwable;
+    } catch(InstantiationException | IllegalAccessException e) {
+      return false;
+    }
+  }
 }

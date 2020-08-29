@@ -28,5 +28,5 @@ package org.aquiver.mvc.argument;
  * @since 2020/8/26
  */
 public interface TypeArgumentGetter<T> extends ArgumentGetter<T> {
-
+  boolean support(Class<?> cls);
 }

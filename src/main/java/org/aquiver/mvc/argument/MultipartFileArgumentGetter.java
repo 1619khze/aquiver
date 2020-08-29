@@ -30,12 +30,17 @@ import org.aquiver.mvc.router.multipart.MultipartFile;
  * @author WangYi
  * @since 2020/8/26
  */
-public final class MultipartFileArgumentGetter implements ArgumentGetter<MultipartFile> {
+public final class MultipartFileArgumentGetter implements TypeArgumentGetter<MultipartFile> {
   @Override
   public MultipartFile get(ArgumentGetterContext context) {
     RequestContext requestContext = context.requestContext();
     final MultipartFile multipartFile = new MultipartFile();
     multipartFile.channelContext(requestContext.request().channelHandlerContext());
     return multipartFile;
+  }
+
+  @Override
+  public boolean support(Class<?> cls) {
+    return cls.isAssignableFrom(MultipartFile.class);
   }
 }

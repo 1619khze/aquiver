@@ -34,4 +34,9 @@ public final class RequestContextArgumentGetter implements TypeArgumentGetter<Re
   public RequestContext get(ArgumentGetterContext context) {
     return context.requestContext();
   }
+
+  @Override
+  public boolean support(Class<?> cls) {
+    return cls.isAssignableFrom(RequestContext.class);
+  }
 }
