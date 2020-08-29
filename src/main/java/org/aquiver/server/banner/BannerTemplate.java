@@ -23,7 +23,7 @@
  */
 package org.aquiver.server.banner;
 
-import org.aquiver.Const;
+import org.aquiver.server.Const;
 
 import java.io.PrintStream;
 

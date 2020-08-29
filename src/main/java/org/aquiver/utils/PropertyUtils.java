@@ -23,7 +23,7 @@
  */
 package org.aquiver.utils;
 
-import org.aquiver.Const;
+import org.aquiver.server.Const;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;

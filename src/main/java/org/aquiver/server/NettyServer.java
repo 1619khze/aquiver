@@ -61,7 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.aquiver.Const.*;
+import static org.aquiver.server.Const.*;
 
 /**
  * open ssl {@code initSSL}

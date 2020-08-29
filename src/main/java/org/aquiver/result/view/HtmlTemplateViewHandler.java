@@ -26,7 +26,7 @@ package org.aquiver.result.view;
 import io.netty.handler.codec.http.FullHttpResponse;
 import org.apex.io.FileBaseResource;
 import org.apex.io.Resource;
-import org.aquiver.Const;
+import org.aquiver.server.Const;
 import org.aquiver.RequestContext;
 import org.aquiver.result.ResultUtils;
 

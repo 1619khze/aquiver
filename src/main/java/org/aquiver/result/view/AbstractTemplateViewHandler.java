@@ -25,7 +25,7 @@ package org.aquiver.result.view;
 
 import org.apex.Environment;
 import org.aquiver.Aquiver;
-import org.aquiver.Const;
+import org.aquiver.server.Const;
 import org.aquiver.RequestContext;
 import org.aquiver.ViewHandler;
 

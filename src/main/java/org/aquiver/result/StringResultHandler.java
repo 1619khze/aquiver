@@ -27,7 +27,7 @@ import org.aquiver.*;
 
 import java.util.Objects;
 
-import static org.aquiver.Const.SERVER_VIEW_SUFFIX;
+import static org.aquiver.server.Const.SERVER_VIEW_SUFFIX;
 
 /**
  * @author WangYi

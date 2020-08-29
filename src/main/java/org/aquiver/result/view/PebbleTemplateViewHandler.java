@@ -24,7 +24,7 @@
 package org.aquiver.result.view;
 
 import io.netty.handler.codec.http.FullHttpResponse;
-import org.aquiver.Const;
+import org.aquiver.server.Const;
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.router.views.HTMLView;
 import org.aquiver.mvc.router.views.PebbleHTMLView;

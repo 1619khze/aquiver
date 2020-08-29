@@ -45,7 +45,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.LongAdder;
 
 import static java.util.Objects.requireNonNull;
-import static org.aquiver.Const.*;
+import static org.aquiver.server.Const.*;
 
 /**
  * Aquiver is apex context, can use method configure
