@@ -21,55 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.function;
+package org.aquiver.handler;
 
+import org.apex.ApexContext;
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.argument.ArgumentGetterContext;
-import org.aquiver.mvc.argument.ArgumentResolverManager;
-import org.aquiver.mvc.router.RouteParam;
-import org.aquiver.utils.ReflectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author WangYi
  * @since 2020/7/3
  */
-public class AdviceManager {
-  private static final Logger log = LoggerFactory.getLogger(AdviceManager.class);
+public class ErrorHandlerResolver {
+  private final Map<Class<? extends Throwable>, ErrorHandler> exceptionHandlerMap = new HashMap<>();
+  private final ApexContext context = ApexContext.of();
 
-  private final Map<Class<? extends Throwable>, Advice> adviceMap = new ConcurrentHashMap<>(8);
-
-  public void addAdvice(Class<? extends Throwable> throwableCls, Advice advice) {
-    this.adviceMap.put(throwableCls, advice);
+  public void registerErrorHandler(Class<? extends Throwable> throwableCls, ErrorHandler errorHandler) {
+    Objects.requireNonNull(throwableCls, "throwableCls can' be null");
+    Objects.requireNonNull(errorHandler, "errorHandler can' be null");
+    this.exceptionHandlerMap.put(throwableCls, errorHandler);
   }
 
-  public Object handlerException(Throwable throwable, ArgumentResolverManager resolverManager, ArgumentGetterContext context) {
-    if (adviceMap.isEmpty()) {
+  public void handlerException(Throwable throwable, ArgumentGetterContext context) {
+    if (exceptionHandlerMap.isEmpty()) {
       RequestContext requestContext = context.requestContext();
       requestContext.request().channelHandlerContext().channel().close();
     }
-    if (!adviceMap.containsKey(throwable.getClass())) {
-      return null;
+    if (!exceptionHandlerMap.containsKey(throwable.getClass())) {
+      return;
     }
-    Advice advice = this.adviceMap.get(throwable.getClass());
-    List<RouteParam> params = advice.params();
-
-    Object[] paramValues = new Object[params.size()];
-    Class<?>[] paramTypes = new Class[params.size()];
+    ErrorHandler errorHandler = exceptionHandlerMap.get(throwable.getClass());
     try {
-      ReflectionUtils.invokeParam(context, params, paramValues, paramTypes, resolverManager);
-      if (Objects.nonNull(advice)) {
-        return advice.handlerException(throwable, paramValues, paramTypes);
-      }
-    } catch (Throwable e) {
-      log.error("An exception occurred when calling Advice for exception handling", e);
+      this.context.addBean(context);
+      errorHandler.handle(throwable);
+    } catch(Exception e) {
+      e.printStackTrace();
     }
-    return null;
   }
 }

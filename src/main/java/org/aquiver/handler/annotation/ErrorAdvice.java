@@ -21,33 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.function.handler;
+package org.aquiver.handler.annotation;
 
-import io.netty.channel.ChannelFuture;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import org.aquiver.RequestContext;
+import java.lang.annotation.*;
 
 /**
  * @author WangYi
- * @since 2020/5/29
+ * @since 2020/7/1
  */
-public class HttpExceptionHandler extends AbstractExceptionHandler {
-  /**
-   * Handler Exception
-   *
-   * @param requestContext Current request
-   * @param throwable      The Throwable caused in handler
-   * @param status         The Response Status
-   */
-  @Override
-  public void handle(RequestContext requestContext, Throwable throwable, HttpResponseStatus status) {
-    FullHttpResponse fullHttpResponse = buildResponse(requestContext, throwable, status);
-    fullHttpResponse.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8");
-    if (super.support(status.hashCode(), throwable.getMessage())) {
-      ChannelFuture channelFuture = super.writeResponse(requestContext, fullHttpResponse);
-      super.closeFuture(channelFuture);
-    }
-  }
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface ErrorAdvice {
+  Class<? extends Throwable> value();
 }

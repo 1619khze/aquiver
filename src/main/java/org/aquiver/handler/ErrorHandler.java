@@ -21,16 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.function.handler;
+package org.aquiver.handler;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
-import org.aquiver.RequestContext;
-
-public interface ExceptionHandler {
-  /**
-   * @param requestContext Current request
-   * @param throwable      The Throwable caused in handler
-   * @param status         The Response Status
-   */
-  void handle(RequestContext requestContext, Throwable throwable, HttpResponseStatus status);
+/**
+ * @author WangYi
+ * @since 2020/8/29
+ */
+public interface ErrorHandler {
+  void handle(Throwable throwable) throws Exception;
 }
