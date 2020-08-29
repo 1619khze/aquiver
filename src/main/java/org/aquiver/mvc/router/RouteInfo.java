@@ -27,15 +27,14 @@ import org.aquiver.mvc.annotation.HttpMethod;
 import org.aquiver.mvc.router.views.HTMLView;
 import org.aquiver.mvc.router.views.ViewType;
 
-import java.util.ArrayList;
+import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 public class RouteInfo {
   private String url;
   private Class<?> clazz;
-  private String method;
+  private Method method;
   private Object bean;
   private HttpMethod httpMethod;
   private Object[] paramValues;
@@ -44,9 +43,7 @@ public class RouteInfo {
   private ViewType viewType;
   private HTMLView htmlView;
 
-  private List<RouteParam> params = new ArrayList<>();
-
-  private RouteInfo(String url, Class<?> clazz, Object bean, String method, HttpMethod httpMethod) {
+  private RouteInfo(String url, Class<?> clazz, Object bean, Method method, HttpMethod httpMethod) {
     this.url = url;
     this.clazz = clazz;
     this.method = method;
@@ -54,7 +51,7 @@ public class RouteInfo {
     this.bean = bean;
   }
 
-  public static RouteInfo of(String url, Class<?> clazz, Object bean, String method, HttpMethod httpMethod) {
+  public static RouteInfo of(String url, Class<?> clazz, Object bean, Method method, HttpMethod httpMethod) {
     Objects.requireNonNull(url, "url must not be null");
     Objects.requireNonNull(clazz, "clazz must not be null");
     Objects.requireNonNull(method, "method must not be null");
@@ -78,11 +75,11 @@ public class RouteInfo {
     this.clazz = clazz;
   }
 
-  public String getMethod() {
+  public Method getMethod() {
     return method;
   }
 
-  public void setMethod(String method) {
+  public void setMethod(Method method) {
     this.method = method;
   }
 
@@ -100,14 +97,6 @@ public class RouteInfo {
 
   public void setBean(Object bean) {
     this.bean = bean;
-  }
-
-  public List<RouteParam> getParams() {
-    return params;
-  }
-
-  public void setParams(List<RouteParam> params) {
-    this.params = params;
   }
 
   public Object[] getParamValues() {
@@ -163,7 +152,6 @@ public class RouteInfo {
             ", invokeResult=" + invokeResult +
             ", viewType=" + viewType +
             ", htmlView=" + htmlView +
-            ", params=" + params +
             '}';
   }
 }

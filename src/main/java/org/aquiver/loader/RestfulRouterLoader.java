@@ -23,9 +23,11 @@
  */
 package org.aquiver.loader;
 
+import org.apex.ApexContext;
 import org.aquiver.Aquiver;
 import org.aquiver.mvc.annotation.Path;
 import org.aquiver.mvc.annotation.RestPath;
+import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +39,8 @@ import java.util.Objects;
  * @author WangYi
  * @since 2020/8/12
  */
-public class RequestRouteLoader implements WebLoader {
-  private static final Logger log = LoggerFactory.getLogger(RequestRouteLoader.class);
+public class RestfulRouterLoader implements WebLoader {
+  private static final Logger log = LoggerFactory.getLogger(RestfulRouterLoader.class);
 
   /**
    * Filter out the routing class from the scanned
@@ -49,6 +51,7 @@ public class RequestRouteLoader implements WebLoader {
    */
   @Override
   public void load(Map<String, Object> instances, Aquiver aquiver) {
+    final ApexContext context = ApexContext.of();
     for (Map.Entry<String, Object> entry : instances.entrySet()) {
       Class<?> next = entry.getValue().getClass();
       String url = "/";
@@ -64,7 +67,7 @@ public class RequestRouteLoader implements WebLoader {
         continue;
       }
       url = url(next, url);
-      aquiver.routeManager().addRoute(entry.getValue(), url);
+      context.getBean(RestfulRouter.class).registerRoute(url, entry.getValue());
     }
   }
 

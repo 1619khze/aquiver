@@ -25,74 +25,29 @@ package org.aquiver.mvc.router;
 
 import org.aquiver.RequestContext;
 import org.aquiver.RequestHandler;
+import org.aquiver.RouteRepeatException;
 import org.aquiver.mvc.annotation.*;
-import org.aquiver.mvc.argument.ArgumentResolverManager;
 import org.aquiver.mvc.router.views.PebbleHTMLView;
 import org.aquiver.mvc.router.views.ViewType;
-import org.aquiver.utils.ReflectionUtils;
-import org.aquiver.websocket.WebSocket;
-import org.aquiver.websocket.WebSocketChannel;
-import org.aquiver.websocket.WebSocketWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author WangYi
  * @since 2020/5/23
  */
-public final class RouteManager {
-  private static final Logger log = LoggerFactory.getLogger(RouteManager.class);
+public final class RestfulRouter implements Router {
+  private static final Logger log = LoggerFactory.getLogger(RestfulRouter.class);
 
   private final Map<String, RouteInfo> routes = new ConcurrentHashMap<>(64);
-  private final Map<String, WebSocketChannel> webSockets = new ConcurrentHashMap<>(4);
-  private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-  private ArgumentResolverManager resolverManager;
-
-  public void setResolverManager(ArgumentResolverManager resolverManager) {
-    this.resolverManager = resolverManager;
-  }
-
-  protected ReentrantReadWriteLock.ReadLock readLock() {
-    return this.readWriteLock.readLock();
-  }
-
-  protected ReentrantReadWriteLock.WriteLock writeLock() {
-    return this.readWriteLock.writeLock();
-  }
-
-  protected boolean whetherRouteIsDuplicated(String url) {
-    return this.routes.containsKey(url);
-  }
-
-  public void removeRoute(String url) {
-    this.writeLock().lock();
-    try {
-      this.routes.remove(url);
-    } finally {
-      this.writeLock().unlock();
-    }
-  }
-
-  /**
-   * Get WebSocket Route Map
-   *
-   * @return WebSocket Route Map
-   */
-  public Map<String, WebSocketChannel> getWebSockets() {
-    return webSockets;
-  }
 
   /**
    * Get Route Map
@@ -100,43 +55,39 @@ public final class RouteManager {
    * @return Route Map
    */
   public Map<String, RouteInfo> getRoutes() {
-    readLock().lock();
-    try {
-      return this.routes;
-    } finally {
-      readLock().unlock();
-    }
+    return this.routes;
   }
 
-  /**
-   * add route
-   *
-   * @param object route object
-   * @param url @Path value
-   */
-  public void addRoute(Object object, String url) {
+  @Override
+  public void registerRoute(String path, Object object) {
     try {
       Class<?> cls = object.getClass();
       Method[] methods = cls.getMethods();
       for (Method method : methods) {
         Path methodPath = method.getAnnotation(Path.class);
         if (Objects.nonNull(methodPath)) {
-          String completeUrl = this.getMethodUrl(url, methodPath.value());
-          this.addRoute(cls, object, completeUrl, method, methodPath.method());
+          String completeUrl = this.getMethodUrl(path, methodPath.value());
+          this.registerRoute(cls, object, completeUrl, method, methodPath.method());
         }
-        addRoute(cls, object, url, method);
+        registerRoute(cls, object, path, method);
       }
-    } catch (Throwable throwable) {
-      throwable.printStackTrace();
+    } catch(Throwable throwable) {
+      log.error("Register route exception", throwable);
     }
   }
 
-  public void addRoute(String path, RequestHandler handler, HttpMethod httpMethod) {
+  @Override
+  public RouteInfo lookup(String url) {
+    return routes.getOrDefault(url, null);
+  }
+
+  @Override
+  public void registerRoute(String path, RequestHandler handler, HttpMethod httpMethod) {
     try {
       Class<? extends RequestHandler> ref = handler.getClass();
       Method handle = ref.getMethod("handle", RequestContext.class);
-      this.addRoute(RequestHandler.class, handler, path, handle, httpMethod);
-    } catch (NoSuchMethodException e) {
+      this.registerRoute(RequestHandler.class, handler, path, handle, httpMethod);
+    } catch(NoSuchMethodException e) {
       log.error("There is no such method {}", "handle", e);
     }
   }
@@ -149,7 +100,7 @@ public final class RouteManager {
    * @param method Mapping annotation annotation method
    * @throws Throwable reflection exception
    */
-  private void addRoute(Class<?> cls, Object bean, String url, Method method) throws Throwable {
+  private void registerRoute(Class<?> cls, Object bean, String url, Method method) throws Throwable {
     Annotation[] annotations = method.getAnnotations();
     if (annotations.length != 0) {
       for (Annotation annotation : annotations) {
@@ -167,7 +118,7 @@ public final class RouteManager {
           routeUrl = String.join(routeUrl, String.valueOf(valueInvokeResult));
         }
         String completeUrl = this.getMethodUrl(url, routeUrl);
-        this.addRoute(cls, bean, completeUrl, method, httpMethod);
+        this.registerRoute(cls, bean, completeUrl, method, httpMethod);
       }
     }
   }
@@ -179,25 +130,18 @@ public final class RouteManager {
    * @param method     Mapping annotation annotation method
    * @param httpMethod http method
    */
-  public void addRoute(Class<?> clazz, Object bean, String completeUrl, Method method, HttpMethod httpMethod) {
+  private void registerRoute(Class<?> clazz, Object bean, String completeUrl, Method method, HttpMethod httpMethod) {
     if (completeUrl.trim().isEmpty()) {
       return;
     }
     RouteInfo routeInfo = createRoute(clazz, bean, method, httpMethod, completeUrl);
-
-    Parameter[] parameters = method.getParameters();
-    String[] paramNames = ReflectionUtils.getMethodParamName(method);
-
-    List<RouteParam> routeParams = resolverManager.invokeParamResolver(parameters, paramNames);
-    routeInfo.setParams(routeParams);
-
-    if (this.whetherRouteIsDuplicated(completeUrl)) {
+    if (this.routes.containsKey(completeUrl)) {
       if (log.isDebugEnabled()) {
         log.debug("Registered request route URL is duplicated :{}", completeUrl);
       }
       throw new RouteRepeatException("Registered request route URL is duplicated : " + completeUrl);
     } else {
-      this.addRoute(completeUrl, routeInfo);
+      this.registerRoute(completeUrl, routeInfo);
     }
   }
 
@@ -211,7 +155,7 @@ public final class RouteManager {
    * @return Route
    */
   private RouteInfo createRoute(Class<?> clazz, Object bean, Method method, HttpMethod httpMethod, String completeUrl) {
-    RouteInfo routeInfo = RouteInfo.of(completeUrl, clazz, bean, method.getName(), httpMethod);
+    RouteInfo routeInfo = RouteInfo.of(completeUrl, clazz, bean, method, httpMethod);
 
     boolean isAllJsonResponse = Objects.isNull(clazz.getAnnotation(RestPath.class));
     boolean isJsonResponse = Objects.isNull(method.getAnnotation(JSON.class));
@@ -236,69 +180,8 @@ public final class RouteManager {
    * @param url   url
    * @param routeInfo Route info
    */
-  protected void addRoute(String url, RouteInfo routeInfo) {
-    this.writeLock().lock();
-    try {
-      this.routes.put(url, routeInfo);
-    } finally {
-      this.writeLock().unlock();
-    }
-  }
-
-  /**
-   * add websocket route
-   *
-   * @param webSocketClass Classes annotated with @WebSocket annotation
-   *                       and implementing the WebSocketChannel interface
-   * @throws ReflectiveOperationException Exception superclass when
-   *                                      performing reflection operation
-   */
-  public void addWebSocket(Class<?> webSocketClass) throws ReflectiveOperationException {
-    WebSocket webSocket = webSocketClass.getAnnotation(WebSocket.class);
-    if (Objects.isNull(webSocket)) {
-      return;
-    }
-    String webSocketPath = webSocket.value();
-    if (webSocketPath.equals("")) {
-      webSocketPath = "/";
-    }
-
-    for (Class<?> interfaceCls : webSocketClass.getInterfaces()) {
-      if (!interfaceCls.isAssignableFrom(WebSocketChannel.class)) {
-        continue;
-      }
-      final WebSocketChannel webSocketChannel =
-              (WebSocketChannel) webSocketClass.newInstance();
-      this.addWebSocket(webSocketPath, webSocketChannel);
-    }
-    this.addWebSocket(webSocketPath, webSocketClass);
-  }
-
-  private void addWebSocket(String webSocketPath, Class<?> webSocketClass) {
-    List<Class<?>> classes = Arrays.asList(webSocketClass.getInterfaces());
-    if (classes.contains(WebSocketChannel.class)) {
-      return;
-    }
-    final WebSocketWrapper wrapper = new WebSocketWrapper(resolverManager);
-    wrapper.initialize(webSocketClass);
-    this.addWebSocket(webSocketPath, wrapper);
-  }
-
-  /**
-   * add websocket route
-   *
-   * @param webSocketPath    WebSocket url path
-   * @param webSocketChannel WebSocket abstract interface
-   */
-  public void addWebSocket(String webSocketPath, WebSocketChannel webSocketChannel) {
-    if (this.whetherRouteIsDuplicated(webSocketPath)
-            || this.webSockets.containsKey(webSocketPath)) {
-      if (log.isDebugEnabled()) {
-        log.debug("Registered websocket channel URL is duplicated :{}", webSocketPath);
-      }
-      throw new RouteRepeatException("Registered websocket channel URL is duplicated : " + webSocketPath);
-    }
-    this.webSockets.put(webSocketPath, webSocketChannel);
+  private void registerRoute(String url, RouteInfo routeInfo) {
+    this.routes.put(url, routeInfo);
   }
 
   /**

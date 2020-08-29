@@ -23,7 +23,7 @@
  */
 package org.aquiver.server;
 
-import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
@@ -32,11 +32,11 @@ import org.aquiver.Const;
 import org.aquiver.RequestContext;
 import org.aquiver.ResultHandler;
 import org.aquiver.ResultHandlerResolver;
-import org.aquiver.exception.NoRouteFoundException;
-import org.aquiver.handler.ExceptionHandlerResolver;
-import org.aquiver.handler.HttpExceptionHandler;
+import org.aquiver.function.ExceptionHandlerResolver;
+import org.aquiver.function.handler.HttpExceptionHandler;
 import org.aquiver.mvc.RequestResult;
 import org.aquiver.mvc.argument.*;
+import org.aquiver.NoRouteFoundException;
 import org.aquiver.mvc.router.PathVarMatcher;
 import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.RouteInfo;
@@ -56,7 +56,7 @@ import java.util.Objects;
  * @author WangYi
  * @since 2020/5/26
  */
-@ChannelHandler.Sharable
+@Sharable
 public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
 

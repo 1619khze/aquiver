@@ -23,10 +23,6 @@
  */
 package org.aquiver.utils;
 
-import org.aquiver.mvc.argument.ArgumentGetterContext;
-import org.aquiver.mvc.argument.ArgumentResolverManager;
-import org.aquiver.mvc.router.RouteParam;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -52,32 +48,6 @@ public final class ReflectionUtils {
 
   public static <T> boolean isNormal(Class<T> clazz) {
     return !isAbstract(clazz) && !isInterface(clazz) && !isEnum(clazz);
-  }
-
-  public static void invokeParam(ArgumentGetterContext context, List<RouteParam> routeParams,
-                                 Object[] paramValues, Class<?>[] paramTypes,
-                                 ArgumentResolverManager resolverManager) {
-    for (int i = 0; i < paramValues.length; i++) {
-      RouteParam handlerParam = routeParams.get(i);
-      paramTypes[i] = handlerParam.getDataType();
-      try {
-        paramValues[i] = resolverManager.assignment(
-                handlerParam, context);
-      }
-      catch(Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  public static Method getInvokeMethod(Class<?> refClass, String method,
-                                       Class<?>[] paramTypes) {
-    try {
-      return refClass.getMethod(method, paramTypes);
-    }
-    catch(NoSuchMethodException e) {
-      return null;
-    }
   }
 
   public static String[] getMethodParamName(Method method) {

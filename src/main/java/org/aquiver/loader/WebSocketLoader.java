@@ -23,9 +23,11 @@
  */
 package org.aquiver.loader;
 
+import org.apex.ApexContext;
 import org.aquiver.Aquiver;
 import org.aquiver.utils.ReflectionUtils;
 import org.aquiver.websocket.WebSocket;
+import org.aquiver.websocket.WebSocketResolver;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -41,18 +43,17 @@ public class WebSocketLoader implements WebLoader {
    * list of the routing manager
    *
    * @param instances Scanned result
-   * @throws ReflectiveOperationException Exception superclass when
-   *                                      performing reflection operation
    */
   @Override
-  public void load(Map<String, Object> instances, Aquiver aquiver) throws Exception {
+  public void load(Map<String, Object> instances, Aquiver aquiver) {
+    final ApexContext context = ApexContext.of();
     for (Object object : instances.values()) {
       Class<?> cls = object.getClass();
       Method[] declaredMethods = cls.getDeclaredMethods();
       if (!ReflectionUtils.isNormal(cls)
               || !cls.isAnnotationPresent(WebSocket.class)
               || declaredMethods.length == 0) continue;
-      aquiver.routeManager().addWebSocket(cls);
+      context.getBean(WebSocketResolver.class).registerWebSocket(cls);
     }
   }
 }
