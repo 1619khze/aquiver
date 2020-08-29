@@ -31,9 +31,8 @@ import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.ReferenceCountUtil;
-import org.aquiver.Aquiver;
+import org.apex.ApexContext;
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.router.RouteManager;
 import org.aquiver.utils.StringUtils;
 
 import java.util.Objects;
@@ -44,16 +43,16 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author WangYi
  * @since 2020/7/5
  */
-public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> {
+public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
   private WebSocketServerHandshaker handshaker;
   private WebSocketChannel webSocketChannel;
   private WebSocketSession webSocketSession;
-  private final RouteManager routeManager;
   private RequestContext requestContext;
+  private final WebSocketResolver webSocketResolver;
 
-  public WebSocketServerHandler() {
-    Aquiver of = Aquiver.of();
-    this.routeManager = of.routeManager();
+  public WebSocketHandler() {
+    final ApexContext context = ApexContext.of();
+    this.webSocketResolver = context.getBean(WebSocketResolver.class);
   }
 
   @Override
@@ -156,7 +155,7 @@ public class WebSocketServerHandler extends SimpleChannelInboundHandler<Object> 
   private boolean isWebSocketRequest(HttpRequest req) {
     String uri = StringUtils.substringBefore(req.uri(), "?");
     return Objects.nonNull(req)
-            && Objects.nonNull((this.webSocketChannel = this.routeManager.getWebSockets().get(uri)))
+            && Objects.nonNull((this.webSocketChannel = this.webSocketResolver.lookup(uri)))
             && req.decoderResult().isSuccess()
             && "websocket".equals(req.headers().get("Upgrade"));
   }

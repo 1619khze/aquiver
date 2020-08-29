@@ -23,11 +23,10 @@
  */
 package org.aquiver.websocket;
 
+import org.apex.ApexContext;
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.argument.ArgumentGetterContext;
-import org.aquiver.mvc.argument.ArgumentResolverManager;
-import org.aquiver.mvc.router.RouteParam;
-import org.aquiver.utils.ReflectionUtils;
+import org.aquiver.mvc.argument.MethodArgumentGetter;
 import org.aquiver.websocket.action.OnClose;
 import org.aquiver.websocket.action.OnConnect;
 import org.aquiver.websocket.action.OnError;
@@ -39,6 +38,7 @@ import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,14 +53,14 @@ public class WebSocketWrapper implements WebSocketChannel {
   private static final Logger log = LoggerFactory.getLogger(WebSocketWrapper.class);
 
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-  private final Map<Class<? extends Annotation>, WebSocketActionPair> methodCache;
-
-  private final ArgumentResolverManager resolver;
+  private final Map<Class<? extends Annotation>, Method> methodCache;
+  private final MethodArgumentGetter methodArgumentGetter;
   private Class<?> webSocketClass;
 
-  public WebSocketWrapper(ArgumentResolverManager resolver) {
-    this.resolver = resolver;
+  public WebSocketWrapper() {
     this.methodCache = new HashMap<>();
+    ApexContext context = ApexContext.of();
+    this.methodArgumentGetter = context.getBean(MethodArgumentGetter.class);
   }
 
   public void initialize(Class<?> webSocketClass) {
@@ -69,7 +69,7 @@ public class WebSocketWrapper implements WebSocketChannel {
     if (methods.length == 0) {
       return;
     }
-    final Map<Class<? extends Annotation>, WebSocketActionPair>
+    final Map<Class<? extends Annotation>, Method>
             cache = new HashMap<>(4);
 
     cacheMethod(cache, methods, OnClose.class);
@@ -84,20 +84,14 @@ public class WebSocketWrapper implements WebSocketChannel {
     this.methodCache.putAll(cache);
   }
 
-  private void cacheMethod(Map<Class<? extends Annotation>, WebSocketActionPair> cache, Method[] methods,
+  private void cacheMethod(Map<Class<? extends Annotation>, Method> cache, Method[] methods,
                            Class<? extends Annotation> filter) {
     List<Method> methodList = Stream.of(methods)
             .filter(method -> method.isAnnotationPresent(filter))
             .collect(Collectors.toList());
 
     if (methodList.size() == 1) {
-      final Method method = methodList.get(0);
-      final Parameter[] parameters = method.getParameters();
-      final String[] paramNames = ReflectionUtils.getMethodParamName(method);
-      final List<RouteParam> routeParams = resolver
-              .invokeParamResolver(parameters, paramNames);
-
-      cache.put(filter, new WebSocketActionPair(method.getName(), routeParams));
+      cache.put(filter, methodList.get(0));
     } else if (methodList.size() > 1) {
       throw new RuntimeException("Duplicate annotation @" + filter.getSimpleName()
               + " in class: " + methodList.get(0).getDeclaringClass().getName());
@@ -128,52 +122,23 @@ public class WebSocketWrapper implements WebSocketChannel {
     if (!methodCache.containsKey(actionAnnotation)) {
       return;
     }
-    WebSocketActionPair webSocketActionPair = methodCache.get(actionAnnotation);
-    List<RouteParam> params = webSocketActionPair.params();
-    Object[] paramValues = new Object[params.size()];
-    Class<?>[] paramTypes = new Class[params.size()];
+    Method method = methodCache.get(actionAnnotation);
     try {
       final RequestContext requestContext = webSocketContext.requestContext();
       final ArgumentGetterContext context = new ArgumentGetterContext();
       context.requestContext(requestContext);
       context.webSocketContext(webSocketContext);
-      ReflectionUtils.invokeParam(context,
-              params, paramValues, paramTypes, resolver);
-
-      Method method = ReflectionUtils.getInvokeMethod(webSocketClass,
-              webSocketActionPair.method(), paramTypes);
-
+      methodArgumentGetter.setArgumentGetterContext(context);
+      final List<Object> invokeArguments = new ArrayList<>();
+      for (Parameter parameter : method.getParameters()) {
+        Object param = methodArgumentGetter.getParam(parameter);
+        invokeArguments.add(param);
+      }
       this.lookup.unreflect(method).bindTo(webSocketClass.newInstance())
-              .invokeWithArguments(paramValues);
-    } catch (Throwable e) {
+              .invokeWithArguments(invokeArguments);
+    } catch(Throwable e) {
       log.error("An exception occurred when obtaining invoke param", e);
       webSocketContext.disconnect();
-    }
-  }
-
-  static class WebSocketActionPair {
-    private String method;
-    private List<RouteParam> params;
-
-    public WebSocketActionPair(String method, List<RouteParam> params) {
-      this.method = method;
-      this.params = params;
-    }
-
-    public String method() {
-      return method;
-    }
-
-    public void method(String method) {
-      this.method = method;
-    }
-
-    public List<RouteParam> params() {
-      return params;
-    }
-
-    public void params(List<RouteParam> params) {
-      this.params = params;
     }
   }
 }
