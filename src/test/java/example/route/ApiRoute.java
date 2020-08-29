@@ -72,7 +72,7 @@ public class ApiRoute {
     user.setName(name);
     user.user();
 
-    ApexContext apexContext = Apex.of().apexContext();
+    ApexContext apexContext = ApexContext.of();
     User bean = apexContext.getBean(User.class);
     bean.user();
     return user;
