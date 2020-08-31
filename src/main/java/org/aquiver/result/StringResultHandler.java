@@ -24,6 +24,7 @@
 package org.aquiver.result;
 
 import org.aquiver.*;
+import org.aquiver.mvc.RequestResult;
 
 import java.util.Objects;
 
@@ -33,7 +34,7 @@ import static org.aquiver.server.Const.SERVER_VIEW_SUFFIX;
  * @author WangYi
  * @since 2020/8/22
  */
-public final class StringResultHandler implements ResultHandler<String> {
+public final class StringResultHandler implements ResultHandler {
   private final ViewHandlerResolver viewHandlerResolver;
   private ViewHandler defaultViewHandler;
 
@@ -42,7 +43,13 @@ public final class StringResultHandler implements ResultHandler<String> {
   }
 
   @Override
-  public void handle(RequestContext ctx, String result) throws Exception {
+  public boolean support(RequestResult requestResult) {
+    return String.class.isAssignableFrom(requestResult.getResultType());
+  }
+
+  @Override
+  public void handle(RequestContext ctx, RequestResult requestResult) throws Exception {
+    String result = (String) requestResult.getResultObject();
     ViewHandler viewHandler = null;
     String url;
 

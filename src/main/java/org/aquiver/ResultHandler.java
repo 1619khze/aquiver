@@ -23,10 +23,14 @@
  */
 package org.aquiver;
 
+import org.aquiver.mvc.RequestResult;
+
 /**
  * @author WangYi
  * @since 2020/8/22
  */
-public interface ResultHandler<T> {
-  void handle(RequestContext ctx, T result) throws Exception;
+public interface ResultHandler {
+  boolean support(RequestResult requestResult);
+
+  void handle(RequestContext ctx, RequestResult result) throws Exception;
 }

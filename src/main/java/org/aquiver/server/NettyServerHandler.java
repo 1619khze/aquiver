@@ -114,8 +114,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
       this.context.addBean(methodArgumentGetter);
       final RequestResult result = logicExecution(requestContext);
       if (Objects.nonNull(result)) {
-        ResultHandler<Object> handler = resultHandlerResolver.lookup(result.getResultType());
-        handler.handle(requestContext, result.getResultObject());
+        ResultHandler handler = resultHandlerResolver.lookup(result);
+        handler.handle(requestContext, result);
+      } else {
+        throw new IllegalStateException("Unsupported result class: " + result.getResultType().getSimpleName());
       }
     } catch(Throwable throwable) {
       exceptionCaught(ctx, throwable);
@@ -142,7 +144,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     }
     final Object invokeResult = lookup.unreflect(method).bindTo(routeInfo.getBean())
             .invokeWithArguments(invokeArguments);
-    return new RequestResult(method.getReturnType(), invokeResult);
+    return new RequestResult(method.getReturnType(), invokeResult, method);
   }
 
   private RouteInfo lookupRoute(RequestContext context) throws Exception {

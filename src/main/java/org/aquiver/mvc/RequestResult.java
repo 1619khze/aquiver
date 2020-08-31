@@ -23,6 +23,8 @@
  */
 package org.aquiver.mvc;
 
+import java.lang.reflect.Method;
+
 /**
  * @author WangYi
  * @since 2020/8/22
@@ -30,15 +32,18 @@ package org.aquiver.mvc;
 public class RequestResult {
   private final Class<?> resultType;
   private final Object resultObject;
+  private final Method method;
 
-  public RequestResult(Object resultObject) {
+  public RequestResult(Object resultObject, Method method) {
     this.resultType = resultObject.getClass();
     this.resultObject = resultObject;
+    this.method = method;
   }
 
-  public RequestResult(Class<?> resultType, Object resultObject) {
+  public RequestResult(Class<?> resultType, Object resultObject, Method method) {
     this.resultType = resultType;
     this.resultObject = resultObject;
+    this.method = method;
   }
 
   public Class<?> getResultType() {
@@ -47,5 +52,9 @@ public class RequestResult {
 
   public Object getResultObject() {
     return resultObject;
+  }
+
+  public Method getMethod() {
+    return method;
   }
 }

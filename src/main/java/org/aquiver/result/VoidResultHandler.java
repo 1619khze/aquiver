@@ -23,17 +23,24 @@
  */
 package org.aquiver.result;
 
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.FullHttpResponse;
 import org.aquiver.RequestContext;
 import org.aquiver.ResultHandler;
+import org.aquiver.mvc.RequestResult;
 
 /**
  * @author WangYi
  * @since 2020/8/22
  */
-public final class VoidResultHandler implements ResultHandler<Void> {
+public final class VoidResultHandler implements ResultHandler {
+
   @Override
-  public void handle(RequestContext ctx, Void result) {
+  public boolean support(RequestResult requestResult) {
+    return Void.TYPE.isAssignableFrom(requestResult.getResultType());
+  }
+
+  @Override
+  public void handle(RequestContext ctx, RequestResult result) {
     FullHttpResponse voidResponse = ResultUtils.emptyResponse();
     ctx.writeAndFlush(voidResponse);
   }

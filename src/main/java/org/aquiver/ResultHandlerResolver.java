@@ -24,15 +24,15 @@
 package org.aquiver;
 
 import org.apex.ApexContext;
+import org.aquiver.mvc.RequestResult;
+import org.aquiver.result.JsonResultHandler;
 import org.aquiver.result.ModelAndViewResultHandler;
 import org.aquiver.result.StringResultHandler;
 import org.aquiver.result.VoidResultHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author WangYi
@@ -40,7 +40,7 @@ import java.util.Objects;
  */
 public final class ResultHandlerResolver {
   private static final Logger log = LoggerFactory.getLogger(ResultHandlerResolver.class);
-  private final Map<Class<?>, ResultHandler<?>> mapping = new IdentityHashMap<>();
+  private final List<ResultHandler> mapping = new ArrayList<>();
   private final ApexContext context = ApexContext.of();
 
   public ResultHandlerResolver() {
@@ -48,35 +48,24 @@ public final class ResultHandlerResolver {
   }
 
   private void init() {
-    this.register(Void.TYPE, VoidResultHandler.class);
-    this.register(String.class, StringResultHandler.class);
-    this.register(ModelAndView.class, ModelAndViewResultHandler.class);
+    this.register(VoidResultHandler.class);
+    this.register(StringResultHandler.class);
+    this.register(ModelAndViewResultHandler.class);
+    this.register(JsonResultHandler.class);
   }
 
-  public void register(Class<?> resultClass, Class<? extends ResultHandler<?>> resultHandlerClass) {
-    Objects.requireNonNull(resultClass, "resultClass can't be null");
+  public void register(Class<? extends ResultHandler> resultHandlerClass) {
     Objects.requireNonNull(resultHandlerClass, "resultHandlerClass can't be null");
 
     if (log.isDebugEnabled()) {
-      log.debug("register ResultHandler: {} -> {}", resultClass.getName(), resultHandlerClass.getName());
+      log.debug("register ResultHandler: -> {}", resultHandlerClass.getName());
     }
-    ResultHandler<?> resultHandler = this.context.addBean(resultHandlerClass);
-    this.mapping.put(resultClass, resultHandler);
+    ResultHandler resultHandler = this.context.addBean(resultHandlerClass);
+    this.mapping.add(resultHandler);
   }
 
-  @SuppressWarnings("unchecked")
-  public ResultHandler<Object> lookup(Class<?> resultClass) {
-    ResultHandler<Object> resultHandler = (ResultHandler<Object>) mapping.get(resultClass);
-    if (resultHandler == null) {
-      // Special code for Object.class as result
-      for (Map.Entry<Class<?>, ResultHandler<?>> entry : mapping.entrySet()) {
-        Class<?> targetClass = entry.getKey();
-        if ((targetClass != Object.class) && targetClass.isAssignableFrom(resultClass)) {
-          return (ResultHandler<Object>) entry.getValue();
-        }
-      }
-      throw new IllegalStateException("Unsupported result class: " + resultClass.getName());
-    }
-    return resultHandler;
+  public ResultHandler lookup(RequestResult result) {
+    return mapping.stream().filter(resultHandler -> resultHandler
+            .support(result)).findFirst().orElse(null);
   }
 }
