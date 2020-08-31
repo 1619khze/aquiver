@@ -24,35 +24,40 @@
 package org.aquiver.websocket;
 
 import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.aquiver.RequestContext;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author WangYi
  * @since 2020/7/11
  */
-public class WebSocketContext {
-  private final RequestContext requestContext;
+public class WebSocketContext extends RequestContext {
   private final WebSocketSession session;
-  private final WebSocketChannel channel;
+  private WebSocketChannel channel;
   private Message message;
   private Error error;
 
-  private WebSocketContext(RequestContext requestContext, WebSocketSession session, WebSocketChannel channel) {
-    this.requestContext = requestContext;
-    this.session = session;
-    this.channel = channel;
+  public WebSocketContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
+    super(httpRequest, context);
+    long id = ThreadLocalRandom.current().nextLong();
+    this.session = new WebSocketSession(context, getId(id));
   }
 
-  public static WebSocketContext create(RequestContext requestContext,
-                                        WebSocketSession webSocketSession,
-                                        WebSocketChannel webSocketChannel) {
-    return new WebSocketContext(requestContext, webSocketSession, webSocketChannel);
+  private String getId(long id) {
+    return String.valueOf(id).replaceFirst("-", "");
   }
 
   public void message(String message) {
     this.session.channelHandlerContext()
             .writeAndFlush(new TextWebSocketFrame(message));
+  }
+
+  public void setChannel(WebSocketChannel channel) {
+    this.channel = channel;
   }
 
   /**
@@ -68,10 +73,6 @@ public class WebSocketContext {
 
   public WebSocketChannel channel() {
     return channel;
-  }
-
-  public RequestContext requestContext() {
-    return requestContext;
   }
 
   public Message getMessage() {

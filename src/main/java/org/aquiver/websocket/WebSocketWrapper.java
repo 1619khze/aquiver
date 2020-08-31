@@ -24,8 +24,6 @@
 package org.aquiver.websocket;
 
 import org.apex.ApexContext;
-import org.aquiver.RequestContext;
-import org.aquiver.mvc.argument.ArgumentGetterContext;
 import org.aquiver.mvc.argument.MethodArgumentGetter;
 import org.aquiver.websocket.action.OnClose;
 import org.aquiver.websocket.action.OnConnect;
@@ -38,10 +36,7 @@ import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,15 +47,14 @@ import java.util.stream.Stream;
 public class WebSocketWrapper implements WebSocketChannel {
   private static final Logger log = LoggerFactory.getLogger(WebSocketWrapper.class);
 
+  private final ApexContext apexContext = ApexContext.of();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
   private final Map<Class<? extends Annotation>, Method> methodCache;
-  private final MethodArgumentGetter methodArgumentGetter;
+  private MethodArgumentGetter methodArgumentGetter;
   private Class<?> webSocketClass;
 
   public WebSocketWrapper() {
     this.methodCache = new HashMap<>();
-    ApexContext context = ApexContext.of();
-    this.methodArgumentGetter = context.getBean(MethodArgumentGetter.class);
   }
 
   public void initialize(Class<?> webSocketClass) {
@@ -119,19 +113,21 @@ public class WebSocketWrapper implements WebSocketChannel {
   }
 
   private void invokeAction(Class<? extends Annotation> actionAnnotation, WebSocketContext webSocketContext) {
+    if (Objects.isNull(methodArgumentGetter)) {
+      this.methodArgumentGetter = apexContext.getBean(MethodArgumentGetter.class);
+    }
+
+    if (Objects.isNull(methodArgumentGetter)) {
+      throw new IllegalArgumentException("methodArgumentGetter can't be null");
+    }
     if (!methodCache.containsKey(actionAnnotation)) {
       return;
     }
     Method method = methodCache.get(actionAnnotation);
     try {
-      final RequestContext requestContext = webSocketContext.requestContext();
-      final ArgumentGetterContext context = new ArgumentGetterContext();
-      context.requestContext(requestContext);
-      context.webSocketContext(webSocketContext);
-      methodArgumentGetter.setArgumentGetterContext(context);
       final List<Object> invokeArguments = new ArrayList<>();
       for (Parameter parameter : method.getParameters()) {
-        Object param = methodArgumentGetter.getParam(parameter);
+        Object param = this.methodArgumentGetter.getParam(parameter);
         invokeArguments.add(param);
       }
       this.lookup.unreflect(method).bindTo(webSocketClass.newInstance())

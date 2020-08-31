@@ -28,27 +28,28 @@ import io.netty.channel.ChannelInboundHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.ReferenceCountUtil;
 import org.apex.ApexContext;
-import org.aquiver.RequestContext;
+import org.aquiver.mvc.argument.MethodArgumentGetter;
 import org.aquiver.utils.StringUtils;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author WangYi
  * @since 2020/7/5
  */
 public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
+  private final ApexContext apexContext = ApexContext.of();
+  private final WebSocketResolver webSocketResolver;
+  private WebSocketContext webSocketContext;
   private WebSocketServerHandshaker handshaker;
   private WebSocketChannel webSocketChannel;
-  private WebSocketSession webSocketSession;
-  private RequestContext requestContext;
-  private final WebSocketResolver webSocketResolver;
+  private MethodArgumentGetter methodArgumentGetter;
 
   public WebSocketHandler() {
     final ApexContext context = ApexContext.of();
@@ -65,6 +66,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
       ReferenceCountUtil.retain(msg);
       ctx.fireChannelRead(msg);
     }
+
   }
 
   @Override
@@ -79,9 +81,10 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
    * @param req An HTTP request.
    */
   private void handleHttpRequest(ChannelHandlerContext ctx, HttpRequest req) {
-    DefaultFullHttpRequest defaultFullHttpRequest =
-            new DefaultFullHttpRequest(req.protocolVersion(), req.method(), req.uri());
-    this.requestContext = new RequestContext(defaultFullHttpRequest, ctx);
+    DefaultFullHttpRequest fullHttpRequest = new DefaultFullHttpRequest(req.protocolVersion(), req.method(), req.uri());
+    this.webSocketContext = webSocketContext(fullHttpRequest, ctx);
+    this.methodArgumentGetter = new MethodArgumentGetter(webSocketContext);
+    this.apexContext.addBean(methodArgumentGetter);
     if (isWebSocketRequest(req)) {
       final WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
               req.uri(), null, true);
@@ -90,11 +93,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
         WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
       } else {
         handshaker.handshake(ctx.channel(), req);
-
-        long id = ThreadLocalRandom.current().nextLong();
-        this.webSocketSession = new WebSocketSession(ctx, String.valueOf(id)
-                .replaceFirst("-", ""));
-        CompletableFuture.completedFuture(webSocketContext())
+        CompletableFuture.completedFuture(webSocketContext)
                 .thenAcceptAsync(session -> webSocketChannel
                         .onConnect(session), ctx.executor());
       }
@@ -104,8 +103,10 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
     }
   }
 
-  private WebSocketContext webSocketContext() {
-    return WebSocketContext.create(requestContext, webSocketSession, webSocketChannel);
+  private WebSocketContext webSocketContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
+    WebSocketContext webSocketContext = new WebSocketContext(httpRequest, context);
+    webSocketContext.setChannel(webSocketChannel);
+    return webSocketContext;
   }
 
   /**
@@ -117,7 +118,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
   private void handleWebSocketFrame(ChannelHandlerContext ctx, WebSocketFrame frame) {
     if (frame instanceof CloseWebSocketFrame) {
       handshaker.close(ctx.channel(), (CloseWebSocketFrame) frame.retain());
-      CompletableFuture.completedFuture(webSocketContext()).thenAcceptAsync(webSocketChannel::onClose);
+      CompletableFuture.completedFuture(webSocketContext).thenAcceptAsync(webSocketChannel::onClose);
       return;
     }
 
@@ -132,15 +133,13 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
 
       this.handshaker.close(ctx.channel(), new CloseWebSocketFrame());
 
-      WebSocketContext webSocketContext = webSocketContext();
-      webSocketContext.setError(new WebSocketContext.Error(throwable, webSocketContext()));
+      webSocketContext.setError(new WebSocketContext.Error(throwable, webSocketContext));
       CompletableFuture.completedFuture(webSocketContext)
               .thenAcceptAsync(webSocketChannel::onError, ctx.executor());
       return;
     }
-    WebSocketContext webSocketContext = webSocketContext();
     webSocketContext.setMessage(new WebSocketContext
-            .Message(((TextWebSocketFrame) frame).text(), webSocketContext()));
+            .Message(((TextWebSocketFrame) frame).text(), webSocketContext));
 
     CompletableFuture.completedFuture(webSocketContext)
             .thenAcceptAsync(webSocketChannel::onMessage, ctx.executor());
@@ -168,9 +167,8 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
    */
   @Override
   public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) {
-    if (null != webSocketSession && null != webSocketChannel) {
-      WebSocketContext webSocketContext = webSocketContext();
-      webSocketContext.setError(new WebSocketContext.Error(cause, webSocketContext()));
+    if (null != webSocketChannel) {
+      webSocketContext.setError(new WebSocketContext.Error(cause, webSocketContext));
       CompletableFuture.completedFuture(webSocketContext)
               .thenAcceptAsync(webSocketChannel::onError, ctx.executor());
     }
