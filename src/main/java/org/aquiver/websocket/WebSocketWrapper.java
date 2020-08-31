@@ -125,11 +125,7 @@ public class WebSocketWrapper implements WebSocketChannel {
     }
     Method method = methodCache.get(actionAnnotation);
     try {
-      final List<Object> invokeArguments = new ArrayList<>();
-      for (Parameter parameter : method.getParameters()) {
-        Object param = this.methodArgumentGetter.getParam(parameter);
-        invokeArguments.add(param);
-      }
+      final List<Object> invokeArguments = this.methodArgumentGetter.getParams(method.getParameters());
       this.lookup.unreflect(method).bindTo(webSocketClass.newInstance())
               .invokeWithArguments(invokeArguments);
     } catch(Throwable e) {

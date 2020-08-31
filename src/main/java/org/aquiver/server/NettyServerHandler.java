@@ -132,16 +132,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     final RouteInfo routeInfo = lookupRoute(context);
     final Method method = routeInfo.getMethod();
     final Parameter[] parameters = method.getParameters();
-    final List<Object> invokeArguments = new ArrayList<>();
     context.route(routeInfo);
 
-    for (Parameter parameter : parameters) {
-      Object param = methodArgumentGetter.getParam(parameter);
-      if (Objects.isNull(param)) {
-        param = new Object();
-      }
-      invokeArguments.add(param);
-    }
+    final List<Object> invokeArguments = methodArgumentGetter.getParams(parameters);
     final Object invokeResult = lookup.unreflect(method).bindTo(routeInfo.getBean())
             .invokeWithArguments(invokeArguments);
     return new RequestResult(method.getReturnType(), invokeResult, method);

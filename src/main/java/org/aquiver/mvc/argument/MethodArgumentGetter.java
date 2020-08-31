@@ -28,6 +28,9 @@ import org.aquiver.RequestContext;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author WangYi
@@ -58,5 +61,17 @@ public class MethodArgumentGetter {
       }
     }
     return null;
+  }
+
+  public List<Object> getParams(Parameter[] parameters) throws Exception {
+    final List<Object> invokeArguments = new ArrayList<>(parameters.length);
+    for (Parameter parameter : parameters) {
+      Object param = this.getParam(parameter);
+      if (Objects.isNull(param)) {
+        param = new Object();
+      }
+      invokeArguments.add(param);
+    }
+    return invokeArguments;
   }
 }

@@ -72,7 +72,7 @@ public class ErrorHandlerWrapper implements ErrorHandler {
   }
 
   @Override
-  public void handle(Throwable throwable) throws Exception {
+  public void handle(Throwable throwable) {
     if (handlerMethod.isEmpty()) {
       return;
     }
@@ -88,7 +88,7 @@ public class ErrorHandlerWrapper implements ErrorHandler {
     this.handle(method);
   }
 
-  private void handle(Method method) throws Exception {
+  private void handle(Method method) {
     if (Objects.isNull(methodArgumentGetter)) {
       this.methodArgumentGetter = context.getBean(MethodArgumentGetter.class);
     }
@@ -96,15 +96,8 @@ public class ErrorHandlerWrapper implements ErrorHandler {
     if (Objects.isNull(methodArgumentGetter)) {
       throw new IllegalArgumentException("methodArgumentGetter can't be null");
     }
-    List<Object> invokeArguments = new ArrayList<>();
-    for (Parameter parameter : method.getParameters()) {
-      Object param = methodArgumentGetter.getParam(parameter);
-      if (Objects.isNull(param)) {
-        param = new Object();
-      }
-      invokeArguments.add(param);
-    }
     try {
+      final List<Object> invokeArguments = methodArgumentGetter.getParams(method.getParameters());
       this.lookup.unreflect(method).bindTo(exceptionHandler.newInstance())
               .invokeWithArguments(invokeArguments);
     } catch(Throwable e) {
