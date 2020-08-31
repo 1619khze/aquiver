@@ -33,6 +33,7 @@ import org.aquiver.mvc.router.RouteInfo;
  * @since 2020/6/27
  */
 public class RequestContext {
+  private Throwable throwable;
   private RouteInfo routeInfo;
   private final Request request;
   private final Response response;
@@ -56,6 +57,14 @@ public class RequestContext {
 
   public Response response() {
     return response;
+  }
+
+  public Throwable throwable() {
+    return throwable;
+  }
+
+  public void throwable(Throwable throwable) {
+    this.throwable = throwable;
   }
 
   public void redirect(String redirectUrl) {
