@@ -25,7 +25,6 @@ package org.aquiver.handler;
 
 import org.apex.ApexContext;
 import org.aquiver.RequestContext;
-import org.aquiver.mvc.argument.ArgumentGetterContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,9 +44,8 @@ public class ErrorHandlerResolver {
     this.exceptionHandlerMap.put(throwableCls, errorHandler);
   }
 
-  public void handlerException(Throwable throwable, ArgumentGetterContext context) {
+  public void handlerException(Throwable throwable, RequestContext requestContext) {
     if (exceptionHandlerMap.isEmpty()) {
-      RequestContext requestContext = context.requestContext();
       requestContext.request().channelHandlerContext().channel().close();
     }
     if (!exceptionHandlerMap.containsKey(throwable.getClass())) {

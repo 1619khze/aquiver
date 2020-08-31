@@ -28,10 +28,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import org.apex.ApexContext;
-import org.aquiver.*;
+import org.aquiver.NoRouteFoundException;
+import org.aquiver.RequestContext;
+import org.aquiver.ResultHandler;
+import org.aquiver.ResultHandlerResolver;
 import org.aquiver.handler.ErrorHandlerResolver;
 import org.aquiver.mvc.RequestResult;
-import org.aquiver.mvc.argument.*;
+import org.aquiver.mvc.argument.MethodArgumentGetter;
 import org.aquiver.mvc.router.PathVarMatcher;
 import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.RouteInfo;
@@ -39,7 +42,6 @@ import org.aquiver.result.ResultUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -57,24 +59,20 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
 
   private FullHttpRequest request;
+  private RequestContext requestContext;
+  private MethodArgumentGetter methodArgumentGetter;
   private final StaticFileServerHandler fileServerHandler;
   private final RestfulRouter restfulRouter;
   private final ErrorHandlerResolver errorHandlerResolver;
   private final ResultHandlerResolver resultHandlerResolver;
-  private final ArgumentGetterResolver argumentGetterResolver;
-  private final AnnotationArgumentGetterResolver annotationResolver;
-
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-  private final ArgumentGetterContext argumentGetterContext = new ArgumentGetterContext();
+  private final ApexContext context = ApexContext.of();
 
   public NettyServerHandler() {
-    final ApexContext context = ApexContext.of();
     this.fileServerHandler = new StaticFileServerHandler();
     this.errorHandlerResolver = context.getBean(ErrorHandlerResolver.class);
     this.restfulRouter = context.getBean(RestfulRouter.class);
     this.resultHandlerResolver = context.getBean(ResultHandlerResolver.class);
-    this.argumentGetterResolver = context.getBean(ArgumentGetterResolver.class);
-    this.annotationResolver = context.getBean(AnnotationArgumentGetterResolver.class);
   }
 
   @Override
@@ -90,8 +88,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     log.error("An exception occurred when calling the mapping method", cause);
-    this.argumentGetterContext.throwable(cause);
-    this.errorHandlerResolver.handlerException(cause, argumentGetterContext);
+    this.requestContext.throwable(cause);
+    this.errorHandlerResolver.handlerException(cause, requestContext);
     ctx.close();
   }
 
@@ -111,8 +109,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
       return;
     }
     try {
-      final RequestContext requestContext = this.buildRequestContext(request, ctx);
-      this.argumentGetterContext.requestContext(requestContext);
+      this.requestContext = this.buildRequestContext(request, ctx);
+      this.methodArgumentGetter = new MethodArgumentGetter(requestContext);
+      this.context.addBean(methodArgumentGetter);
       final RequestResult result = logicExecution(requestContext);
       if (Objects.nonNull(result)) {
         ResultHandler<Object> handler = resultHandlerResolver.lookup(result.getResultType());
@@ -135,18 +134,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     context.route(routeInfo);
 
     for (Parameter parameter : parameters) {
-      if (parameter.getAnnotations().length == 0) {
-        ArgumentGetter<?> lookup = argumentGetterResolver.lookup(parameter.getType());
-        Object argument = lookup.get(argumentGetterContext);
-        invokeArguments.add(argument);
-      } else {
-        Annotation[] annotations = parameter.getAnnotations();
-        for (Annotation annotation : annotations) {
-          AnnotationArgumentGetter lookup = annotationResolver.lookup(annotation.annotationType());
-          ArgumentContext argumentContext = new ArgumentContext(parameter, annotation, argumentGetterContext);
-          invokeArguments.add(lookup.get(argumentContext));
-        }
+      Object param = methodArgumentGetter.getParam(parameter);
+      if (Objects.isNull(param)) {
+        param = new Object();
       }
+      invokeArguments.add(param);
     }
     final Object invokeResult = lookup.unreflect(method).bindTo(routeInfo.getBean())
             .invokeWithArguments(invokeArguments);

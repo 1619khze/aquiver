@@ -168,7 +168,6 @@ public class NettyServer implements Server {
     apexContext.addBean(ViewHandlerResolver.class);
     apexContext.addBean(ArgumentGetterResolver.class);
     apexContext.addBean(AnnotationArgumentGetterResolver.class);
-    apexContext.addBean(MethodArgumentGetter.class);
 
     apexContext.registerBeanDefinitions(loadResult);
     final Map<String, Object> instances = apexContext.getInstances();

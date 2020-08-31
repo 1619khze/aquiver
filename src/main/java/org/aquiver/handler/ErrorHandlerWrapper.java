@@ -26,7 +26,6 @@ package org.aquiver.handler;
 import org.apex.ApexContext;
 import org.aquiver.handler.annotation.ErrorAdvice;
 import org.aquiver.handler.annotation.RouteAdvice;
-import org.aquiver.mvc.argument.ArgumentGetterContext;
 import org.aquiver.mvc.argument.MethodArgumentGetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,11 +46,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ErrorHandlerWrapper implements ErrorHandler {
   private static final Logger log = LoggerFactory.getLogger(ErrorHandlerWrapper.class);
 
+  private final ApexContext context = ApexContext.of();
   private final Map<Class<? extends Throwable>, Method> handlerMethod = new ConcurrentHashMap<>();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-  private final ApexContext context = ApexContext.of();
-  private final MethodArgumentGetter argumentGetter = context.getBean(MethodArgumentGetter.class);
   private Class<?> exceptionHandler;
+  private MethodArgumentGetter methodArgumentGetter;
 
   public void initialize(Class<?> exceptionHandler) {
     if (!exceptionHandler.isAnnotationPresent(RouteAdvice.class)) {
@@ -90,14 +89,16 @@ public class ErrorHandlerWrapper implements ErrorHandler {
   }
 
   private void handle(Method method) throws Exception {
-    List<Object> invokeArguments = new ArrayList<>();
-    ArgumentGetterContext getterContext = context.getBean(ArgumentGetterContext.class);
-    if (getterContext == null) {
-      throw new IllegalArgumentException("ArgumentGetterContext can't be null");
+    if (Objects.isNull(methodArgumentGetter)) {
+      this.methodArgumentGetter = context.getBean(MethodArgumentGetter.class);
     }
-    this.argumentGetter.setArgumentGetterContext(getterContext);
+
+    if (Objects.isNull(methodArgumentGetter)) {
+      throw new IllegalArgumentException("methodArgumentGetter can't be null");
+    }
+    List<Object> invokeArguments = new ArrayList<>();
     for (Parameter parameter : method.getParameters()) {
-      Object param = argumentGetter.getParam(parameter);
+      Object param = methodArgumentGetter.getParam(parameter);
       if (Objects.isNull(param)) {
         param = new Object();
       }
