@@ -123,7 +123,7 @@
                 <version>${maven-license-plugin.version}</version>
                 <configuration>
                     <basedir>${basedir}</basedir>
-                    <header>src/main/resources/etc/header.txt</header>
+                    <header>LICENSE</header>
                     <quiet>false</quiet>
                     <failIfMissing>true</failIfMissing>
                     <aggregate>true</aggregate>
