@@ -23,6 +23,7 @@
  */
 package org.aquiver.mvc.argument;
 
+import org.aquiver.RequestContext;
 import org.aquiver.mvc.router.session.Session;
 
 /**
@@ -31,8 +32,8 @@ import org.aquiver.mvc.router.session.Session;
  */
 public final class SessionArgumentGetter implements TypeArgumentGetter<Session> {
   @Override
-  public Session get(ArgumentGetterContext context) {
-    return context.requestContext().request().session();
+  public Session get(RequestContext context) {
+    return context.request().session();
   }
 
   @Override

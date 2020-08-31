@@ -23,6 +23,8 @@
  */
 package org.aquiver.mvc.argument;
 
+import org.aquiver.RequestContext;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 
@@ -33,12 +35,12 @@ import java.lang.reflect.Parameter;
 public final class ArgumentContext {
   private final Parameter parameter;
   private final Annotation annotation;
-  private final ArgumentGetterContext context;
+  private final RequestContext context;
 
-  public ArgumentContext(Parameter parameter, Annotation annotation, ArgumentGetterContext context) {
+  public ArgumentContext(Parameter parameter, Annotation annotation, RequestContext requestContext) {
     this.parameter = parameter;
     this.annotation = annotation;
-    this.context = context;
+    this.context = requestContext;
   }
 
   public Parameter getParameter() {
@@ -49,7 +51,7 @@ public final class ArgumentContext {
     return annotation;
   }
 
-  public ArgumentGetterContext getContext() {
+  public RequestContext getContext() {
     return context;
   }
 }

@@ -33,7 +33,7 @@ import org.aquiver.mvc.router.PathVarMatcher;
 public final class PathVarArgumentGetter implements AnnotationArgumentGetter {
   @Override
   public Object get(ArgumentContext context) throws Exception {
-    RequestContext requestContext = context.getContext().requestContext();
+    RequestContext requestContext = context.getContext();
     return PathVarMatcher.getPathVariable(requestContext.request().uri(),
             requestContext.route().getUrl(), context.getParameter().getName());
   }

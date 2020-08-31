@@ -23,6 +23,7 @@
  */
 package org.aquiver.mvc.argument;
 
+import org.aquiver.RequestContext;
 import org.aquiver.websocket.WebSocketContext;
 
 /**
@@ -31,8 +32,8 @@ import org.aquiver.websocket.WebSocketContext;
  */
 public final class WebSocketContextArgumentGetter implements TypeArgumentGetter<WebSocketContext> {
   @Override
-  public WebSocketContext get(ArgumentGetterContext argumentGetterContext) {
-    return argumentGetterContext.webSocketContext();
+  public WebSocketContext get(RequestContext requestContext) {
+    return (WebSocketContext) requestContext;
   }
 
   @Override

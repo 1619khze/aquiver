@@ -32,7 +32,7 @@ import org.aquiver.RequestContext;
 public final class ParamArgumentGetter implements AnnotationArgumentGetter {
   @Override
   public Object get(ArgumentContext context) throws Exception {
-    RequestContext requestContext = context.getContext().requestContext();
+    RequestContext requestContext = context.getContext();
     return context.getParameter().getType().cast(requestContext.request()
             .queryStrings().get(context.getParameter().getName()));
   }

@@ -24,6 +24,7 @@
 package org.aquiver.mvc.argument;
 
 import org.apex.ApexContext;
+import org.aquiver.RequestContext;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
@@ -35,27 +36,24 @@ import java.lang.reflect.Parameter;
 public class MethodArgumentGetter {
   private final AnnotationArgumentGetterResolver annotationResolver;
   private final ArgumentGetterResolver argumentGetterResolver;
-  private ArgumentGetterContext argumentGetterContext;
+  private final RequestContext requestContext;
 
-  public void setArgumentGetterContext(ArgumentGetterContext argumentGetterContext) {
-    this.argumentGetterContext = argumentGetterContext;
-  }
-
-  public MethodArgumentGetter() {
+  public MethodArgumentGetter(RequestContext requestContext) {
     final ApexContext context = ApexContext.of();
     this.annotationResolver = context.getBean(AnnotationArgumentGetterResolver.class);
     this.argumentGetterResolver = context.getBean(ArgumentGetterResolver.class);
+    this.requestContext = requestContext;
   }
 
   public Object getParam(Parameter parameter) throws Exception {
     if (parameter.getAnnotations().length == 0) {
       ArgumentGetter<?> lookup = argumentGetterResolver.lookup(parameter.getType());
-      return lookup.get(argumentGetterContext);
+      return lookup.get(requestContext);
     } else {
       Annotation[] annotations = parameter.getAnnotations();
       for (Annotation annotation : annotations) {
         AnnotationArgumentGetter lookup = annotationResolver.lookup(annotation.annotationType());
-        ArgumentContext argumentContext = new ArgumentContext(parameter, annotation, argumentGetterContext);
+        ArgumentContext argumentContext = new ArgumentContext(parameter, annotation, requestContext);
         return lookup.get(argumentContext);
       }
     }

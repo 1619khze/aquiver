@@ -23,14 +23,16 @@
  */
 package org.aquiver.mvc.argument;
 
+import org.aquiver.RequestContext;
+
 /**
  * @author WangYi
  * @since 2020/8/26
  */
 public final class ThrowableArgumentGetter implements TypeArgumentGetter<Throwable> {
   @Override
-  public Throwable get(ArgumentGetterContext argumentGetterContext) {
-    return argumentGetterContext.throwable();
+  public Throwable get(RequestContext requestContext) {
+    return requestContext.throwable();
   }
 
   @Override

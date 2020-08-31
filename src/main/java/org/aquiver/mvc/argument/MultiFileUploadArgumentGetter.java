@@ -40,7 +40,7 @@ import java.util.Map;
 public final class MultiFileUploadArgumentGetter implements AnnotationArgumentGetter {
   @Override
   public Object get(ArgumentContext context) throws Exception {
-    RequestContext requestContext = context.getContext().requestContext();
+    RequestContext requestContext = context.getContext();
     Map<String, FileUpload> fileUploads = requestContext.request().fileUpload();
     List<MultipartFile> multipartFiles = new ArrayList<>();
     Parameter parameter = context.getParameter();

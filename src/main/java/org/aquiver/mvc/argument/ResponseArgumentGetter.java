@@ -23,6 +23,7 @@
  */
 package org.aquiver.mvc.argument;
 
+import org.aquiver.RequestContext;
 import org.aquiver.Response;
 
 /**
@@ -31,8 +32,8 @@ import org.aquiver.Response;
  */
 public final class ResponseArgumentGetter implements TypeArgumentGetter<Response> {
   @Override
-  public Response get(ArgumentGetterContext context) {
-    return context.requestContext().response();
+  public Response get(RequestContext context) {
+    return context.response();
   }
 
   @Override

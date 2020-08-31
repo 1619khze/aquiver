@@ -35,7 +35,7 @@ import java.util.Map;
 public final class CookiesArgumentGetter implements AnnotationArgumentGetter {
   @Override
   public Object get(ArgumentContext context) throws Exception {
-    RequestContext requestContext = context.getContext().requestContext();
+    RequestContext requestContext = context.getContext();
     Map<String, Object> cookies = requestContext.request().cookies();
     Parameter parameter = context.getParameter();
     return parameter.getType().cast(cookies.get(parameter.getName()));

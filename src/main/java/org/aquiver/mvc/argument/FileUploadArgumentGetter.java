@@ -38,7 +38,7 @@ import java.util.Map;
 public final class FileUploadArgumentGetter implements AnnotationArgumentGetter {
   @Override
   public Object get(ArgumentContext context) throws Exception {
-    RequestContext requestContext = context.getContext().requestContext();
+    RequestContext requestContext = context.getContext();
     Map<String, FileUpload> fileUploads = requestContext.request().fileUpload();
     Parameter parameter = context.getParameter();
     String name = parameter.getName();

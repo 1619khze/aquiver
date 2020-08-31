@@ -24,6 +24,7 @@
 package org.aquiver.mvc.argument;
 
 import org.aquiver.Request;
+import org.aquiver.RequestContext;
 
 /**
  * @author WangYi
@@ -31,8 +32,8 @@ import org.aquiver.Request;
  */
 public final class RequestArgumentGetter implements TypeArgumentGetter<Request> {
   @Override
-  public Request get(ArgumentGetterContext context) {
-    return context.requestContext().request();
+  public Request get(RequestContext context) {
+    return context.request();
   }
 
   @Override

@@ -23,10 +23,12 @@
  */
 package org.aquiver.mvc.argument;
 
+import org.aquiver.RequestContext;
+
 /**
  * @author WangYi
  * @since 2020/8/26
  */
 public interface ArgumentGetter<T> {
-  T get(ArgumentGetterContext context) throws Exception;
+  T get(RequestContext context) throws Exception;
 }

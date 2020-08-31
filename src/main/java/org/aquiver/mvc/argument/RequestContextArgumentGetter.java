@@ -31,8 +31,8 @@ import org.aquiver.RequestContext;
  */
 public final class RequestContextArgumentGetter implements TypeArgumentGetter<RequestContext> {
   @Override
-  public RequestContext get(ArgumentGetterContext context) {
-    return context.requestContext();
+  public RequestContext get(RequestContext context) {
+    return context;
   }
 
   @Override

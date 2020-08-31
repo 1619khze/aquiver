@@ -36,7 +36,7 @@ import java.util.Map;
 public final class BodyArgumentGetter implements AnnotationArgumentGetter {
   @Override
   public Object get(ArgumentContext context) throws Exception {
-    RequestContext requestContext = context.getContext().requestContext();
+    RequestContext requestContext = context.getContext();
     Map<String, Object> jsonData = requestContext.request().formData();
     String jsonString = JSON.toJSONString(jsonData);
     if (jsonData.isEmpty() || !JSONObject.isValid(jsonString)) {
