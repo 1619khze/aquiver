@@ -242,15 +242,16 @@ public class NettyServer implements Server {
     int acceptThreadCount = environment.getInt(PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT, DEFAULT_ACCEPT_THREAD_COUNT);
     int ioThreadCount = environment.getInt(PATH_SERVER_NETTY_IO_THREAD_COUNT, DEFAULT_IO_THREAD_COUNT);
 
-    NettyServerGroup nettyServerGroup = EventLoopKit.nioGroup(acceptThreadCount, ioThreadCount);
-    this.bossGroup = nettyServerGroup.getBossGroup();
-    this.workerGroup = nettyServerGroup.getWorkGroup();
+    NettyServerGroup nettyServerGroup;
 
     if (EventLoopKit.epollIsAvailable()) {
       nettyServerGroup = EventLoopKit.epollGroup(acceptThreadCount, ioThreadCount);
-      this.bossGroup = nettyServerGroup.getBossGroup();
-      this.workerGroup = nettyServerGroup.getWorkGroup();
+    } else{
+      nettyServerGroup = EventLoopKit.nioGroup(acceptThreadCount, ioThreadCount);
     }
+
+    this.bossGroup = nettyServerGroup.getBossGroup();
+    this.workerGroup = nettyServerGroup.getWorkGroup();
 
     this.serverBootstrap.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
             .channel(nettyServerGroup.getChannelClass());
