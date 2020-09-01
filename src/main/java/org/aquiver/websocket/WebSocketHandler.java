@@ -49,7 +49,6 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
   private WebSocketContext webSocketContext;
   private WebSocketServerHandshaker handshaker;
   private WebSocketChannel webSocketChannel;
-  private MethodArgumentGetter methodArgumentGetter;
 
   public WebSocketHandler() {
     final ApexContext context = ApexContext.of();
@@ -83,7 +82,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
   private void handleHttpRequest(ChannelHandlerContext ctx, HttpRequest req) {
     DefaultFullHttpRequest fullHttpRequest = new DefaultFullHttpRequest(req.protocolVersion(), req.method(), req.uri());
     this.webSocketContext = webSocketContext(fullHttpRequest, ctx);
-    this.methodArgumentGetter = new MethodArgumentGetter(webSocketContext);
+    MethodArgumentGetter methodArgumentGetter = new MethodArgumentGetter(webSocketContext);
     this.apexContext.addBean(methodArgumentGetter);
     if (isWebSocketRequest(req)) {
       final WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(
