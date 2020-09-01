@@ -42,7 +42,6 @@ import org.aquiver.mvc.annotation.Path;
 import org.aquiver.mvc.annotation.RestPath;
 import org.aquiver.mvc.argument.AnnotationArgumentGetterResolver;
 import org.aquiver.mvc.argument.ArgumentGetterResolver;
-import org.aquiver.mvc.argument.MethodArgumentGetter;
 import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvTask;
