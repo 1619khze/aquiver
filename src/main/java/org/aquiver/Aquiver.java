@@ -29,6 +29,7 @@ import org.apex.Environment;
 import org.aquiver.handler.ErrorHandler;
 import org.aquiver.handler.ErrorHandlerResolver;
 import org.aquiver.mvc.annotation.HttpMethod;
+import org.aquiver.mvc.interceptor.Interceptor;
 import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.session.SessionManager;
 import org.aquiver.server.NettyServer;
@@ -111,6 +112,8 @@ public class Aquiver {
   private final RestfulRouter restfulRouter = apexContext.addBean(RestfulRouter.class);
   private final WebSocketResolver webSocketResolver = apexContext.addBean(WebSocketResolver.class);
   private final ErrorHandlerResolver errorHandlerResolver = apexContext.addBean(ErrorHandlerResolver.class);
+
+  private static final List<Interceptor> interceptors = new ArrayList<>();
 
   private Aquiver() {
   }
@@ -609,6 +612,24 @@ public class Aquiver {
   public Aquiver errorHandler(Class<? extends Throwable> throwableCls, ErrorHandler errorHandler) {
     this.errorHandlerResolver.registerErrorHandler(throwableCls, errorHandler);
     return this;
+  }
+
+  /**
+   * Register interceptor
+   * @param interceptor http interceptor
+   * @return this
+   */
+  public Aquiver interceptor(Interceptor interceptor) {
+    Aquiver.interceptors.add(interceptor);
+    return this;
+  }
+
+  /**
+   * Get interceptor list
+   * @return interceptor list
+   */
+  public static List<Interceptor> interceptors() {
+    return interceptors;
   }
 
   /**

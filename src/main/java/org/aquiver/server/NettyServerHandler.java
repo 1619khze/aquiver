@@ -28,13 +28,12 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import org.apex.ApexContext;
-import org.aquiver.NoRouteFoundException;
-import org.aquiver.RequestContext;
-import org.aquiver.ResultHandler;
-import org.aquiver.ResultHandlerResolver;
+import org.aquiver.*;
 import org.aquiver.handler.ErrorHandlerResolver;
 import org.aquiver.mvc.RequestResult;
 import org.aquiver.mvc.argument.MethodArgumentGetter;
+import org.aquiver.mvc.interceptor.AspectInterceptorChain;
+import org.aquiver.mvc.interceptor.Interceptor;
 import org.aquiver.mvc.router.PathVarMatcher;
 import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.RouteInfo;
@@ -43,9 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -60,7 +56,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
   private FullHttpRequest request;
   private RequestContext requestContext;
-  private MethodArgumentGetter methodArgumentGetter;
   private final StaticFileServerHandler fileServerHandler;
   private final RestfulRouter restfulRouter;
   private final ErrorHandlerResolver errorHandlerResolver;
@@ -110,14 +105,21 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     }
     try {
       this.requestContext = this.buildRequestContext(request, ctx);
-      this.methodArgumentGetter = new MethodArgumentGetter(requestContext);
-      this.context.addBean(methodArgumentGetter);
-      final RequestResult result = logicExecution(requestContext);
+      final RouteInfo routeInfo = lookupRoute(requestContext);
+      requestContext.route(routeInfo);
+
+      final List<Interceptor> interceptors = Aquiver.interceptors();
+      final AspectInterceptorChain interceptorChain = new AspectInterceptorChain(interceptors, requestContext);
+      interceptorChain.invoke();
+
+      final RequestResult result = interceptorChain.getResult();
       if (Objects.nonNull(result)) {
         ResultHandler handler = resultHandlerResolver.lookup(result);
-        handler.handle(requestContext, result);
-      } else {
-        throw new IllegalStateException("Unsupported result class: " + result.getResultType().getSimpleName());
+        if (Objects.isNull(handler)) {
+          throw new IllegalStateException("Unsupported result class: " + result.getResultType().getSimpleName());
+        } else {
+          handler.handle(requestContext, result);
+        }
       }
     } catch(Throwable throwable) {
       exceptionCaught(ctx, throwable);
@@ -125,19 +127,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   }
 
   private RequestContext buildRequestContext(FullHttpRequest request, ChannelHandlerContext ctx) {
-    return new RequestContext(request, ctx);
-  }
-
-  public RequestResult logicExecution(RequestContext context) throws Throwable {
-    final RouteInfo routeInfo = lookupRoute(context);
-    final Method method = routeInfo.getMethod();
-    final Parameter[] parameters = method.getParameters();
-    context.route(routeInfo);
-
-    final List<Object> invokeArguments = methodArgumentGetter.getParams(parameters);
-    final Object invokeResult = lookup.unreflect(method).bindTo(routeInfo.getBean())
-            .invokeWithArguments(invokeArguments);
-    return new RequestResult(method.getReturnType(), invokeResult, method);
+    RequestContext requestContext = new RequestContext(request, ctx);
+    MethodArgumentGetter methodArgumentGetter = new MethodArgumentGetter(requestContext);
+    this.context.addBean(methodArgumentGetter);
+    return requestContext;
   }
 
   private RouteInfo lookupRoute(RequestContext context) throws Exception {
