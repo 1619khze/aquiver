@@ -55,28 +55,19 @@ public class StaticFileServerHandler {
       return false;
     }
     URL resource = this.getClass().getClassLoader().getResource(uri.replaceFirst("/", ""));
-    URL notFoundUrl = this.getClass().getClassLoader().getResource("404.html");
 
     if(Objects.isNull(resource)){
       return false;
     }
 
     File html = new File(resource.toURI());
-    File NOT_FOUND = new File(notFoundUrl.toURI());
 
     if (HttpUtil.is100ContinueExpected(request)) {
       send100Continue(ctx);
     }
 
-    if (!html.exists()) {
-      html = NOT_FOUND;
-    }
     try (RandomAccessFile file = new RandomAccessFile(html, "r")) {
       HttpResponse response = new DefaultHttpResponse(request.protocolVersion(), HttpResponseStatus.OK);
-
-      if (html == NOT_FOUND) {
-        response.setStatus(HttpResponseStatus.NOT_FOUND);
-      }
 
       if (uri.endsWith(".html")) {
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html; charset=UTF-8");
