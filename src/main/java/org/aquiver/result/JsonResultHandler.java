@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
  * @author WangYi
  * @since 2020/8/31
  */
-public class JsonResultHandler implements ResultHandler {
+public final class JsonResultHandler implements ResultHandler {
 
   @Override
   public boolean support(RequestResult requestResult) {

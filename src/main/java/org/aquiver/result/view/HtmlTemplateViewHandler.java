@@ -38,7 +38,7 @@ import java.nio.file.Paths;
  * @author WangYi
  * @since 2020/8/27
  */
-public class HtmlTemplateViewHandler extends AbstractTemplateViewHandler {
+public final class HtmlTemplateViewHandler extends AbstractTemplateViewHandler {
 
   @Override
   public String getPrefix() {
