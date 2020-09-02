@@ -52,9 +52,6 @@ public final class HtmlTemplateViewHandler extends AbstractTemplateViewHandler {
 
   @Override
   protected void doRender(RequestContext ctx, String viewPathName) throws Exception {
-    if (!viewPathName.endsWith(getSuffix())) {
-      viewPathName = viewPathName + "." + getSuffix();
-    }
     URL viewUrl = this.getClass().getClassLoader().getResource(viewPathName);
     Resource resource = new FileBaseResource(Paths.get(viewUrl.toURI()));
     String htmlContent = new String(Files.readAllBytes(resource.getPath()));

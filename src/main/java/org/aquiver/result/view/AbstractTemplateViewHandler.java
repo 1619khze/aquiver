@@ -25,9 +25,14 @@ package org.aquiver.result.view;
 
 import org.apex.Environment;
 import org.aquiver.Aquiver;
-import org.aquiver.server.Const;
 import org.aquiver.RequestContext;
 import org.aquiver.ViewHandler;
+import org.aquiver.result.ResultUtils;
+import org.aquiver.server.Const;
+
+import java.io.File;
+import java.net.URL;
+import java.util.Objects;
 
 /**
  * @author WangYi
@@ -40,11 +45,22 @@ public abstract class AbstractTemplateViewHandler implements ViewHandler {
 
   @Override
   public void render(RequestContext ctx, String viewPathName) throws Exception {
+    String viewPath = viewPathName;
     if (!getPrefix().equals("")) {
-      viewPathName = "/" + getPrefix() + viewPathName;
+      viewPath = "/" + getPrefix() + viewPath;
     }
-    viewPathName = Const.SERVER_TEMPLATES_FOLDER + viewPathName;
-    doRender(ctx, viewPathName);
+
+    viewPath = Const.SERVER_TEMPLATES_FOLDER + File.separator + viewPath;
+    if (!viewPath.endsWith(getSuffix())) {
+      viewPath = viewPath + "." + getSuffix();
+    }
+
+    URL viewUrl = this.getClass().getClassLoader().getResource(viewPath);
+    if (Objects.isNull(viewUrl)) {
+      ctx.writeAndFlush(ResultUtils.contentResponse(viewPathName));
+    } else {
+      doRender(ctx, viewPath);
+    }
   }
 
   protected abstract void doRender(RequestContext ctx, String viewPathName) throws Exception;
