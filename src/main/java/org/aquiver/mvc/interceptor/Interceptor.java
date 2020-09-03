@@ -32,7 +32,7 @@ import org.aquiver.RequestContext;
 public interface Interceptor {
   void initialize();
 
-  void intercept(RequestContext ctx, InterceptorChain chain) throws Exception;
+  void intercept(RequestContext ctx, InterceptorChain chain) throws Throwable;
 
   void destroy();
 }

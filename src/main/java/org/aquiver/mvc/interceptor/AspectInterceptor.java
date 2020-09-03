@@ -35,7 +35,7 @@ public abstract class AspectInterceptor implements Interceptor {
   protected abstract void after(RequestContext context);
 
   @Override
-  public void intercept(RequestContext ctx, InterceptorChain chain) throws Exception {
+  public void intercept(RequestContext ctx, InterceptorChain chain) throws Throwable {
     before(ctx);
     chain.invoke();
     after(ctx);

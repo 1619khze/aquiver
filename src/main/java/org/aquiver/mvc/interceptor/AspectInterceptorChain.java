@@ -54,7 +54,7 @@ public class AspectInterceptorChain implements InterceptorChain {
   }
 
   @Override
-  public void invoke() throws Exception {
+  public void invoke() throws Throwable {
     if (currentIndex < interceptors.size()) {
       Interceptor interceptor = interceptors.get(currentIndex++);
       interceptor.intercept(ctx, this);
@@ -67,17 +67,13 @@ public class AspectInterceptorChain implements InterceptorChain {
     return result;
   }
 
-  private void executeAction(RequestContext ctx) throws Exception {
+  private void executeAction(RequestContext ctx) throws Throwable {
     RouteInfo routeInfo = ctx.route();
     final Method method = routeInfo.getMethod();
     final Parameter[] parameters = method.getParameters();
     final List<Object> invokeArguments = methodArgumentGetter.getParams(parameters);
-    try {
-      final Object invokeResult = lookup.unreflect(method).bindTo(routeInfo.getBean())
-              .invokeWithArguments(invokeArguments);
-      this.result = new RequestResult(method.getReturnType(), invokeResult, method);
-    } catch(Throwable throwable) {
-      throwable.printStackTrace();
-    }
+    final Object invokeResult = lookup.unreflect(method).bindTo(routeInfo.getBean())
+            .invokeWithArguments(invokeArguments);
+    this.result = new RequestResult(method.getReturnType(), invokeResult, method);
   }
 }

@@ -28,5 +28,5 @@ package org.aquiver.mvc.interceptor;
  * @since 2020/8/26
  */
 public interface InterceptorChain {
-  void invoke() throws Exception;
+  void invoke() throws Throwable;
 }
