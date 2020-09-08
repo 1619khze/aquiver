@@ -52,13 +52,9 @@ public final class ViewHandlerResolver {
 
   private void init() {
     this.register(CssDataViewHandler.class);
-    this.register(GifDataViewHandler.class);
-    this.register(PngDataViewHandler.class);
     this.register(XmlDataViewHandler.class);
     this.register(HtmlDataViewHandler.class);
-    this.register(JpegDataViewHandler.class);
     this.register(RedirectViewHandler.class);
-    this.register(MarkdownDataViewHandler.class);
     this.register(HtmlTemplateViewHandler.class);
     this.register(PebbleTemplateViewHandler.class);
   }
