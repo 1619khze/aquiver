@@ -25,7 +25,6 @@ package example.route;
 
 import example.bean.User;
 import io.netty.channel.ChannelHandlerContext;
-import org.apex.Apex;
 import org.apex.ApexContext;
 import org.aquiver.ModelAndView;
 import org.aquiver.RequestContext;
@@ -117,7 +116,7 @@ public class ApiRoute {
   @View
   @GET(value = "/getPeb")
   public String getPeb() {
-    return "/index.peb";
+    return "/templates/index.peb";
   }
 
   @View

@@ -23,10 +23,18 @@
  */
 package example.route;
 
+import org.aquiver.mvc.annotation.GET;
+import org.aquiver.mvc.annotation.RestPath;
+
 /**
  * @author WangYi
  * @since 2020/6/22
  */
+@RestPath("/index")
 public class IndexRoute {
 
+  @GET("/index")
+  public String index() {
+    return "index";
+  }
 }
