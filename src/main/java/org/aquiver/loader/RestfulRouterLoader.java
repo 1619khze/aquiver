@@ -62,11 +62,19 @@ public class RestfulRouterLoader implements WebLoader {
       if (log.isDebugEnabled()) {
         log.debug("Is this class normal: {}", next.getSimpleName());
       }
-      if (Objects.isNull(next.getAnnotation(RestPath.class)) &&
-              Objects.isNull(next.getAnnotation(Path.class))) {
+      if (!next.isAnnotationPresent(Path.class) &&
+              !next.isAnnotationPresent(RestPath.class)) {
         continue;
       }
+      if (next.isAnnotationPresent(Path.class) &&
+              next.isAnnotationPresent(RestPath.class)) {
+        throw new IllegalArgumentException("There are duplicate annotations in "
+                + next.getName() + ": @" + Path.class.getSimpleName() + " @" + RestPath.class.getSimpleName());
+      }
       url = url(next, url);
+      if (!url.startsWith("/")) {
+        url = "/" + url;
+      }
       context.getBean(RestfulRouter.class).registerRoute(url, entry.getValue());
     }
   }
@@ -79,14 +87,24 @@ public class RestfulRouterLoader implements WebLoader {
    * @return The complete url after stitching
    */
   private String url(Class<?> cls, String url) {
-    Path classPath = cls.getAnnotation(Path.class);
-    if (classPath == null) {
-      return url;
+    String pathValue = "/";
+    if (cls.isAnnotationPresent(Path.class)) {
+      Path path = cls.getAnnotation(Path.class);
+      if (path.value().equals("")) {
+        return url;
+      }
+      pathValue = path.value();
+    }
+    if (cls.isAnnotationPresent(RestPath.class)) {
+      RestPath restPath = cls.getAnnotation(RestPath.class);
+      if (restPath.value().equals("")) {
+        return url;
+      }
+      pathValue = restPath.value();
     }
     String className = cls.getName();
-    String value = classPath.value();
-    if (!"".equals(value)) {
-      url = value;
+    if (!"".equals(pathValue)) {
+      url = pathValue;
     }
     if (log.isDebugEnabled()) {
       log.debug("Registered rest controller:[{}:{}]", url, className);
