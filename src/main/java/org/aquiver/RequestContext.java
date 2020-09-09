@@ -68,14 +68,12 @@ public class RequestContext {
   }
 
   public void redirect(String redirectUrl) {
-    FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
-            HttpResponseStatus.PERMANENT_REDIRECT);
-    HttpHeaders headers = response.headers();
-    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS, "x-requested-with,content-type");
-    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS, "POST,GET");
-    headers.set(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN, "*");
-    headers.set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+    final HttpHeaders headers = new DefaultHttpHeaders();
     headers.set(HttpHeaderNames.LOCATION, redirectUrl);
+
+    final FullHttpResponse response = ResultResponseBuilder.forResponse(
+            HttpResponseStatus.PERMANENT_REDIRECT).headers(headers).build();
+
     this.writeAndFlush(response);
   }
 

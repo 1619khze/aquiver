@@ -28,7 +28,7 @@ import org.aquiver.server.Const;
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.router.views.HTMLView;
 import org.aquiver.mvc.router.views.PebbleHTMLView;
-import org.aquiver.result.ResultUtils;
+import org.aquiver.ResultResponseBuilder;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -48,7 +48,7 @@ public final class PebbleTemplateViewHandler extends AbstractTemplateViewHandler
   @Override
   protected void doRender(RequestContext ctx, String viewPathName) throws IOException {
     String renderView = this.htmlView.renderView(viewPathName, new HashMap<>());
-    final FullHttpResponse responseView = ResultUtils.contentResponse(renderView);
+    final FullHttpResponse responseView = ResultResponseBuilder.forResponse(renderView).build();
     ctx.writeAndFlush(responseView);
   }
 

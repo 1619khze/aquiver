@@ -30,6 +30,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.aquiver.RequestContext;
 import org.aquiver.ResultHandler;
+import org.aquiver.ResultResponseBuilder;
 import org.aquiver.mvc.RequestResult;
 import org.aquiver.mvc.annotation.JSON;
 import org.aquiver.mvc.http.MediaType;
@@ -53,7 +54,7 @@ public final class JsonResultHandler implements ResultHandler {
     String jsonString = JSONObject.toJSONString(result.getResultObject());
     HttpHeaders httpHeaders = new DefaultHttpHeaders();
     httpHeaders.add(HttpHeaderNames.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-    FullHttpResponse jsonResponse = ResultUtils.contentResponse(jsonString);
+    FullHttpResponse jsonResponse = ResultResponseBuilder.forResponse(httpHeaders, jsonString).build();
     ctx.writeAndFlush(jsonResponse);
   }
 }

@@ -26,6 +26,7 @@ package org.aquiver.result;
 import io.netty.handler.codec.http.FullHttpResponse;
 import org.aquiver.RequestContext;
 import org.aquiver.ResultHandler;
+import org.aquiver.ResultResponseBuilder;
 import org.aquiver.mvc.RequestResult;
 
 /**
@@ -41,7 +42,7 @@ public final class VoidResultHandler implements ResultHandler {
 
   @Override
   public void handle(RequestContext ctx, RequestResult result) {
-    FullHttpResponse voidResponse = ResultUtils.emptyResponse();
+    FullHttpResponse voidResponse = ResultResponseBuilder.forResponse().build();
     ctx.writeAndFlush(voidResponse);
   }
 }

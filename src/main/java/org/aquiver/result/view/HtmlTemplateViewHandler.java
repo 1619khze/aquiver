@@ -28,7 +28,7 @@ import org.apex.io.FileBaseResource;
 import org.apex.io.Resource;
 import org.aquiver.server.Const;
 import org.aquiver.RequestContext;
-import org.aquiver.result.ResultUtils;
+import org.aquiver.ResultResponseBuilder;
 
 import java.net.URL;
 import java.nio.file.Files;
@@ -55,7 +55,7 @@ public final class HtmlTemplateViewHandler extends AbstractTemplateViewHandler {
     URL viewUrl = this.getClass().getClassLoader().getResource(viewPathName);
     Resource resource = new FileBaseResource(Paths.get(viewUrl.toURI()));
     String htmlContent = new String(Files.readAllBytes(resource.getPath()));
-    FullHttpResponse response = ResultUtils.contentResponse(htmlContent);
+    FullHttpResponse response = ResultResponseBuilder.forResponse(htmlContent).build();
     ctx.writeAndFlush(response);
   }
 

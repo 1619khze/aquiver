@@ -23,11 +23,14 @@
  */
 package org.aquiver.result.view;
 
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaders;
 import org.aquiver.Request;
 import org.aquiver.RequestContext;
+import org.aquiver.ResultResponseBuilder;
 import org.aquiver.ViewHandler;
-import org.aquiver.result.ResultUtils;
 
 /**
  * @author WangYi
@@ -40,7 +43,7 @@ public abstract class AbstractDataViewHandler implements ViewHandler {
   public void render(RequestContext ctx, String viewPathName) {
     final HttpHeaders httpHeaders = new DefaultHttpHeaders();
     httpHeaders.add(HttpHeaderNames.CONTENT_TYPE, getMimeType(ctx.request()));
-    final FullHttpResponse response = ResultUtils.contentResponse(viewPathName, httpHeaders);
+    final FullHttpResponse response = ResultResponseBuilder.forResponse(httpHeaders, viewPathName).build();
     ctx.writeAndFlush(response);
   }
 }

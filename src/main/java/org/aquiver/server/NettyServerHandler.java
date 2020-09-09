@@ -37,7 +37,6 @@ import org.aquiver.mvc.interceptor.Interceptor;
 import org.aquiver.mvc.router.PathVarMatcher;
 import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.RouteInfo;
-import org.aquiver.result.ResultUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -172,8 +171,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     if (!result) {
       final NoRouteFoundException exception = new NoRouteFoundException
               (context.request().httpMethodName(), context.request().uri());
-      FullHttpResponse response = ResultUtils.contentResponse(exception.getMessage());
-      response.setStatus(HttpResponseStatus.NOT_FOUND);
+      final FullHttpResponse response = ResultResponseBuilder.forResponse(
+              HttpResponseStatus.NOT_FOUND, exception.getMessage()).build();
       context.writeAndFlush(response);
       throw exception;
     }
