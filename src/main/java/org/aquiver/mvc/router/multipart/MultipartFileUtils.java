@@ -23,11 +23,15 @@
  */
 package org.aquiver.mvc.router.multipart;
 
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.*;
+import io.netty.handler.codec.http.HttpChunkedInput;
 import io.netty.handler.codec.http.multipart.FileUpload;
+import io.netty.handler.ssl.SslHandler;
+import io.netty.handler.stream.ChunkedFile;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,5 +70,31 @@ public final class MultipartFileUtils {
     multipartFile.path(tmpFile.toFile().getPath());
     multipartFile.length(fileUpload.length());
     return multipartFile;
+  }
+
+  public static ChannelFuture writeChunkFile(ChannelHandlerContext context, RandomAccessFile raf) throws IOException {
+    ChannelFuture sendFileFuture;
+    long length = raf.length();
+    if (context.pipeline().get(SslHandler.class) == null) {
+      sendFileFuture = context.write(new DefaultFileRegion(raf.getChannel(),
+              0, length), context.newProgressivePromise());
+    } else {
+      sendFileFuture = context.write(new HttpChunkedInput(new ChunkedFile(raf,
+              0, length, 8192)), context.newProgressivePromise());
+    }
+    return sendFileFuture;
+  }
+
+  public static void closeChannel(RandomAccessFile raf, ChannelFuture sendFileFuture) {
+    sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
+      @Override
+      public void operationComplete(ChannelProgressiveFuture future) throws Exception {
+        raf.close();
+      }
+
+      @Override
+      public void operationProgressed(ChannelProgressiveFuture future, long progress, long total) {
+      }
+    });
   }
 }

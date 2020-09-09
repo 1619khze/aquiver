@@ -23,7 +23,8 @@
  */
 package org.aquiver.mvc.router.multipart;
 
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +37,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+import static org.aquiver.mvc.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 /**
  * @author WangYi
@@ -64,35 +66,17 @@ public class MultipartFile {
     try {
       final RandomAccessFile raf = new RandomAccessFile(file, "r");
       long fileLength = raf.length();
+
       HttpResponse response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK);
       response.headers().set(HttpHeaderNames.CONTENT_LENGTH, fileLength);
-      response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/octet-stream");
+      response.headers().set(HttpHeaderNames.CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE);
       response.headers().add(HttpHeaderNames.CONTENT_DISPOSITION,
               String.format("attachment; filename=\"%s\"", file.getName()));
 
       this.context.write(response);
 
-      ChannelFuture sendFileFuture = context.write(new DefaultFileRegion(raf.getChannel(),
-              0, fileLength), context.newProgressivePromise());
-
-      sendFileFuture.addListener(new ChannelProgressiveFutureListener() {
-        @Override
-        public void operationComplete(ChannelProgressiveFuture future)
-                throws Exception {
-          log.info("file {} transfer complete.", file.getName());
-          raf.close();
-        }
-
-        @Override
-        public void operationProgressed(ChannelProgressiveFuture future,
-                                        long progress, long total) {
-          if (total < 0) {
-            log.warn("file {} transfer progress: {}", file.getName(), progress);
-          } else {
-            log.debug("file {} transfer progress: {}/{}", file.getName(), progress, total);
-          }
-        }
-      });
+      ChannelFuture sendFileFuture = MultipartFileUtils.writeChunkFile(context, raf);
+      MultipartFileUtils.closeChannel(raf, sendFileFuture);
       this.context.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
     } catch (IOException e) {
       log.warn("file {} not found", file.getPath());
