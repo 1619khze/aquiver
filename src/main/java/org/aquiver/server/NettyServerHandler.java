@@ -41,7 +41,6 @@ import org.aquiver.result.ResultUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -60,11 +59,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private final RestfulRouter restfulRouter;
   private final ErrorHandlerResolver errorHandlerResolver;
   private final ResultHandlerResolver resultHandlerResolver;
-  private final MethodHandles.Lookup lookup = MethodHandles.lookup();
   private final ApexContext context = ApexContext.of();
 
   public NettyServerHandler() {
-    this.fileServerHandler = new StaticFileServerHandler();
+    this.fileServerHandler = context.getBean(StaticFileServerHandler.class);
     this.errorHandlerResolver = context.getBean(ErrorHandlerResolver.class);
     this.restfulRouter = context.getBean(RestfulRouter.class);
     this.resultHandlerResolver = context.getBean(ResultHandlerResolver.class);
@@ -105,7 +103,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     }
     try {
       this.requestContext = this.buildRequestContext(request, ctx);
-      final RouteInfo routeInfo = lookupRoute(requestContext);
+      final RouteInfo routeInfo = lookupRoute(request.uri());
       requestContext.route(routeInfo);
 
       final List<Interceptor> interceptors = Aquiver.interceptors();
@@ -121,7 +119,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
           handler.handle(requestContext, result);
         }
       }
-    } catch(Throwable throwable) {
+    } catch (Throwable throwable) {
       exceptionCaught(ctx, throwable);
     }
   }
@@ -133,8 +131,12 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     return requestContext;
   }
 
-  private RouteInfo lookupRoute(RequestContext context) throws Exception {
-    String lookupPath = lookupPath(context.request().uri());
+  private String lookupPath(String uri) {
+    return uri.endsWith("/") ? uri.substring(0, uri.length() - 1) : uri;
+  }
+
+  private RouteInfo lookupRoute(String url) throws Exception {
+    String lookupPath = lookupPath(url);
     int paramStartIndex = lookupPath.indexOf("?");
     if (paramStartIndex > 0) {
       lookupPath = lookupPath.substring(0, paramStartIndex);
@@ -144,17 +146,9 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
       lookupPath = "/";
     }
 
-    RouteInfo routeInfo = lookupRoute(lookupPath);
-    if (Objects.isNull(routeInfo)) {
-      lookupStaticFile(context);
-    }
-    return routeInfo;
-  }
-
-  private RouteInfo lookupRoute(String lookupPath) {
-    RouteInfo lookup = restfulRouter.lookup(lookupPath);
-    if (Objects.nonNull(lookup)) {
-      return lookup;
+    RouteInfo routeInfo = restfulRouter.lookup(lookupPath);
+    if (Objects.nonNull(routeInfo)) {
+      return routeInfo;
     }
     for (Map.Entry<String, RouteInfo> entry : restfulRouter.getRoutes().entrySet()) {
       String[] lookupPathSplit = lookupPath.split("/");
@@ -167,11 +161,10 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
         return entry.getValue();
       }
     }
-    return null;
-  }
-
-  private String lookupPath(String uri) {
-    return uri.endsWith("/") ? uri.substring(0, uri.length() - 1) : uri;
+    if (Objects.isNull(routeInfo)) {
+      lookupStaticFile(requestContext);
+    }
+    return routeInfo;
   }
 
   private void lookupStaticFile(RequestContext context) throws Exception {
