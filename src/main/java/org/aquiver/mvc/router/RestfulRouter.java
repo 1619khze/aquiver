@@ -49,15 +49,6 @@ public final class RestfulRouter implements Router {
   private final Map<String, RouteInfo> routes = new ConcurrentHashMap<>(64);
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
 
-  /**
-   * Get Route Map
-   *
-   * @return Route Map
-   */
-  public Map<String, RouteInfo> getRoutes() {
-    return this.routes;
-  }
-
   @Override
   public void registerRoute(String path, Object object) {
     try {
@@ -71,14 +62,40 @@ public final class RestfulRouter implements Router {
         }
         registerRoute(cls, object, path, method);
       }
-    } catch(Throwable throwable) {
+    } catch (Throwable throwable) {
       log.error("Register route exception", throwable);
     }
   }
 
   @Override
   public RouteInfo lookup(String url) {
-    return routes.getOrDefault(url, null);
+    String lookupPath = url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
+    int paramStartIndex = lookupPath.indexOf("?");
+    if (paramStartIndex > 0) {
+      lookupPath = lookupPath.substring(0, paramStartIndex);
+    }
+
+    if (lookupPath.equals("")) {
+      lookupPath = "/";
+    }
+
+    RouteInfo routeInfo = routes.get(url);
+    if (Objects.nonNull(routeInfo)) {
+      return routeInfo;
+    }
+
+    for (Map.Entry<String, RouteInfo> entry : routes.entrySet()) {
+      String[] lookupPathSplit = lookupPath.split("/");
+      String[] mappingUrlSplit = entry.getKey().split("/");
+      String matcher = PathVarMatcher.getMatch(entry.getKey());
+      if (!lookupPath.startsWith(matcher) || lookupPathSplit.length != mappingUrlSplit.length) {
+        continue;
+      }
+      if (PathVarMatcher.checkMatch(lookupPathSplit, mappingUrlSplit)) {
+        return entry.getValue();
+      }
+    }
+    return routeInfo;
   }
 
   @Override
@@ -87,7 +104,7 @@ public final class RestfulRouter implements Router {
       Class<? extends RequestHandler> ref = handler.getClass();
       Method handle = ref.getMethod("handle", RequestContext.class);
       this.registerRoute(RequestHandler.class, handler, path, handle, httpMethod);
-    } catch(NoSuchMethodException e) {
+    } catch (NoSuchMethodException e) {
       log.error("There is no such method {}", "handle", e);
     }
   }
@@ -177,7 +194,7 @@ public final class RestfulRouter implements Router {
   /**
    * add route
    *
-   * @param url   url
+   * @param url       url
    * @param routeInfo Route info
    */
   private void registerRoute(String url, RouteInfo routeInfo) {

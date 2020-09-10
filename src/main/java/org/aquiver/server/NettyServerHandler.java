@@ -34,14 +34,12 @@ import org.aquiver.mvc.RequestResult;
 import org.aquiver.mvc.argument.MethodArgumentGetter;
 import org.aquiver.mvc.interceptor.AspectInterceptorChain;
 import org.aquiver.mvc.interceptor.Interceptor;
-import org.aquiver.mvc.router.PathVarMatcher;
 import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.RouteInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -54,14 +52,13 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
   private FullHttpRequest request;
   private RequestContext requestContext;
-  private final StaticFileServerHandler fileServerHandler;
   private final RestfulRouter restfulRouter;
   private final ErrorHandlerResolver errorHandlerResolver;
   private final ResultHandlerResolver resultHandlerResolver;
   private final ApexContext context = ApexContext.of();
+  private final StaticFileServerHandler fileServerHandler = new StaticFileServerHandler();
 
   public NettyServerHandler() {
-    this.fileServerHandler = context.getBean(StaticFileServerHandler.class);
     this.errorHandlerResolver = context.getBean(ErrorHandlerResolver.class);
     this.restfulRouter = context.getBean(RestfulRouter.class);
     this.resultHandlerResolver = context.getBean(ResultHandlerResolver.class);
@@ -102,8 +99,13 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     }
     try {
       this.requestContext = this.buildRequestContext(request, ctx);
-      final RouteInfo routeInfo = lookupRoute(request.uri());
-      requestContext.route(routeInfo);
+
+      final RouteInfo routeInfo = restfulRouter.lookup(request.uri());
+      if (Objects.isNull(routeInfo)) {
+        lookupStaticFile(requestContext);
+      } else {
+        this.requestContext.route(routeInfo);
+      }
 
       final List<Interceptor> interceptors = Aquiver.interceptors();
       final AspectInterceptorChain interceptorChain = new AspectInterceptorChain(interceptors, requestContext);
@@ -113,7 +115,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
       if (Objects.nonNull(result)) {
         ResultHandler handler = resultHandlerResolver.lookup(result);
         if (Objects.isNull(handler)) {
-          throw new IllegalStateException("Unsupported result class: " + result.getResultType().getSimpleName());
+          throw new IllegalStateException("Unsupported result class:"
+                  + " " + result.getResultType().getSimpleName());
         } else {
           handler.handle(requestContext, result);
         }
@@ -128,42 +131,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     MethodArgumentGetter methodArgumentGetter = new MethodArgumentGetter(requestContext);
     this.context.addBean(methodArgumentGetter);
     return requestContext;
-  }
-
-  private String lookupPath(String uri) {
-    return uri.endsWith("/") ? uri.substring(0, uri.length() - 1) : uri;
-  }
-
-  private RouteInfo lookupRoute(String url) throws Exception {
-    String lookupPath = lookupPath(url);
-    int paramStartIndex = lookupPath.indexOf("?");
-    if (paramStartIndex > 0) {
-      lookupPath = lookupPath.substring(0, paramStartIndex);
-    }
-
-    if (lookupPath.equals("")) {
-      lookupPath = "/";
-    }
-
-    RouteInfo routeInfo = restfulRouter.lookup(lookupPath);
-    if (Objects.nonNull(routeInfo)) {
-      return routeInfo;
-    }
-    for (Map.Entry<String, RouteInfo> entry : restfulRouter.getRoutes().entrySet()) {
-      String[] lookupPathSplit = lookupPath.split("/");
-      String[] mappingUrlSplit = entry.getKey().split("/");
-      String matcher = PathVarMatcher.getMatch(entry.getKey());
-      if (!lookupPath.startsWith(matcher) || lookupPathSplit.length != mappingUrlSplit.length) {
-        continue;
-      }
-      if (PathVarMatcher.checkMatch(lookupPathSplit, mappingUrlSplit)) {
-        return entry.getValue();
-      }
-    }
-    if (Objects.isNull(routeInfo)) {
-      lookupStaticFile(requestContext);
-    }
-    return routeInfo;
   }
 
   private void lookupStaticFile(RequestContext context) throws Exception {
