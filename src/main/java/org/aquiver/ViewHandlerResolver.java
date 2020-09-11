@@ -37,7 +37,7 @@ import java.util.Objects;
  * @author WangYi
  * @since 2020/8/22
  */
-public final class ViewHandlerResolver {
+public class ViewHandlerResolver {
   private static final Logger log = LoggerFactory.getLogger(ViewHandlerResolver.class);
   private final Map<String, ViewHandler> viewHandlerMap = new HashMap<>();
   private final ApexContext context = ApexContext.of();

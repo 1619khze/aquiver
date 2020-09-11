@@ -38,7 +38,7 @@ import static org.apex.Const.BLANK;
  * @author WangYi
  * @since 2020/8/27
  */
-public final class ResultResponseBuilder {
+public class ResultResponseBuilder {
   private HttpResponseStatus status;
   private HttpVersion version;
   private Cookie cookie;

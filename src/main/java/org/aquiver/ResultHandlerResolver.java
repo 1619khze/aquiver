@@ -38,7 +38,7 @@ import java.util.*;
  * @author WangYi
  * @since 2020/8/22
  */
-public final class ResultHandlerResolver {
+public class ResultHandlerResolver {
   private static final Logger log = LoggerFactory.getLogger(ResultHandlerResolver.class);
   private final List<ResultHandler> mapping = new ArrayList<>();
   private final ApexContext context = ApexContext.of();

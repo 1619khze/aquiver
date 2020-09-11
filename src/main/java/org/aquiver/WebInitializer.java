@@ -32,7 +32,7 @@ import java.util.ServiceLoader;
  * @author WangYi
  * @since 2020/8/23
  */
-public final class WebInitializer {
+public class WebInitializer {
   public static void initialize(Map<String, Object> instances, Aquiver aquiver) throws Exception {
     if (instances.isEmpty()) {
       return;
