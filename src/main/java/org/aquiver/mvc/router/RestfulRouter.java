@@ -53,7 +53,7 @@ public final class RestfulRouter implements Router {
   public void registerRoute(String path, Object object) {
     try {
       Class<?> cls = object.getClass();
-      Method[] methods = cls.getMethods();
+      Method[] methods = cls.getDeclaredMethods();
       for (Method method : methods) {
         Path methodPath = method.getAnnotation(Path.class);
         if (Objects.nonNull(methodPath)) {
@@ -124,14 +124,16 @@ public final class RestfulRouter implements Router {
         String routeUrl = "/";
         Class<? extends Annotation> annotationType = annotation.annotationType();
         Path path = annotationType.getAnnotation(Path.class);
-        RestPath restPath = annotationType.getAnnotation(RestPath.class);
-        if (Objects.isNull(path) && Objects.isNull(restPath)) {
+        if (Objects.isNull(path)) {
           continue;
         }
         HttpMethod httpMethod = path.method();
         Method valueMethod = annotationType.getMethod("value");
         Object valueInvokeResult = lookup.unreflect(valueMethod).bindTo(annotation).invoke();
         if (!Objects.isNull(valueInvokeResult) && !valueInvokeResult.equals(routeUrl)) {
+          if (valueInvokeResult.equals("")) {
+            valueInvokeResult = method.getName();
+          }
           routeUrl = String.join(routeUrl, String.valueOf(valueInvokeResult));
         }
         String completeUrl = this.getMethodUrl(url, routeUrl);
