@@ -26,9 +26,8 @@ package org.aquiver.mvc.router;
 import org.aquiver.RequestContext;
 import org.aquiver.RequestHandler;
 import org.aquiver.RouteRepeatException;
-import org.aquiver.mvc.annotation.*;
-import org.aquiver.mvc.router.views.PebbleHTMLView;
-import org.aquiver.mvc.router.views.ViewType;
+import org.aquiver.mvc.annotation.HttpMethod;
+import org.aquiver.mvc.annotation.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -174,23 +173,7 @@ public final class RestfulRouter implements Router {
    * @return Route
    */
   private RouteInfo createRoute(Class<?> clazz, Object bean, Method method, HttpMethod httpMethod, String completeUrl) {
-    RouteInfo routeInfo = RouteInfo.of(completeUrl, clazz, bean, method, httpMethod);
-
-    boolean isAllJsonResponse = Objects.isNull(clazz.getAnnotation(RestPath.class));
-    boolean isJsonResponse = Objects.isNull(method.getAnnotation(JSON.class));
-    boolean isViewResponse = Objects.isNull(method.getAnnotation(View.class));
-
-    if (isJsonResponse || (isAllJsonResponse && isViewResponse)) {
-      routeInfo.setViewType(ViewType.JSON);
-    }
-    if (!isViewResponse) {
-      routeInfo.setViewType(ViewType.HTML);
-      routeInfo.setHtmlView(new PebbleHTMLView());
-    }
-    if (isAllJsonResponse && isJsonResponse && isViewResponse) {
-      routeInfo.setViewType(ViewType.TEXT);
-    }
-    return routeInfo;
+    return RouteInfo.of(completeUrl, clazz, bean, method, httpMethod);
   }
 
   /**

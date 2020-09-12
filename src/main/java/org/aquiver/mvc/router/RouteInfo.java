@@ -24,11 +24,8 @@
 package org.aquiver.mvc.router;
 
 import org.aquiver.mvc.annotation.HttpMethod;
-import org.aquiver.mvc.router.views.HTMLView;
-import org.aquiver.mvc.router.views.ViewType;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Objects;
 
 public class RouteInfo {
@@ -37,11 +34,6 @@ public class RouteInfo {
   private Method method;
   private Object bean;
   private HttpMethod httpMethod;
-  private Object[] paramValues;
-  private Class<?>[] paramTypes;
-  private Object invokeResult;
-  private ViewType viewType;
-  private HTMLView htmlView;
 
   private RouteInfo(String url, Class<?> clazz, Object bean, Method method, HttpMethod httpMethod) {
     this.url = url;
@@ -71,10 +63,6 @@ public class RouteInfo {
     return clazz;
   }
 
-  public void setClazz(Class<?> clazz) {
-    this.clazz = clazz;
-  }
-
   public Method getMethod() {
     return method;
   }
@@ -83,60 +71,8 @@ public class RouteInfo {
     this.method = method;
   }
 
-  public HttpMethod getHttpMethod() {
-    return httpMethod;
-  }
-
-  public void setHttpMethod(HttpMethod httpMethod) {
-    this.httpMethod = httpMethod;
-  }
-
   public Object getBean() {
     return bean;
-  }
-
-  public void setBean(Object bean) {
-    this.bean = bean;
-  }
-
-  public Object[] getParamValues() {
-    return paramValues;
-  }
-
-  public void setParamValues(Object[] paramValues) {
-    this.paramValues = paramValues;
-  }
-
-  public Class<?>[] getParamTypes() {
-    return paramTypes;
-  }
-
-  public void setParamTypes(Class<?>[] paramTypes) {
-    this.paramTypes = paramTypes;
-  }
-
-  public Object getInvokeResult() {
-    return invokeResult;
-  }
-
-  public void setInvokeResult(Object invokeResult) {
-    this.invokeResult = invokeResult;
-  }
-
-  public ViewType getViewType() {
-    return viewType;
-  }
-
-  public void setViewType(ViewType viewType) {
-    this.viewType = viewType;
-  }
-
-  public HTMLView getHtmlView() {
-    return htmlView;
-  }
-
-  public void setHtmlView(HTMLView htmlView) {
-    this.htmlView = htmlView;
   }
 
   @Override
@@ -147,11 +83,6 @@ public class RouteInfo {
             ", method='" + method + '\'' +
             ", bean=" + bean +
             ", pathMethod=" + httpMethod +
-            ", paramValues=" + Arrays.toString(paramValues) +
-            ", paramTypes=" + Arrays.toString(paramTypes) +
-            ", invokeResult=" + invokeResult +
-            ", viewType=" + viewType +
-            ", htmlView=" + htmlView +
             '}';
   }
 }
