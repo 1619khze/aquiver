@@ -84,6 +84,52 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
+    this.mergeRequest(msg);
+    if (Const.FAVICON_PATH.equals(request.uri())) {
+      return;
+    }
+    try {
+      this.buildRequestContext(ctx);
+      final RequestResult result = executeLogic();
+      this.handleResult(result);
+    } catch (Throwable throwable) {
+      exceptionCaught(ctx, throwable);
+    }
+  }
+
+  private void handleResult(RequestResult result) throws Exception {
+    if (Objects.nonNull(result)) {
+      ResultHandler handler = resultHandlerResolver.lookup(result);
+      if (Objects.isNull(handler)) {
+        throw new IllegalStateException("Unsupported result class:"
+                + " " + result.getResultType().getSimpleName());
+      } else {
+        handler.handle(requestContext, result);
+      }
+    }
+  }
+
+  private RequestResult executeLogic() throws Throwable {
+    final List<Interceptor> interceptors = Aquiver.interceptors();
+    final AspectInterceptorChain interceptorChain =
+            new AspectInterceptorChain(interceptors, requestContext);
+
+    interceptorChain.invoke();
+    return interceptorChain.getResult();
+  }
+
+  private void buildRequestContext(ChannelHandlerContext ctx) throws Exception {
+    this.requestContext = this.buildRequestContext(request, ctx);
+
+    final RouteInfo routeInfo = restfulRouter.lookup(request.uri());
+    if (Objects.isNull(routeInfo)) {
+      lookupStaticFile(requestContext);
+    } else {
+      this.requestContext.route(routeInfo);
+    }
+  }
+
+  private void mergeRequest(Object msg) {
     if (msg instanceof HttpRequest) {
       HttpRequest request = (HttpRequest) msg;
       this.request = new DefaultFullHttpRequest(
@@ -92,37 +138,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
     if (msg instanceof FullHttpRequest) {
       this.request = (FullHttpRequest) msg;
-    }
-
-    if (Const.FAVICON_PATH.equals(request.uri())) {
-      return;
-    }
-    try {
-      this.requestContext = this.buildRequestContext(request, ctx);
-
-      final RouteInfo routeInfo = restfulRouter.lookup(request.uri());
-      if (Objects.isNull(routeInfo)) {
-        lookupStaticFile(requestContext);
-      } else {
-        this.requestContext.route(routeInfo);
-      }
-
-      final List<Interceptor> interceptors = Aquiver.interceptors();
-      final AspectInterceptorChain interceptorChain = new AspectInterceptorChain(interceptors, requestContext);
-      interceptorChain.invoke();
-
-      final RequestResult result = interceptorChain.getResult();
-      if (Objects.nonNull(result)) {
-        ResultHandler handler = resultHandlerResolver.lookup(result);
-        if (Objects.isNull(handler)) {
-          throw new IllegalStateException("Unsupported result class:"
-                  + " " + result.getResultType().getSimpleName());
-        } else {
-          handler.handle(requestContext, result);
-        }
-      }
-    } catch (Throwable throwable) {
-      exceptionCaught(ctx, throwable);
     }
   }
 
