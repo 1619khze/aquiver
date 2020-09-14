@@ -6,7 +6,7 @@
 
     <groupId>org.aquiver</groupId>
     <artifactId>aquiver</artifactId>
-    <version>1.0-BETA</version>
+    <version>1.0.1.BETA</version>
 
     <properties>
         <java.version>1.8</java.version>
