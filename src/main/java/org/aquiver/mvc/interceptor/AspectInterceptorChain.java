@@ -77,8 +77,8 @@ public class AspectInterceptorChain implements InterceptorChain {
       invokeResult = lookup.unreflect(method).bindTo(routeInfo.getBean())
               .invokeWithArguments(invokeArguments);
     } catch (IllegalAccessException e) {
-      Method lambdaMethod = routeInfo.getClazz().getMethod(method.getName(), RequestContext.class);
-      invokeResult = lookup.unreflect(lambdaMethod).bindTo(routeInfo.getBean()).invokeWithArguments(ctx);
+      Method lambdaMethod = routeInfo.getClazz().getMethod(method.getName(), method.getParameterTypes());
+      invokeResult = lookup.unreflect(lambdaMethod).bindTo(routeInfo.getBean()).invokeWithArguments(invokeArguments);
     }
     this.result = new RequestResult(method.getReturnType(), invokeResult, method);
   }
