@@ -47,17 +47,17 @@ public class StaticFileServerHandler {
     ctx.writeAndFlush(response);
   }
 
-  public Boolean handle(RequestContext requestContext) throws Exception {
+  public void handle(RequestContext requestContext) throws Exception {
     FullHttpRequest request = requestContext.request().httpRequest();
     ChannelHandlerContext ctx = requestContext.request().channelHandlerContext();
     String uri = request.uri();
     if ("favicon.ico".equals(uri)) {
-      return false;
+      return;
     }
     URL resource = this.getClass().getClassLoader().getResource(uri.replaceFirst("/", ""));
 
-    if(Objects.isNull(resource)){
-      return false;
+    if (Objects.isNull(resource)) {
+      return;
     }
 
     File html = new File(resource.toURI());
@@ -96,7 +96,5 @@ public class StaticFileServerHandler {
         future.addListener(ChannelFutureListener.CLOSE);
       }
     }
-
-    return true;
   }
 }

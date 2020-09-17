@@ -30,6 +30,7 @@ import io.netty.handler.codec.http.*;
 import org.apex.ApexContext;
 import org.aquiver.*;
 import org.aquiver.handler.ErrorHandlerResolver;
+import org.aquiver.mvc.BypassRequestUrls;
 import org.aquiver.mvc.RequestResult;
 import org.aquiver.mvc.argument.MethodArgumentGetter;
 import org.aquiver.mvc.interceptor.AspectInterceptorChain;
@@ -56,12 +57,15 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private final ErrorHandlerResolver errorHandlerResolver;
   private final ResultHandlerResolver resultHandlerResolver;
   private final ApexContext context = ApexContext.of();
-  private final StaticFileServerHandler fileServerHandler = new StaticFileServerHandler();
+  private final StaticFileServerHandler fileServerHandler;
+  private BypassRequestUrls bypassRequestUrls;
 
   public NettyServerHandler() {
     this.errorHandlerResolver = context.getBean(ErrorHandlerResolver.class);
     this.restfulRouter = context.getBean(RestfulRouter.class);
     this.resultHandlerResolver = context.getBean(ResultHandlerResolver.class);
+    this.fileServerHandler = new StaticFileServerHandler();
+    this.bypassRequestUrls = context.getBean(BypassRequestUrls.class);
   }
 
   @Override
@@ -85,11 +89,30 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
     this.mergeRequest(msg);
-    if (Const.FAVICON_PATH.equals(request.uri())) {
-      return;
-    }
     try {
       this.buildRequestContext(ctx);
+
+      if (Objects.isNull(bypassRequestUrls)) {
+        this.bypassRequestUrls = new RegexBypassRequestUrls();
+      }
+
+      if (this.bypassRequestUrls.accept(requestContext.request(), request.uri())) {
+        this.fileServerHandler.handle(requestContext);
+        return;
+      }
+
+      final RouteInfo routeInfo = restfulRouter.lookup(request.uri());
+      if (Objects.isNull(routeInfo)) {
+        final NoRouteFoundException exception = new NoRouteFoundException
+                (requestContext.request().httpMethodName(), requestContext.request().uri());
+        final FullHttpResponse response = ResultResponseBuilder.forResponse(
+                HttpResponseStatus.NOT_FOUND, exception.getMessage()).build();
+        requestContext.writeAndFlush(response);
+        throw exception;
+      } else {
+        this.requestContext.route(routeInfo);
+      }
+
       final RequestResult result = executeLogic();
       this.handleResult(result);
     } catch (Throwable throwable) {
@@ -120,13 +143,6 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
   private void buildRequestContext(ChannelHandlerContext ctx) throws Exception {
     this.requestContext = this.buildRequestContext(request, ctx);
-
-    final RouteInfo routeInfo = restfulRouter.lookup(request.uri());
-    if (Objects.isNull(routeInfo)) {
-      lookupStaticFile(requestContext);
-    } else {
-      this.requestContext.route(routeInfo);
-    }
   }
 
   private void mergeRequest(Object msg) {
@@ -146,17 +162,5 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     MethodArgumentGetter methodArgumentGetter = new MethodArgumentGetter(requestContext);
     this.context.addBean(methodArgumentGetter);
     return requestContext;
-  }
-
-  private void lookupStaticFile(RequestContext context) throws Exception {
-    final boolean result = this.fileServerHandler.handle(context);
-    if (!result) {
-      final NoRouteFoundException exception = new NoRouteFoundException
-              (context.request().httpMethodName(), context.request().uri());
-      final FullHttpResponse response = ResultResponseBuilder.forResponse(
-              HttpResponseStatus.NOT_FOUND, exception.getMessage()).build();
-      context.writeAndFlush(response);
-      throw exception;
-    }
   }
 }
