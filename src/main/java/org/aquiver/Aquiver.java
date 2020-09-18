@@ -23,6 +23,7 @@
  */
 package org.aquiver;
 
+import org.apache.commons.lang3.Validate;
 import org.apex.Apex;
 import org.apex.ApexContext;
 import org.apex.Environment;
@@ -115,36 +116,7 @@ public class Aquiver {
 
   private static final List<Interceptor> interceptors = new ArrayList<>();
 
-  private Aquiver() {
-  }
-
-  /** Ensures that the argument expression is true. */
-  static void requireArgument(boolean expression) {
-    if (!expression) {
-      throw new IllegalArgumentException();
-    }
-  }
-
-  /** Ensures that the argument expression is true */
-  static void requireArgument(boolean expression, String template, Object... args) {
-    if (!expression) {
-      throw new IllegalArgumentException(String.format(template, args));
-    }
-  }
-
-  /** Ensures that the state expression is true. */
-  static void requireState(boolean expression) {
-    if (!expression) {
-      throw new IllegalStateException();
-    }
-  }
-
-  /** Ensures that the state expression is true. */
-  static void requireState(boolean expression, String template, Object... args) {
-    if (!expression) {
-      throw new IllegalStateException(String.format(template, args));
-    }
-  }
+  private Aquiver() {}
 
   /**
    * Return Aquiver instants
@@ -168,34 +140,42 @@ public class Aquiver {
     return aquiver;
   }
 
-  /** Set the listening port number. */
+  /**
+   * Set the listening port number.
+   */
   public Aquiver bind(int port) {
-    requireArgument(port > 0 && port <= 65533, "Port number must be available");
-    requireArgument(this.port >= 0, "port was already set to %s", this.port);
+    Validate.isTrue(port > 0 && port <= 65533, "Port number must be available");
+    Validate.isTrue(this.port >= 0, "port was already set to %s", this.port);
     this.port = port;
     this.environment.add(PATH_SERVER_PORT, port);
     return this;
   }
 
-  /** Set the print banner text */
+  /**
+   * Set the print banner text
+   */
   public Aquiver bannerText(String bannerText) {
-    requireState(this.bannerText == null, "bannerText was already set to %s", this.bannerText);
+    Validate.notNull(this.bannerText, "bannerText was already set to %s", this.bannerText);
     this.bannerText = requireNonNull(bannerText);
     this.environment.add(PATH_APP_BANNER_TEXT, bannerText);
     return this;
   }
 
-  /** Set the print banner font */
+  /**
+   * Set the print banner font
+   */
   public Aquiver bannerFont(String bannerFont) {
-    requireState(this.bannerFont == null, "bannerFont was already set to %s", this.bannerFont);
+    Validate.notNull(this.bannerFont, "bannerFont was already set to %s", this.bannerFont);
     this.bannerFont = requireNonNull(bannerFont);
     this.environment.add(PATH_APP_BANNER_FONT, bannerFont);
     return this;
   }
 
-  /** Set the print banner name */
+  /**
+   * Set the print banner name
+   */
   public Aquiver bootConfName(String bootConfName) {
-    requireState(this.bootConfName == null, "bootConfName was already set to %s", this.bootConfName);
+    Validate.notNull(this.bootConfName, "bootConfName was already set to %s", this.bootConfName);
     this.bootConfName = requireNonNull(bootConfName);
     this.environment.add(PATH_CONFIG_PROPERTIES, bootConfName);
     return this;
@@ -207,7 +187,7 @@ public class Aquiver {
    * @param viewSuffix view suffix
    */
   public Aquiver viewSuffix(String viewSuffix) {
-    requireState(this.viewSuffix == null, "viewSuffix was already set to %s", this.viewSuffix);
+    Validate.notNull(this.viewSuffix, "viewSuffix was already set to %s", this.viewSuffix);
     this.viewSuffix = requireNonNull(viewSuffix);
     this.environment.add(PATH_SERVER_VIEW_SUFFIX, viewSuffix);
     return this;
@@ -219,7 +199,7 @@ public class Aquiver {
    * @param folder template folder
    */
   public Aquiver templateFolder(String folder) {
-    requireState(this.templateFolder == null, "templateFolder was already set to %s", this.templateFolder);
+    Validate.notNull(this.templateFolder, "templateFolder was already set to %s", this.templateFolder);
     this.templateFolder = requireNonNull(folder);
     this.environment.add(PATH_SERVER_TEMPLATES_FOLDER, folder);
     return this;
@@ -227,6 +207,7 @@ public class Aquiver {
 
   /**
    * Get template folder
+   *
    * @return template folder
    */
   public String templateFolder() {
@@ -243,7 +224,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver sessionKey(String sessionKey) {
-    requireArgument(this.sessionKey == null, "sessionKey was already set to %s", this.sessionKey);
+    Validate.notNull(this.sessionKey, "sessionKey was already set to %s", this.sessionKey);
     this.sessionKey = requireNonNull(sessionKey);
     this.environment.add(PATH_SERVER_SESSION_KEY, sessionKey);
     return this;
@@ -268,7 +249,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver sessionTimeout(Integer sessionTimeout) {
-    requireArgument(this.sessionTimeout == null, "sessionTimeout was already set to %s", this.sessionTimeout);
+    Validate.notNull(this.sessionTimeout, "sessionTimeout was already set to %s", this.sessionTimeout);
     this.sessionTimeout = requireNonNull(sessionTimeout);
     this.environment.add(PATH_SERVER_SESSION_TIMEOUT, sessionTimeout);
     return this;
@@ -312,7 +293,7 @@ public class Aquiver {
    * @return port number
    */
   public int port() {
-    requireArgument(this.port > 0 && port <= 65533, "Port number must be available");
+    Validate.isTrue(this.port > 0 && port <= 65533, "Port number must be available");
     return port;
   }
 
@@ -363,6 +344,7 @@ public class Aquiver {
 
   /**
    * Get main method args
+   *
    * @return main method args
    */
   public String[] mainArgs() {
@@ -467,6 +449,7 @@ public class Aquiver {
 
   /**
    * Get CORS on status
+   *
    * @return cors status
    */
   public boolean cors() {
@@ -475,6 +458,7 @@ public class Aquiver {
 
   /**
    * Get Gzip on status
+   *
    * @return Gzip status
    */
   public boolean gzip() {
@@ -486,11 +470,11 @@ public class Aquiver {
    *
    * @param path             Websocket route path
    * @param webSocketChannel WebSocket abstract interface
-   * @return
+   * @return this
    */
   public Aquiver websocket(String path, WebSocketChannel webSocketChannel) {
-    requireNonNull(path, "WebSocket url path can't be null");
-    requireNonNull(webSocketChannel, "WebSocketChannel can't be null");
+    Validate.notNull(path, "WebSocket url path can't be null");
+    Validate.notNull(webSocketChannel, "WebSocketChannel can't be null");
     this.webSocketResolver.registerWebSocket(path, webSocketChannel);
     return this;
   }
@@ -503,7 +487,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver get(String path, RequestHandler requestHandler) {
-    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.GET);
+    this.route(path, requestHandler, HttpMethod.GET);
     return this;
   }
 
@@ -515,7 +499,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver post(String path, RequestHandler requestHandler) {
-    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.POST);
+    this.route(path, requestHandler, HttpMethod.POST);
     return this;
   }
 
@@ -527,7 +511,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver head(String path, RequestHandler requestHandler) {
-    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.HEAD);
+    this.route(path, requestHandler, HttpMethod.HEAD);
     return this;
   }
 
@@ -539,7 +523,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver put(String path, RequestHandler requestHandler) {
-    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.PUT);
+    this.route(path, requestHandler, HttpMethod.PUT);
     return this;
   }
 
@@ -551,7 +535,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver patch(String path, RequestHandler requestHandler) {
-    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.PATCH);
+    this.route(path, requestHandler, HttpMethod.PATCH);
     return this;
   }
 
@@ -563,7 +547,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver delete(String path, RequestHandler requestHandler) {
-    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.DELETE);
+    this.route(path, requestHandler, HttpMethod.DELETE);
     return this;
   }
 
@@ -575,7 +559,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver options(String path, RequestHandler requestHandler) {
-    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.OPTIONS);
+    this.route(path, requestHandler, HttpMethod.OPTIONS);
     return this;
   }
 
@@ -587,7 +571,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver trace(String path, RequestHandler requestHandler) {
-    this.restfulRouter.registerRoute(path, requestHandler, HttpMethod.TRACE);
+    this.route(path, requestHandler, HttpMethod.TRACE);
     return this;
   }
 
@@ -599,12 +583,16 @@ public class Aquiver {
    * @return this
    */
   public Aquiver route(String path, RequestHandler requestHandler, HttpMethod httpMethod) {
+    Validate.notBlank(path, "Route path can't be null");
+    Validate.notNull(httpMethod, "Need to specify of http request method registered");
+    Validate.notNull(requestHandler, "RequestHandler object can't be null");
     this.restfulRouter.registerRoute(path, requestHandler, httpMethod);
     return this;
   }
 
   /**
    * Register exception advice
+   *
    * @param throwableCls exception
    * @param errorHandler exception handler
    * @return this
@@ -616,6 +604,7 @@ public class Aquiver {
 
   /**
    * Register interceptor
+   *
    * @param interceptor http interceptor
    * @return this
    */
@@ -626,6 +615,7 @@ public class Aquiver {
 
   /**
    * Get interceptor list
+   *
    * @return interceptor list
    */
   public static List<Interceptor> interceptors() {
@@ -642,7 +632,7 @@ public class Aquiver {
     try {
       this.mainArgs = args;
       this.initReusableThreadPool();
-    } catch(Exception e) {
+    } catch (Exception e) {
       log.error("An exception occurred while loading the configuration", e);
     }
     this.reusableExecutor.execute(() -> {
@@ -651,9 +641,9 @@ public class Aquiver {
         this.nettyServer.start(this);
         this.countDownLatch.countDown();
         this.nettyServer.join();
-      } catch(BindException e) {
+      } catch (BindException e) {
         log.error("Bind port is exception:", e);
-      } catch(Exception e) {
+      } catch (Exception e) {
         log.error("An exception occurred while the service started", e);
       } finally {
         log.info("SingleExecutor graceful shutdown");
@@ -700,7 +690,7 @@ public class Aquiver {
     }
     try {
       this.countDownLatch.await();
-    } catch(Exception e) {
+    } catch (Exception e) {
       log.error("Server start await error", e);
       Thread.currentThread().interrupt();
     }
