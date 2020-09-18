@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.utils;
+package org.aquiver.async;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
