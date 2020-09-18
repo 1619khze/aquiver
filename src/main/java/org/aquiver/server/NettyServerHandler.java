@@ -103,12 +103,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
 
       final RouteInfo routeInfo = restfulRouter.lookup(request.uri());
       if (Objects.isNull(routeInfo)) {
-        final NoRouteFoundException exception = new NoRouteFoundException
-                (requestContext.request().httpMethodName(), requestContext.request().uri());
-        final FullHttpResponse response = ResultResponseBuilder.forResponse(
-                HttpResponseStatus.NOT_FOUND, exception.getMessage()).build();
-        requestContext.writeAndFlush(response);
-        throw exception;
+        throw handlerException();
       } else {
         this.requestContext.route(routeInfo);
       }
@@ -118,6 +113,15 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     } catch (Throwable throwable) {
       exceptionCaught(ctx, throwable);
     }
+  }
+
+  private NoRouteFoundException handlerException() {
+    final NoRouteFoundException exception = new NoRouteFoundException
+            (requestContext.request().httpMethodName(), requestContext.request().uri());
+    final FullHttpResponse response = ResultResponseBuilder.forResponse(
+            HttpResponseStatus.NOT_FOUND, exception.getMessage()).build();
+    requestContext.writeAndFlush(response);
+    return exception;
   }
 
   private void handleResult(RequestResult result) throws Exception {
