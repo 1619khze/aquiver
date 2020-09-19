@@ -23,12 +23,12 @@
  */
 package org.aquiver.handler;
 
+import org.apache.commons.lang3.Validate;
 import org.apex.ApexContext;
 import org.aquiver.RequestContext;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author WangYi
@@ -39,8 +39,8 @@ public class ErrorHandlerResolver {
   private final ApexContext context = ApexContext.of();
 
   public void registerErrorHandler(Class<? extends Throwable> throwableCls, ErrorHandler errorHandler) {
-    Objects.requireNonNull(throwableCls, "throwableCls can' be null");
-    Objects.requireNonNull(errorHandler, "errorHandler can' be null");
+    Validate.notNull(throwableCls, "throwableCls can' be null");
+    Validate.notNull(errorHandler, "errorHandler can' be null");
     this.exceptionHandlerMap.put(throwableCls, errorHandler);
   }
 
