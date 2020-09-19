@@ -1,22 +1,9 @@
 <code_scheme name="Default" version="173">
   <JavaCodeStyleSettings>
-    <option name="ENABLE_JAVADOC_FORMATTING" value="false" />
-    <option name="JD_DO_NOT_WRAP_ONE_LINE_COMMENTS" value="true" />
+    <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="100000" />
+    <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="100000" />
   </JavaCodeStyleSettings>
-  <ScalaCodeStyleSettings>
-    <option name="MULTILINE_STRING_CLOSING_QUOTES_ON_NEW_LINE" value="true" />
-  </ScalaCodeStyleSettings>
-  <editorconfig>
-    <option name="ENABLED" value="false" />
-  </editorconfig>
   <codeStyleSettings language="JAVA">
-    <option name="SPACE_BEFORE_CATCH_PARENTHESES" value="false" />
-    <indentOptions>
-      <option name="INDENT_SIZE" value="2" />
-      <option name="TAB_SIZE" value="2" />
-    </indentOptions>
-  </codeStyleSettings>
-  <codeStyleSettings language="kotlin">
     <indentOptions>
       <option name="INDENT_SIZE" value="2" />
       <option name="TAB_SIZE" value="2" />
