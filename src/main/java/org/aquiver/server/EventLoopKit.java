@@ -37,12 +37,13 @@ import java.util.concurrent.ThreadFactory;
  * @since 2019/6/6
  */
 public final class EventLoopKit {
-  private static EventLoopGroup bossGroup;
-  private static EventLoopGroup workerGroup;
   private static final Class<? extends ServerChannel> epollChannel = EpollServerSocketChannel.class;
   private static final Class<? extends ServerChannel> nioChannel = NioServerSocketChannel.class;
+  private static EventLoopGroup bossGroup;
+  private static EventLoopGroup workerGroup;
 
-  private EventLoopKit() {}
+  private EventLoopKit() {
+  }
 
   public static boolean epollIsAvailable() {
     try {

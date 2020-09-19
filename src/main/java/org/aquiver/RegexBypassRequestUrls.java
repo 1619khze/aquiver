@@ -42,16 +42,6 @@ public class RegexBypassRequestUrls implements BypassRequestUrls {
   private String patterns = DEFAULT_PATTERNS;
   private Map<String, Boolean> cache;
 
-  public void setPatterns(String patterns) {
-    this.patterns = patterns;
-  }
-
-  public void setCache(boolean enabled) {
-    if (enabled) {
-      cache = new HashMap<>(128);
-    }
-  }
-
   public RegexBypassRequestUrls() {
     if (cache != null) {
       cache.put("/favicon.ico", Boolean.TRUE);
@@ -64,6 +54,16 @@ public class RegexBypassRequestUrls implements BypassRequestUrls {
           patternList.add(Pattern.compile(pattern));
         }
       }
+    }
+  }
+
+  public void setPatterns(String patterns) {
+    this.patterns = patterns;
+  }
+
+  public void setCache(boolean enabled) {
+    if (enabled) {
+      cache = new HashMap<>(128);
     }
   }
 

@@ -25,10 +25,10 @@ package org.aquiver.loader;
 
 import org.apex.ApexContext;
 import org.aquiver.Aquiver;
+import org.aquiver.ReflectionHelper;
 import org.aquiver.mvc.annotation.Path;
 import org.aquiver.mvc.annotation.RestPath;
 import org.aquiver.mvc.router.RestfulRouter;
-import org.aquiver.utils.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +46,7 @@ public class RestfulRouterLoader implements WebLoader {
    * result set and add it to the routing manager
    *
    * @param instances Scanned result
-   * @param aquiver aquiver
+   * @param aquiver   aquiver
    */
   @Override
   public void load(Map<String, Object> instances, Aquiver aquiver) {
@@ -54,7 +54,7 @@ public class RestfulRouterLoader implements WebLoader {
     for (Map.Entry<String, Object> entry : instances.entrySet()) {
       Class<?> next = entry.getValue().getClass();
       String url = "/";
-      boolean normal = ReflectionUtils.isNormal(next);
+      boolean normal = ReflectionHelper.isNormal(next);
       if (!normal) {
         continue;
       }

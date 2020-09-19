@@ -26,7 +26,11 @@ package org.aquiver.mvc.router.session;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Used to save the session state between the client and the server
@@ -38,10 +42,10 @@ public final class HttpSession implements Session {
   private final Map<String, Object> attrs = new HashMap<>();
   private final List<String> attributeNames = new ArrayList<>();
   private final Channel channel;
-  private volatile long lastAccessedTime;
   private final long creationTime;
   private final String id;
   private final ChannelHandlerContext channelHandlerContext;
+  private volatile long lastAccessedTime;
 
   public HttpSession(ChannelHandlerContext channelHandlerContext, String id) {
     this.channelHandlerContext = channelHandlerContext;

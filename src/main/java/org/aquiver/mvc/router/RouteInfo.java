@@ -30,10 +30,10 @@ import java.util.Objects;
 
 public class RouteInfo {
   private String url;
-  private Class<?> clazz;
+  private final Class<?> clazz;
   private Method method;
-  private Object bean;
-  private HttpMethod httpMethod;
+  private final Object bean;
+  private final HttpMethod httpMethod;
 
   private RouteInfo(String url, Class<?> clazz, Object bean, Method method, HttpMethod httpMethod) {
     this.url = url;

@@ -47,8 +47,8 @@ public final class SessionManager {
     Session httpSession = getSession(request);
     if (Objects.isNull(httpSession)) {
       long l = ThreadLocalRandom.current().nextLong();
-      httpSession = new HttpSession(request.channelHandlerContext(),String.valueOf(l)
-              .replaceFirst("-",""));
+      httpSession = new HttpSession(request.channelHandlerContext(), String.valueOf(l)
+              .replaceFirst("-", ""));
       this.sessionPool.put(httpSession.getId(), httpSession);
     }
 

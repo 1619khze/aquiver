@@ -23,7 +23,11 @@
  */
 package org.aquiver.result;
 
-import org.aquiver.*;
+import org.aquiver.RequestContext;
+import org.aquiver.ResultHandler;
+import org.aquiver.ResultResponseBuilder;
+import org.aquiver.ViewHandler;
+import org.aquiver.ViewHandlerResolver;
 import org.aquiver.mvc.RequestResult;
 
 import java.util.Objects;
@@ -40,6 +44,16 @@ public final class StringResultHandler implements ResultHandler {
 
   public StringResultHandler() {
     this.viewHandlerResolver = new ViewHandlerResolver();
+  }
+
+  private static int getFileSeparatorIndex(String path) {
+    for (int i = path.length() - 1; i >= 0; --i) {
+      char c = path.charAt(i);
+      if (c == '/' || c == '\\') {
+        return i;
+      }
+    }
+    return -1;
   }
 
   @Override
@@ -110,15 +124,5 @@ public final class StringResultHandler implements ResultHandler {
       int folderIndex = getFileSeparatorIndex(result);
       return folderIndex > i ? null : result.substring(i + 1);
     }
-  }
-
-  private static int getFileSeparatorIndex(String path) {
-    for (int i = path.length() - 1; i >= 0; --i) {
-      char c = path.charAt(i);
-      if (c == '/' || c == '\\') {
-        return i;
-      }
-    }
-    return -1;
   }
 }

@@ -23,7 +23,7 @@
  */
 package org.aquiver.server;
 
-import org.aquiver.utils.PropertyUtils;
+import org.aquiver.Aquiver;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -89,5 +89,5 @@ public interface Const {
   String PATH_PREFIX_ROOT = "PATH_";
 
   // watch env
-  Path SERVER_WATCHER_PATH = Paths.get(Objects.requireNonNull(PropertyUtils.getCurrentClassPath()));
+  Path SERVER_WATCHER_PATH = Paths.get(Objects.requireNonNull(Aquiver.getCurrentClassPath()));
 }

@@ -55,7 +55,7 @@ public class ErrorHandlerResolver {
     try {
       this.context.addBean(context);
       errorHandler.handle(throwable);
-    } catch(Exception e) {
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }

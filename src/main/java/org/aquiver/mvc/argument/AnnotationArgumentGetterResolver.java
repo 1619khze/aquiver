@@ -23,7 +23,13 @@
  */
 package org.aquiver.mvc.argument;
 
-import org.aquiver.mvc.annotation.bind.*;
+import org.aquiver.mvc.annotation.bind.Body;
+import org.aquiver.mvc.annotation.bind.Cookies;
+import org.aquiver.mvc.annotation.bind.FileUpload;
+import org.aquiver.mvc.annotation.bind.Header;
+import org.aquiver.mvc.annotation.bind.MultiFileUpload;
+import org.aquiver.mvc.annotation.bind.Param;
+import org.aquiver.mvc.annotation.bind.PathVar;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;

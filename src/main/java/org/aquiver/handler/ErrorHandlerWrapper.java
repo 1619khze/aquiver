@@ -98,7 +98,7 @@ public class ErrorHandlerWrapper implements ErrorHandler {
       final List<Object> invokeArguments = methodArgumentGetter.getParams(method.getParameters());
       this.lookup.unreflect(method).bindTo(exceptionHandler.newInstance())
               .invokeWithArguments(invokeArguments);
-    } catch(Throwable e) {
+    } catch (Throwable e) {
       log.error("invoke error handler method exception", e);
     }
   }

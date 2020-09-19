@@ -32,7 +32,15 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.ResourceLeakDetector;
-import org.apex.*;
+import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.SystemUtils;
+import org.apex.Apex;
+import org.apex.ApexContext;
+import org.apex.BeanDefinition;
+import org.apex.ClassgraphOptions;
+import org.apex.ClassgraphScanner;
+import org.apex.Environment;
+import org.apex.Scanner;
 import org.aquiver.Aquiver;
 import org.aquiver.ResultHandlerResolver;
 import org.aquiver.ViewHandlerResolver;
@@ -45,7 +53,6 @@ import org.aquiver.mvc.argument.ArgumentGetterResolver;
 import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvTask;
-import org.aquiver.utils.SystemUtils;
 import org.aquiver.websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +60,7 @@ import org.slf4j.LoggerFactory;
 import javax.net.ssl.SSLException;
 import java.io.File;
 import java.lang.annotation.Annotation;
+import java.lang.management.ManagementFactory;
 import java.nio.file.Paths;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
@@ -60,7 +68,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.aquiver.server.Const.*;
+import static org.aquiver.server.Const.DEFAULT_ACCEPT_THREAD_COUNT;
+import static org.aquiver.server.Const.DEFAULT_IO_THREAD_COUNT;
+import static org.aquiver.server.Const.PATH_ENV_WATCHER;
+import static org.aquiver.server.Const.PATH_SERVER_ADDRESS;
+import static org.aquiver.server.Const.PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT;
+import static org.aquiver.server.Const.PATH_SERVER_NETTY_IO_THREAD_COUNT;
+import static org.aquiver.server.Const.PATH_SERVER_PORT;
+import static org.aquiver.server.Const.PATH_SERVER_SSL;
+import static org.aquiver.server.Const.PATH_SERVER_SSL_CERT;
+import static org.aquiver.server.Const.PATH_SERVER_SSL_PRIVATE_KEY;
+import static org.aquiver.server.Const.PATH_SERVER_SSL_PRIVATE_KEY_PASS;
+import static org.aquiver.server.Const.SERVER_ADDRESS;
+import static org.aquiver.server.Const.SERVER_PORT;
+import static org.aquiver.server.Const.SERVER_SSL;
+import static org.aquiver.server.Const.SERVER_WATCHER_PATH;
 
 /**
  * open ssl {@code initSSL}
@@ -109,13 +131,19 @@ public class NettyServer implements Server {
     final String bootClsName = this.aquiver.bootClsName();
     final String bootConfName = this.aquiver.bootConfName();
     final String envName = this.apex.envName();
-    final String deviceName = SystemUtils.getDeviceName();
-    final String currentUserName = System.getProperty("user.name");
-    final String pidCode = SystemUtils.getPid();
+    final String pidCode = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+    final String hostName = SystemUtils.getHostName();
+    final String javaHome = SystemUtils.getJavaHome().getPath();
+    final String ioTmpdir = SystemUtils.getJavaIoTmpDir().getPath();
+    final String userName = SystemUtils.getUserName();
+    final String javaVersion = JavaVersion.JAVA_1_8.name();
 
-    log.info("Starting {} on {} with PID {} ", bootClsName, deviceName + "/" + currentUserName, pidCode);
+    log.info("Starting {} on {} with PID {} ", bootClsName, hostName + "/" + userName, pidCode);
     log.info("Starting service [Netty]");
     log.info("Starting Http Server: Netty/4.1.36.Final");
+    log.info("Java Home: {}", javaHome);
+    log.info("Io tmp path: {}", ioTmpdir);
+    log.info("Java version: {}", javaVersion);
     log.info("The configuration file loaded by this application startup is {}", bootConfName);
 
     this.configLoadLog(envName);
@@ -245,7 +273,7 @@ public class NettyServer implements Server {
 
     if (EventLoopKit.epollIsAvailable()) {
       nettyServerGroup = EventLoopKit.epollGroup(acceptThreadCount, ioThreadCount);
-    } else{
+    } else {
       nettyServerGroup = EventLoopKit.nioGroup(acceptThreadCount, ioThreadCount);
     }
 
@@ -266,7 +294,7 @@ public class NettyServer implements Server {
 
     long endTime = System.currentTimeMillis();
     long startUpTime = (endTime - startTime);
-    long jvmStartTime = (endTime - SystemUtils.getJvmStartUpTime());
+    long jvmStartTime = (endTime - ManagementFactory.getRuntimeMXBean().getStartTime());
 
     log.info("Aquiver started on port(s): {} (com.aquiver.http) with context path ''", port);
     log.info("Started {} in {} ms (JVM running for {} ms)", aquiver.bootClsName(), startUpTime, jvmStartTime);
@@ -290,7 +318,7 @@ public class NettyServer implements Server {
         this.workerGroup.shutdownGracefully();
       }
       log.info("The netty service is gracefully closed");
-    } catch(Exception e) {
+    } catch (Exception e) {
       log.error("An exception occurred while the Netty Http service was down", e);
     }
   }
@@ -299,7 +327,7 @@ public class NettyServer implements Server {
   public void join() {
     try {
       this.channel.closeFuture().sync();
-    } catch(InterruptedException e) {
+    } catch (InterruptedException e) {
       log.error("Channel close future fail", e);
     }
   }

@@ -27,7 +27,11 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.aquiver.mvc.router.session.Session;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author WangYi
@@ -39,8 +43,8 @@ public class WebSocketSession implements Session {
   private final Channel channel;
   private final long creationTime;
   private final String id;
-  private volatile long lastAccessedTime;
   private final ChannelHandlerContext channelHandlerContext;
+  private volatile long lastAccessedTime;
 
   WebSocketSession(ChannelHandlerContext channelHandlerContext, String id) {
     this.channelHandlerContext = channelHandlerContext;

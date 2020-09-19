@@ -30,6 +30,7 @@ package org.aquiver;
 public interface RequestHandler {
   /**
    * Handling routing
+   *
    * @param context Request context
    * @throws Exception Exceptions that may be thrown
    */

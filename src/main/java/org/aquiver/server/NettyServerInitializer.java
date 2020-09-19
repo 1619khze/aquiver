@@ -53,6 +53,7 @@ public class NettyServerInitializer extends ChannelInitializer<SocketChannel> {
   /**
    * init webSocket and bind netty childHandler, Determine whether SSL needs to
    * be enabled based on whether the incoming SSLContext is null
+   *
    * @param ch A TCP/IP socket
    */
   @Override

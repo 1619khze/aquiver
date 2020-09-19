@@ -32,21 +32,28 @@ import java.util.concurrent.ExecutionException;
  * @since 2020/5/29
  */
 public final class Async {
-  private Async() {}
+  private Async() {
+  }
 
-  /** Returns if the future has successfully completed. */
+  /**
+   * Returns if the future has successfully completed.
+   */
   public static boolean isReady(CompletableFuture<?> future) {
     return (Objects.nonNull(future)) && future.isDone()
             && !future.isCompletedExceptionally()
             && (Objects.nonNull(future.join()));
   }
 
-  /** Returns the current value or null if either not done or failed. */
+  /**
+   * Returns the current value or null if either not done or failed.
+   */
   public static <V> V getIfReady(CompletableFuture<V> future) {
     return isReady(future) ? future.join() : null;
   }
 
-  /** Returns the value when completed successfully or null if failed. */
+  /**
+   * Returns the value when completed successfully or null if failed.
+   */
   public static <V> V getWhenSuccessful(CompletableFuture<V> future) {
     try {
       return (Objects.isNull(future.join())) ? null : future.get();

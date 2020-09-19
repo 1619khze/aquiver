@@ -26,9 +26,20 @@ package org.aquiver.server;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpMessage;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.apex.ApexContext;
-import org.aquiver.*;
+import org.aquiver.Aquiver;
+import org.aquiver.NoRouteFoundException;
+import org.aquiver.RegexBypassRequestUrls;
+import org.aquiver.RequestContext;
+import org.aquiver.ResultHandler;
+import org.aquiver.ResultHandlerResolver;
+import org.aquiver.ResultResponseBuilder;
 import org.aquiver.handler.ErrorHandlerResolver;
 import org.aquiver.mvc.BypassRequestUrls;
 import org.aquiver.mvc.RequestResult;
@@ -50,14 +61,13 @@ import java.util.Objects;
 @ChannelHandler.Sharable
 public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
-
-  private FullHttpRequest request;
-  private RequestContext requestContext;
   private final RestfulRouter restfulRouter;
   private final ErrorHandlerResolver errorHandlerResolver;
   private final ResultHandlerResolver resultHandlerResolver;
   private final ApexContext context = ApexContext.of();
   private final StaticFileServerHandler fileServerHandler;
+  private FullHttpRequest request;
+  private RequestContext requestContext;
   private BypassRequestUrls bypassRequestUrls;
 
   public NettyServerHandler() {

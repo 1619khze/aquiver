@@ -25,11 +25,11 @@ package org.aquiver.loader;
 
 import org.apex.ApexContext;
 import org.aquiver.Aquiver;
+import org.aquiver.ReflectionHelper;
 import org.aquiver.handler.ErrorHandlerResolver;
 import org.aquiver.handler.ErrorHandlerWrapper;
 import org.aquiver.handler.annotation.ErrorAdvice;
 import org.aquiver.handler.annotation.RouteAdvice;
-import org.aquiver.utils.ReflectionUtils;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -52,7 +52,7 @@ public class ExceptionHandlerLoader implements WebLoader {
     for (Object object : instances.values()) {
       Class<?> cls = object.getClass();
       Method[] declaredMethods = cls.getDeclaredMethods();
-      if (!ReflectionUtils.isNormal(cls)
+      if (!ReflectionHelper.isNormal(cls)
               || !cls.isAnnotationPresent(RouteAdvice.class)
               || declaredMethods.length == 0) {
         continue;

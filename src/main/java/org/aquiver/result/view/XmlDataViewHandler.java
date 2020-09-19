@@ -23,8 +23,8 @@
  */
 package org.aquiver.result.view;
 
-import org.aquiver.mvc.http.MediaType;
 import org.aquiver.Request;
+import org.aquiver.mvc.http.MediaType;
 
 /**
  * @author WangYi

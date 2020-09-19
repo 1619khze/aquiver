@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.utils;
+package org.aquiver;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -29,9 +29,8 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ReflectionUtils {
-  private ReflectionUtils() {
-  }
+public class ReflectionHelper {
+  private ReflectionHelper() {}
 
   public static <T> boolean isInterface(Class<T> clazz) {
     return clazz.isInterface();

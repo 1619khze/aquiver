@@ -25,7 +25,7 @@ package org.aquiver.loader;
 
 import org.apex.ApexContext;
 import org.aquiver.Aquiver;
-import org.aquiver.utils.ReflectionUtils;
+import org.aquiver.ReflectionHelper;
 import org.aquiver.websocket.WebSocket;
 import org.aquiver.websocket.WebSocketResolver;
 
@@ -50,7 +50,7 @@ public class WebSocketLoader implements WebLoader {
     for (Object object : instances.values()) {
       Class<?> cls = object.getClass();
       Method[] declaredMethods = cls.getDeclaredMethods();
-      if (!ReflectionUtils.isNormal(cls)
+      if (!ReflectionHelper.isNormal(cls)
               || !cls.isAnnotationPresent(WebSocket.class)
               || declaredMethods.length == 0) continue;
       context.getBean(WebSocketResolver.class).registerWebSocket(cls);

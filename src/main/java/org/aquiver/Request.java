@@ -26,15 +26,33 @@ package org.aquiver;
 import com.alibaba.fastjson.JSONObject;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.FullHttpMessage;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMessage;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
-import io.netty.handler.codec.http.multipart.*;
+import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
+import io.netty.handler.codec.http.multipart.FileUpload;
+import io.netty.handler.codec.http.multipart.HttpDataFactory;
+import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
+import io.netty.handler.codec.http.multipart.InterfaceHttpData;
+import io.netty.handler.codec.http.multipart.MemoryAttribute;
 import org.aquiver.mvc.http.MediaType;
 import org.aquiver.mvc.router.session.Session;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -44,40 +62,53 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @since 2020/6/25
  */
 public class Request {
-  /** Save the query string for this request */
+  /**
+   * Save the query string for this request
+   */
   private static final Map<String, String> queryStringMap = new HashMap<>();
-  /** Save the cookies for this request */
+  /**
+   * Save the cookies for this request
+   */
   private static final Map<String, Object> cookieMap = new HashMap<>();
-  /** Save the form data for this request */
+  /**
+   * Save the form data for this request
+   */
   private static final Map<String, Object> formDataMap = new HashMap<>();
-  /** Save the json data for this request */
+  /**
+   * Save the json data for this request
+   */
   private static final Map<String, Object> jsonDataMap = new HashMap<>();
-  /** Save the fileUpload for this request */
+  /**
+   * Save the fileUpload for this request
+   */
   private static final Map<String, FileUpload> fileUploadMap = new HashMap<>();
 
-  /** Atomic boolean variable to judge whether parameter is initialized */
+  /**
+   * Atomic boolean variable to judge whether parameter is initialized
+   */
   private final AtomicBoolean initQueryString = new AtomicBoolean(false);
   private final AtomicBoolean initCookie = new AtomicBoolean(false);
   private final AtomicBoolean initJsonData = new AtomicBoolean(false);
   private final AtomicBoolean initFormData = new AtomicBoolean(false);
   private final AtomicBoolean initFileUpload = new AtomicBoolean(false);
-
-  /** Query string decoder */
-  private QueryStringDecoder queryStringDecoder;
-  /** Post request decoder */
-  private HttpPostRequestDecoder httpPostRequestDecoder;
-
   /**
    * Combine the {@link HttpRequest} and {@link FullHttpMessage}, so the request is a <i>complete</i> HTTP
    * request.
    */
   private final FullHttpRequest httpRequest;
   private final ChannelHandlerContext ctx;
-
   /**
    * Used to save the session state between the client and the server
    */
   private final String sessionKey = Aquiver.of().sessionKey();
+  /**
+   * Query string decoder
+   */
+  private QueryStringDecoder queryStringDecoder;
+  /**
+   * Post request decoder
+   */
+  private HttpPostRequestDecoder httpPostRequestDecoder;
   private Session session;
 
   /**

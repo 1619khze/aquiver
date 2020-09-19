@@ -35,8 +35,10 @@ import org.slf4j.LoggerFactory;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -128,7 +130,7 @@ public class WebSocketWrapper implements WebSocketChannel {
       final List<Object> invokeArguments = this.methodArgumentGetter.getParams(method.getParameters());
       this.lookup.unreflect(method).bindTo(webSocketClass.newInstance())
               .invokeWithArguments(invokeArguments);
-    } catch(Throwable e) {
+    } catch (Throwable e) {
       log.error("An exception occurred when obtaining invoke param", e);
       webSocketContext.disconnect();
     }

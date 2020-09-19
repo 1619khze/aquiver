@@ -41,13 +41,46 @@ import org.aquiver.websocket.WebSocketResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.BindException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 
+import static io.netty.util.internal.PlatformDependent.isWindows;
 import static java.util.Objects.requireNonNull;
-import static org.aquiver.server.Const.*;
+import static org.aquiver.server.Const.BANNER_TEXT;
+import static org.aquiver.server.Const.PATH_APP_BANNER_FONT;
+import static org.aquiver.server.Const.PATH_APP_BANNER_TEXT;
+import static org.aquiver.server.Const.PATH_CONFIG_PROPERTIES;
+import static org.aquiver.server.Const.PATH_SERVER_CONTENT_COMPRESSOR;
+import static org.aquiver.server.Const.PATH_SERVER_CORS;
+import static org.aquiver.server.Const.PATH_SERVER_PORT;
+import static org.aquiver.server.Const.PATH_SERVER_SESSION_ENABLE;
+import static org.aquiver.server.Const.PATH_SERVER_SESSION_KEY;
+import static org.aquiver.server.Const.PATH_SERVER_SESSION_TIMEOUT;
+import static org.aquiver.server.Const.PATH_SERVER_TEMPLATES_FOLDER;
+import static org.aquiver.server.Const.PATH_SERVER_VIEW_SUFFIX;
+import static org.aquiver.server.Const.SERVER_CONTENT_COMPRESSOR;
+import static org.aquiver.server.Const.SERVER_CORS;
+import static org.aquiver.server.Const.SERVER_SESSION_ENABLE;
+import static org.aquiver.server.Const.SERVER_SESSION_KEY;
+import static org.aquiver.server.Const.SERVER_SESSION_TIMEOUT;
+import static org.aquiver.server.Const.SERVER_TEMPLATES_FOLDER;
+import static org.aquiver.server.Const.SERVER_THREAD_NAME;
 
 /**
  * Aquiver is apex context, can use method configure
@@ -138,6 +171,42 @@ public class Aquiver {
     final Aquiver aquiver = of();
     aquiver.start(bootClass, args);
     return aquiver;
+  }
+
+  /**
+   * Get interceptor list
+   *
+   * @return interceptor list
+   */
+  public static List<Interceptor> interceptors() {
+    return interceptors;
+  }
+
+  public static String getCurrentClassPath() {
+    URL url = Aquiver.class.getResource("/");
+    String path;
+    if (Objects.isNull(url)) {
+      File f = new File(Aquiver.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+      path = f.getPath();
+    } else {
+      path = url.getPath();
+    }
+
+    String decode = "/";
+    try {
+      if (isWindows()) {
+        decode = decode(path.replaceFirst("^/(.:/)", "$1"));
+      } else {
+        decode = decode(path);
+      }
+    } catch (UnsupportedEncodingException e) {
+      log.info("Un supported encoding", e);
+    }
+    return decode;
+  }
+
+  public static String decode(String path) throws UnsupportedEncodingException {
+    return java.net.URLDecoder.decode(path, StandardCharsets.UTF_8.name());
   }
 
   /**
@@ -611,15 +680,6 @@ public class Aquiver {
   public Aquiver interceptor(Interceptor interceptor) {
     Aquiver.interceptors.add(interceptor);
     return this;
-  }
-
-  /**
-   * Get interceptor list
-   *
-   * @return interceptor list
-   */
-  public static List<Interceptor> interceptors() {
-    return interceptors;
   }
 
   /**

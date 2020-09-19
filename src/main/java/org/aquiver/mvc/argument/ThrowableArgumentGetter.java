@@ -39,7 +39,7 @@ public final class ThrowableArgumentGetter implements TypeArgumentGetter<Throwab
   public boolean support(Class<?> cls) {
     try {
       return cls.newInstance() instanceof Throwable;
-    } catch(InstantiationException | IllegalAccessException e) {
+    } catch (InstantiationException | IllegalAccessException e) {
       return false;
     }
   }

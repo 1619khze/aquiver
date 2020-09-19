@@ -25,7 +25,12 @@ package org.aquiver;
 
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.aquiver.mvc.router.RouteInfo;
 
 /**
@@ -33,10 +38,10 @@ import org.aquiver.mvc.router.RouteInfo;
  * @since 2020/6/27
  */
 public class RequestContext {
-  private Throwable throwable;
-  private RouteInfo routeInfo;
   private final Request request;
   private final Response response;
+  private Throwable throwable;
+  private RouteInfo routeInfo;
 
   public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
     this.request = new Request(httpRequest, context);

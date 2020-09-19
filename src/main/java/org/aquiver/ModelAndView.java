@@ -33,7 +33,8 @@ public class ModelAndView {
   private Map<String, Object> params;
   private String htmlPath;
 
-  public ModelAndView() {}
+  public ModelAndView() {
+  }
 
   public ModelAndView(Map<String, Object> params, String htmlPath) {
     this.params = params;
