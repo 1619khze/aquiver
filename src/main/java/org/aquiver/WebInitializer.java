@@ -23,23 +23,42 @@
  */
 package org.aquiver;
 
+import org.aquiver.loader.ExceptionHandlerLoader;
+import org.aquiver.loader.RestfulRouterLoader;
 import org.aquiver.loader.WebLoader;
+import org.aquiver.loader.WebSocketLoader;
+import org.aquiver.mvc.router.RestfulRouter;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.ServiceLoader;
 
 /**
  * @author WangYi
  * @since 2020/8/23
  */
 public class WebInitializer {
+  private static final Map<String, WebLoader> webLoaderMap = new HashMap<>();
+
+  static {
+    WebInitializer.webLoaderMap.put(RestfulRouter.class.getName(), new RestfulRouterLoader());
+    WebInitializer.webLoaderMap.put(WebSocketLoader.class.getName(), new WebSocketLoader());
+    WebInitializer.webLoaderMap.put(ExceptionHandlerLoader.class.getName(), new ExceptionHandlerLoader());
+  }
+
+  public static void registerWebLoader(WebLoader webLoader) {
+    WebInitializer.webLoaderMap.put(webLoader.getClass().getName(), webLoader);
+  }
+
+  public static void lookupWebLoader(String className) {
+    WebInitializer.webLoaderMap.getOrDefault(className, null);
+  }
+
   public static void initialize(Map<String, Object> instances, Aquiver aquiver) throws Exception {
     if (instances.isEmpty()) {
       return;
     }
-    ServiceLoader<WebLoader> webLoaders = ServiceLoader.load(WebLoader.class);
-    for (WebLoader webLoader : webLoaders) {
-      webLoader.load(instances, aquiver);
+    for (Map.Entry<String, WebLoader> entry : webLoaderMap.entrySet()) {
+      entry.getValue().load(instances, aquiver);
     }
   }
 }

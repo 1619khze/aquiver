@@ -1,3 +1,0 @@
-org.aquiver.loader.RestfulRouterLoader
-org.aquiver.loader.ExceptionHandlerLoader
-org.aquiver.loader.WebSocketLoader
