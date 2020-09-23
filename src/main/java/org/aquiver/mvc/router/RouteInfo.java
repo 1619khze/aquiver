@@ -23,15 +23,15 @@
  */
 package org.aquiver.mvc.router;
 
+import org.apache.commons.lang3.Validate;
 import org.aquiver.mvc.annotation.HttpMethod;
 
 import java.lang.reflect.Method;
-import java.util.Objects;
 
 public class RouteInfo {
-  private String url;
+  private final String url;
   private final Class<?> clazz;
-  private Method method;
+  private final Method method;
   private final Object bean;
   private final HttpMethod httpMethod;
 
@@ -44,19 +44,15 @@ public class RouteInfo {
   }
 
   public static RouteInfo of(String url, Class<?> clazz, Object bean, Method method, HttpMethod httpMethod) {
-    Objects.requireNonNull(url, "url must not be null");
-    Objects.requireNonNull(clazz, "clazz must not be null");
-    Objects.requireNonNull(method, "method must not be null");
-    Objects.requireNonNull(httpMethod, "pathMethod must not be null");
+    Validate.notNull(url, "url must not be null");
+    Validate.notNull(clazz, "clazz must not be null");
+    Validate.notNull(method, "method must not be null");
+    Validate.notNull(httpMethod, "pathMethod must not be null");
     return new RouteInfo(url, clazz, bean, method, httpMethod);
   }
 
   public String getUrl() {
     return url;
-  }
-
-  public void setUrl(String url) {
-    this.url = url;
   }
 
   public Class<?> getClazz() {
@@ -65,10 +61,6 @@ public class RouteInfo {
 
   public Method getMethod() {
     return method;
-  }
-
-  public void setMethod(Method method) {
-    this.method = method;
   }
 
   public Object getBean() {

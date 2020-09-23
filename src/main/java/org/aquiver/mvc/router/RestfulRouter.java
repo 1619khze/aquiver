@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author WangYi
  * @since 2020/5/23
  */
-public final class RestfulRouter implements Router {
+public class RestfulRouter implements Router {
   private static final Logger log = LoggerFactory.getLogger(RestfulRouter.class);
 
   private final Map<String, RouteInfo> routes = new ConcurrentHashMap<>(64);
