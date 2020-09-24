@@ -23,7 +23,7 @@
  */
 package example.bean;
 
-import javax.inject.Singleton;
+import org.apex.annotation.Singleton;
 
 /**
  * @author WangYi
@@ -31,7 +31,7 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class User2 {
-  private String aa  ="aaa";
+  private String aa = "aaa";
 
   public String getAa() {
     return aa;

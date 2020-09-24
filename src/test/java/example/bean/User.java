@@ -24,10 +24,9 @@
 package example.bean;
 
 import example.config.ConfigProperty;
+import org.apex.annotation.Inject;
+import org.apex.annotation.Singleton;
 import org.apex.annotation.Value;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 /**
  * @author WangYi

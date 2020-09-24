@@ -23,9 +23,9 @@
  */
 package example.config;
 
-import org.apex.annotation.ConfigurationProperty;
+import org.apex.annotation.PropertyBean;
+import org.apex.annotation.Singleton;
 
-import javax.inject.Singleton;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +34,7 @@ import java.util.Map;
  * @since 2020/8/4
  */
 @Singleton
-@ConfigurationProperty(value = "config.test")
+@PropertyBean(value = "config.test")
 public class ConfigProperty {
   private List<String> list;
   private Map<String, Object> map;

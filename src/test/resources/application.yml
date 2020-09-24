@@ -13,3 +13,7 @@ config:
       key2: value2
       key3: value3
       key4: value4
+      key5: ${key1}/${key2}
+
+server:
+  profile: test

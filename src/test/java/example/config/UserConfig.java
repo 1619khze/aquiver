@@ -25,13 +25,13 @@ package example.config;
 
 import example.bean.User3;
 import org.apex.annotation.Bean;
-import org.apex.annotation.Configuration;
+import org.apex.annotation.ConfigBean;
 
 /**
  * @author WangYi
  * @since 2020/7/24
  */
-@Configuration
+@ConfigBean
 public class UserConfig {
 
   @Bean

@@ -37,4 +37,10 @@ public class IndexRoute {
   public String index() {
     return "index";
   }
+
+
+  @GET
+  public String get() {
+    return "get";
+  }
 }

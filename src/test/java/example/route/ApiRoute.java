@@ -26,6 +26,7 @@ package example.route;
 import example.bean.User;
 import io.netty.channel.ChannelHandlerContext;
 import org.apex.ApexContext;
+import org.apex.annotation.Inject;
 import org.aquiver.ModelAndView;
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.annotation.*;
@@ -37,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import javax.inject.Inject;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -71,7 +71,7 @@ public class ApiRoute {
     user.setName(name);
     user.user();
 
-    ApexContext apexContext = ApexContext.of();
+    ApexContext apexContext = ApexContext.instance();
     User bean = apexContext.getBean(User.class);
     bean.user();
     return user;
@@ -158,8 +158,7 @@ public class ApiRoute {
     DocumentBuilder builder;
     try {
       builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-    }
-    catch(ParserConfigurationException e) {
+    } catch (ParserConfigurationException e) {
       throw new IllegalStateException(e);
     }
     Document doc = builder.newDocument();
@@ -216,7 +215,7 @@ public class ApiRoute {
 
   @GET(value = "/downloadFile")
   public void downloadFile(MultipartFile multipartFile) {
-    multipartFile.download("C:\\Users\\ever\\Desktop\\aa.png");
+    multipartFile.download("D:\\desktop\\aa.png");
   }
 
   @GET(value = "/downloadFilea")
