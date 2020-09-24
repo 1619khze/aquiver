@@ -35,12 +35,11 @@ import io.netty.util.ResourceLeakDetector;
 import org.apache.commons.lang3.JavaVersion;
 import org.apache.commons.lang3.SystemUtils;
 import org.apex.Apex;
-import org.apex.ApexContext;
-import org.apex.BeanDefinition;
-import org.apex.ClassgraphOptions;
-import org.apex.ClassgraphScanner;
 import org.apex.Environment;
-import org.apex.Scanner;
+import org.apex.annotation.ConfigBean;
+import org.apex.annotation.PropertyBean;
+import org.apex.annotation.Scheduled;
+import org.apex.annotation.Singleton;
 import org.aquiver.Aquiver;
 import org.aquiver.ResultHandlerResolver;
 import org.aquiver.ViewHandlerResolver;
@@ -68,21 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.aquiver.server.Const.DEFAULT_ACCEPT_THREAD_COUNT;
-import static org.aquiver.server.Const.DEFAULT_IO_THREAD_COUNT;
-import static org.aquiver.server.Const.PATH_ENV_WATCHER;
-import static org.aquiver.server.Const.PATH_SERVER_ADDRESS;
-import static org.aquiver.server.Const.PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT;
-import static org.aquiver.server.Const.PATH_SERVER_NETTY_IO_THREAD_COUNT;
-import static org.aquiver.server.Const.PATH_SERVER_PORT;
-import static org.aquiver.server.Const.PATH_SERVER_SSL;
-import static org.aquiver.server.Const.PATH_SERVER_SSL_CERT;
-import static org.aquiver.server.Const.PATH_SERVER_SSL_PRIVATE_KEY;
-import static org.aquiver.server.Const.PATH_SERVER_SSL_PRIVATE_KEY_PASS;
-import static org.aquiver.server.Const.SERVER_ADDRESS;
-import static org.aquiver.server.Const.SERVER_PORT;
-import static org.aquiver.server.Const.SERVER_SSL;
-import static org.aquiver.server.Const.SERVER_WATCHER_PATH;
+import static org.aquiver.server.Const.*;
 
 /**
  * open ssl {@code initSSL}
@@ -130,7 +115,6 @@ public class NettyServer implements Server {
 
     final String bootClsName = this.aquiver.bootClsName();
     final String bootConfName = this.aquiver.bootConfName();
-    final String envName = this.apex.envName();
     final String pidCode = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
     final String hostName = SystemUtils.getHostName();
     final String javaHome = SystemUtils.getJavaHome().getPath();
@@ -146,8 +130,6 @@ public class NettyServer implements Server {
     log.info("Java version: {}", javaVersion);
     log.info("The configuration file loaded by this application startup is {}", bootConfName);
 
-    this.configLoadLog(envName);
-
     this.initSsl();
     this.initApex();
     this.startServer(startMs);
@@ -156,48 +138,32 @@ public class NettyServer implements Server {
   }
 
   /**
-   * record the log loaded by the configuration
-   *
-   * @param envName Enabled environment name
-   */
-  private void configLoadLog(String envName) {
-    if (apex.masterConfig()) {
-      log.info("Configuration information is loaded");
-    }
-    if (!apex.envConfig()) {
-      log.info("No active profile set, falling back to default profiles: default");
-    }
-    log.info("The application startup env is: {}", envName);
-  }
-
-  /**
    * init ioc container
    */
   private void initApex() throws Exception {
     final String scanPath = aquiver.bootCls().getPackage().getName();
-    final ClassgraphOptions classgraphOptions = ClassgraphOptions.builder()
-            .verbose(apex.verbose()).realtimeLogging(apex.realtimeLogging())
-            .scanPackages(aquiver.scanPaths()).build();
 
-    final List<Class<? extends Annotation>> extendAnnotations = new ArrayList<>();
-    extendAnnotations.add(Path.class);
-    extendAnnotations.add(RouteAdvice.class);
-    extendAnnotations.add(RestPath.class);
-    extendAnnotations.add(WebSocket.class);
+    final List<Class<? extends Annotation>> typeAnnotations = new ArrayList<>();
+    typeAnnotations.add(Path.class);
+    typeAnnotations.add(RouteAdvice.class);
+    typeAnnotations.add(RestPath.class);
+    typeAnnotations.add(WebSocket.class);
+    typeAnnotations.add(Singleton.class);
+    typeAnnotations.add(ConfigBean.class);
+    typeAnnotations.add(PropertyBean.class);
+    typeAnnotations.add(Scheduled.class);
 
-    final Scanner scanner = new ClassgraphScanner(classgraphOptions);
-    Map<String, BeanDefinition> loadResult = apex.addScanAnnotation(extendAnnotations)
-            .options(classgraphOptions).scanner(scanner).packages(scanPath)
-            .mainArgs(aquiver.mainArgs()).load();
+    apex.typeAnnotation(typeAnnotations);
+    apex.packages().add(scanPath);
+    apex.mainArgs(aquiver.mainArgs());
+    aquiver.apexContext.init(apex);
 
-    final ApexContext apexContext = aquiver.apexContext;
-    apexContext.addBean(ResultHandlerResolver.class);
-    apexContext.addBean(ViewHandlerResolver.class);
-    apexContext.addBean(ArgumentGetterResolver.class);
-    apexContext.addBean(AnnotationArgumentGetterResolver.class);
+    aquiver.apexContext.addBean(ResultHandlerResolver.class);
+    aquiver.apexContext.addBean(ViewHandlerResolver.class);
+    aquiver.apexContext.addBean(ArgumentGetterResolver.class);
+    aquiver.apexContext.addBean(AnnotationArgumentGetterResolver.class);
 
-    apexContext.registerBeanDefinitions(loadResult);
-    final Map<String, Object> instances = apexContext.getInstances();
+    final Map<String, Object> instances = aquiver.apexContext.getInstanceMap();
     WebInitializer.initialize(instances, aquiver);
   }
 

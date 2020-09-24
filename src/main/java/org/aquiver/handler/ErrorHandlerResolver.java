@@ -36,7 +36,7 @@ import java.util.Map;
  */
 public class ErrorHandlerResolver {
   private final Map<Class<? extends Throwable>, ErrorHandler> exceptionHandlerMap = new HashMap<>();
-  private final ApexContext context = ApexContext.of();
+  private final ApexContext context = ApexContext.instance();
 
   public void registerErrorHandler(Class<? extends Throwable> throwableCls, ErrorHandler errorHandler) {
     Validate.notNull(throwableCls, "throwableCls can' be null");

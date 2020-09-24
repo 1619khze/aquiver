@@ -43,7 +43,7 @@ import java.util.Objects;
 public class ResultHandlerResolver {
   private static final Logger log = LoggerFactory.getLogger(ResultHandlerResolver.class);
   private final List<ResultHandler> mapping = new ArrayList<>();
-  private final ApexContext context = ApexContext.of();
+  private final ApexContext context = ApexContext.instance();
 
   public ResultHandlerResolver() {
     this.init();

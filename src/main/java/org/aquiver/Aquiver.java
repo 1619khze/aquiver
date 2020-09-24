@@ -46,41 +46,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.BindException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.LongAdder;
 
 import static io.netty.util.internal.PlatformDependent.isWindows;
 import static java.util.Objects.requireNonNull;
-import static org.aquiver.server.Const.BANNER_TEXT;
-import static org.aquiver.server.Const.PATH_APP_BANNER_FONT;
-import static org.aquiver.server.Const.PATH_APP_BANNER_TEXT;
-import static org.aquiver.server.Const.PATH_CONFIG_PROPERTIES;
-import static org.aquiver.server.Const.PATH_SERVER_CONTENT_COMPRESSOR;
-import static org.aquiver.server.Const.PATH_SERVER_CORS;
-import static org.aquiver.server.Const.PATH_SERVER_PORT;
-import static org.aquiver.server.Const.PATH_SERVER_SESSION_ENABLE;
-import static org.aquiver.server.Const.PATH_SERVER_SESSION_KEY;
-import static org.aquiver.server.Const.PATH_SERVER_SESSION_TIMEOUT;
-import static org.aquiver.server.Const.PATH_SERVER_TEMPLATES_FOLDER;
-import static org.aquiver.server.Const.PATH_SERVER_VIEW_SUFFIX;
-import static org.aquiver.server.Const.SERVER_CONTENT_COMPRESSOR;
-import static org.aquiver.server.Const.SERVER_CORS;
-import static org.aquiver.server.Const.SERVER_SESSION_ENABLE;
-import static org.aquiver.server.Const.SERVER_SESSION_KEY;
-import static org.aquiver.server.Const.SERVER_SESSION_TIMEOUT;
-import static org.aquiver.server.Const.SERVER_TEMPLATES_FOLDER;
-import static org.aquiver.server.Const.SERVER_THREAD_NAME;
+import static org.aquiver.server.Const.*;
 
 /**
  * Aquiver is apex context, can use method configure
@@ -140,7 +112,7 @@ public class Aquiver {
 
   // Components needed for dependency injection
   public final Apex apex = Apex.of();
-  public final ApexContext apexContext = ApexContext.of();
+  public final ApexContext apexContext = ApexContext.instance();
 
   // A series of components used
   private final RestfulRouter restfulRouter = apexContext.addBean(RestfulRouter.class);

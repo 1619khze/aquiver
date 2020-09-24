@@ -64,7 +64,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private final RestfulRouter restfulRouter;
   private final ErrorHandlerResolver errorHandlerResolver;
   private final ResultHandlerResolver resultHandlerResolver;
-  private final ApexContext context = ApexContext.of();
+  private final ApexContext context = ApexContext.instance();
   private final StaticFileServerHandler fileServerHandler;
   private FullHttpRequest request;
   private RequestContext requestContext;

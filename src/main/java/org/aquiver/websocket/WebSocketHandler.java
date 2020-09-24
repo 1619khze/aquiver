@@ -50,14 +50,14 @@ import java.util.concurrent.CompletableFuture;
  * @since 2020/7/5
  */
 public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
-  private final ApexContext apexContext = ApexContext.of();
+  private final ApexContext apexContext = ApexContext.instance();
   private final WebSocketResolver webSocketResolver;
   private WebSocketContext webSocketContext;
   private WebSocketServerHandshaker handshaker;
   private WebSocketChannel webSocketChannel;
 
   public WebSocketHandler() {
-    final ApexContext context = ApexContext.of();
+    final ApexContext context = ApexContext.instance();
     this.webSocketResolver = context.getBean(WebSocketResolver.class);
   }
 

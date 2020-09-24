@@ -41,7 +41,7 @@ import java.util.List;
 public class AspectInterceptorChain implements InterceptorChain {
   private final List<Interceptor> interceptors;
   private final RequestContext ctx;
-  private final ApexContext apexContext = ApexContext.of();
+  private final ApexContext apexContext = ApexContext.instance();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
   private final MethodArgumentGetter methodArgumentGetter = apexContext.getBean(MethodArgumentGetter.class);
   private int currentIndex = 0;

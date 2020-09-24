@@ -50,7 +50,7 @@ public class RestfulRouterLoader implements WebLoader {
    */
   @Override
   public void load(Map<String, Object> instances, Aquiver aquiver) {
-    final ApexContext context = ApexContext.of();
+    final ApexContext context = ApexContext.instance();
     for (Map.Entry<String, Object> entry : instances.entrySet()) {
       Class<?> next = entry.getValue().getClass();
       String url = "/";

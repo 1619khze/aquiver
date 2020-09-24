@@ -48,7 +48,7 @@ public class ExceptionHandlerLoader implements WebLoader {
    */
   @Override
   public void load(Map<String, Object> instances, Aquiver aquiver) {
-    final ApexContext context = ApexContext.of();
+    final ApexContext context = ApexContext.instance();
     for (Object object : instances.values()) {
       Class<?> cls = object.getClass();
       Method[] declaredMethods = cls.getDeclaredMethods();

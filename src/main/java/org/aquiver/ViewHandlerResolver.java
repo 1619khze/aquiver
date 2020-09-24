@@ -45,7 +45,7 @@ import java.util.Objects;
 public class ViewHandlerResolver {
   private static final Logger log = LoggerFactory.getLogger(ViewHandlerResolver.class);
   private final Map<String, ViewHandler> viewHandlerMap = new HashMap<>();
-  private final ApexContext context = ApexContext.of();
+  private final ApexContext context = ApexContext.instance();
 
   public ViewHandlerResolver() {
     this.init();

@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class WebSocketResolver {
   private final Map<String, WebSocketChannel> webSockets = new ConcurrentHashMap<>(4);
-  private final ApexContext context = ApexContext.of();
+  private final ApexContext context = ApexContext.instance();
 
   public void registerWebSocket(String path, WebSocketChannel webSocketChannel) {
     this.webSockets.put(path, webSocketChannel);
