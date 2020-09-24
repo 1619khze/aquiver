@@ -14,7 +14,6 @@
         <fastjson.version>1.2.58</fastjson.version>
         <banana.version>1.2.0</banana.version>
         <snakeyaml.version>1.24</snakeyaml.version>
-        <classgraph.version>4.8.37</classgraph.version>
         <junit.version>4.12</junit.version>
         <logback.version>1.2.3</logback.version>
         <netty.version>4.1.50.Final</netty.version>
@@ -88,11 +87,6 @@
             <version>${logback.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.classgraph</groupId>
-            <artifactId>classgraph</artifactId>
-            <version>${classgraph.version}</version>
-        </dependency>
-        <dependency>
             <groupId>io.pebbletemplates</groupId>
             <artifactId>pebble</artifactId>
             <version>${pebble.version}</version>
@@ -101,11 +95,6 @@
             <groupId>org.apex</groupId>
             <artifactId>apex</artifactId>
             <version>${apex.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>${common-lang3.version}</version>
         </dependency>
     </dependencies>
 
