@@ -158,6 +158,9 @@ public class NettyServer implements Server {
     apex.mainArgs(aquiver.mainArgs());
     aquiver.apexContext.init(apex);
 
+    log.info("ApexContext initialization completed");
+    log.info("Environment initialization completed");
+
     aquiver.apexContext.addBean(ResultHandlerResolver.class);
     aquiver.apexContext.addBean(ViewHandlerResolver.class);
     aquiver.apexContext.addBean(ArgumentGetterResolver.class);
