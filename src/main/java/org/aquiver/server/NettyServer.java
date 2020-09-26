@@ -141,6 +141,7 @@ public class NettyServer implements Server {
    * init ioc container
    */
   private void initApex() throws Exception {
+    WebInitializer webInitializer = new WebInitializer();
     final String scanPath = aquiver.bootCls().getPackage().getName();
 
     final List<Class<? extends Annotation>> typeAnnotations = new ArrayList<>();
@@ -167,7 +168,7 @@ public class NettyServer implements Server {
     aquiver.apexContext.addBean(AnnotationArgumentGetterResolver.class);
 
     final Map<String, Object> instances = aquiver.apexContext.getInstanceMap();
-    WebInitializer.initialize(instances, aquiver);
+    webInitializer.initialize(instances, aquiver);
   }
 
   /**
