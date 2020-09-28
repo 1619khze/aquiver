@@ -65,11 +65,11 @@ public final class AnnotationArgumentGetterResolver implements GetterResolver<An
     Objects.requireNonNull(argumentClass, "argumentClass can't be null");
 
     if (!Annotation.class.isAssignableFrom(bindClass)) {
-      throw new IllegalArgumentException(bindClass.getName() + " cam't assignable from Annotation");
+      throw new IllegalArgumentException(bindClass.getName() + " can't assignable from Annotation");
     }
 
     if (!AnnotationArgumentGetter.class.isAssignableFrom(argumentClass)) {
-      throw new IllegalArgumentException(bindClass.getName() + " cam't assignable from AnnotationArgumentGetter");
+      throw new IllegalArgumentException(bindClass.getName() + " can't assignable from AnnotationArgumentGetter");
     }
 
     AnnotationArgumentGetter annotationArgumentGetter = (AnnotationArgumentGetter) apexContext().addBean(argumentClass);
