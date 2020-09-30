@@ -139,8 +139,8 @@ public class Aquiver {
   private String templateFolder;
 
   // Components needed for dependency injection
-  public final Apex apex = Apex.of();
-  public final ApexContext apexContext = ApexContext.instance();
+  private final Apex apex = Apex.of();
+  private final ApexContext apexContext = ApexContext.instance();
 
   // A series of components used
   private final RestfulRouter restfulRouter = apexContext.addBean(RestfulRouter.class);
@@ -680,6 +680,22 @@ public class Aquiver {
   public Aquiver interceptor(Interceptor interceptor) {
     Aquiver.interceptors.add(interceptor);
     return this;
+  }
+
+  /**
+   * Get apex instance
+   * @return apex instance
+   */
+  public Apex apex() {
+    return apex;
+  }
+
+  /**
+   * Get apexContext instance
+   * @return ApexContext instance
+   */
+  public ApexContext apexContext() {
+    return apexContext;
   }
 
   /**

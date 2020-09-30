@@ -35,6 +35,7 @@ import io.netty.util.ResourceLeakDetector;
 import org.apache.commons.lang3.JavaVersion;
 import org.apache.commons.lang3.SystemUtils;
 import org.apex.Apex;
+import org.apex.ApexContext;
 import org.apex.Environment;
 import org.apex.annotation.ConfigBean;
 import org.apex.annotation.PropertyBean;
@@ -123,7 +124,7 @@ public class NettyServer implements Server {
     long startMs = System.currentTimeMillis();
 
     this.aquiver = aquiver;
-    this.apex = aquiver.apex;
+    this.apex = aquiver.apex();
     this.environment = this.aquiver.environment();
     this.printBanner();
 
@@ -171,17 +172,18 @@ public class NettyServer implements Server {
     apex.typeAnnotation(typeAnnotations);
     apex.packages().add(scanPath);
     apex.mainArgs(aquiver.mainArgs());
-    aquiver.apexContext.init(apex);
+    ApexContext apexContext = aquiver.apexContext();
+    apexContext.init(apex);
 
     log.info("ApexContext initialization completed");
     log.info("Environment initialization completed");
 
-    aquiver.apexContext.addBean(ResultHandlerResolver.class);
-    aquiver.apexContext.addBean(ViewHandlerResolver.class);
-    aquiver.apexContext.addBean(ArgumentGetterResolver.class);
-    aquiver.apexContext.addBean(AnnotationArgumentGetterResolver.class);
+    apexContext.addBean(ResultHandlerResolver.class);
+    apexContext.addBean(ViewHandlerResolver.class);
+    apexContext.addBean(ArgumentGetterResolver.class);
+    apexContext.addBean(AnnotationArgumentGetterResolver.class);
 
-    final Map<String, Object> instances = aquiver.apexContext.getInstanceMap();
+    final Map<String, Object> instances = apexContext.getInstanceMap();
     webInitializer.initialize(instances, aquiver);
   }
 
