@@ -67,7 +67,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.aquiver.server.Const.*;
+import static org.aquiver.server.Const.DEFAULT_ACCEPT_THREAD_COUNT;
+import static org.aquiver.server.Const.DEFAULT_IO_THREAD_COUNT;
+import static org.aquiver.server.Const.PATH_ENV_WATCHER;
+import static org.aquiver.server.Const.PATH_SERVER_ADDRESS;
+import static org.aquiver.server.Const.PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT;
+import static org.aquiver.server.Const.PATH_SERVER_NETTY_IO_THREAD_COUNT;
+import static org.aquiver.server.Const.PATH_SERVER_PORT;
+import static org.aquiver.server.Const.PATH_SERVER_SSL;
+import static org.aquiver.server.Const.PATH_SERVER_SSL_CERT;
+import static org.aquiver.server.Const.PATH_SERVER_SSL_PRIVATE_KEY;
+import static org.aquiver.server.Const.PATH_SERVER_SSL_PRIVATE_KEY_PASS;
+import static org.aquiver.server.Const.SERVER_ADDRESS;
+import static org.aquiver.server.Const.SERVER_PORT;
+import static org.aquiver.server.Const.SERVER_SSL;
+import static org.aquiver.server.Const.SERVER_WATCHER_PATH;
 
 /**
  * open ssl {@code initSSL}

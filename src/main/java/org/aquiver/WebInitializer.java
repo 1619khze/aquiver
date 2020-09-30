@@ -38,7 +38,7 @@ import java.util.Map;
 public class WebInitializer {
   private final Map<String, WebLoader> webLoaderMap = new HashMap<>();
 
-  public WebInitializer(){
+  public WebInitializer() {
     this.registerWebLoader(new RestfulRouterLoader());
     this.registerWebLoader(new WebSocketLoader());
     this.registerWebLoader(new ExceptionHandlerLoader());
