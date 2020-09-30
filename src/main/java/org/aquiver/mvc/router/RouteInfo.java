@@ -43,7 +43,7 @@ public class RouteInfo {
     this.bean = bean;
   }
 
-  public static RouteInfo of(String url, Class<?> clazz, Object bean, Method method, HttpMethod httpMethod) {
+  public static RouteInfo create(String url, Class<?> clazz, Object bean, Method method, HttpMethod httpMethod) {
     Validate.notNull(url, "url must not be null");
     Validate.notNull(clazz, "clazz must not be null");
     Validate.notNull(method, "method must not be null");

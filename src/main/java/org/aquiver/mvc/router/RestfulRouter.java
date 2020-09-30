@@ -173,7 +173,7 @@ public class RestfulRouter implements Router {
    * @return Route
    */
   private RouteInfo createRoute(Class<?> clazz, Object bean, Method method, HttpMethod httpMethod, String completeUrl) {
-    return RouteInfo.of(completeUrl, clazz, bean, method, httpMethod);
+    return RouteInfo.create(completeUrl, clazz, bean, method, httpMethod);
   }
 
   /**
