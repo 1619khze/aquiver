@@ -35,9 +35,7 @@ public class RequestResult {
   private final Method method;
 
   public RequestResult(Object resultObject, Method method) {
-    this.resultType = resultObject.getClass();
-    this.resultObject = resultObject;
-    this.method = method;
+    this(resultObject.getClass(), resultObject, method);
   }
 
   public RequestResult(Class<?> resultType, Object resultObject, Method method) {
