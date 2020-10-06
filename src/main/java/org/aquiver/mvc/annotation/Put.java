@@ -37,6 +37,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Path(method = HttpMethod.PUT)
-public @interface PUT {
+public @interface Put {
   String value() default "";
 }

@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Path(method = HttpMethod.OPTIONS)
-public @interface OPTIONS {
+@Path(method = HttpMethod.GET)
+public @interface Get {
   String value() default "";
 }

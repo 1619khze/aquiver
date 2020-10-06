@@ -37,6 +37,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Path(method = HttpMethod.DELETE)
-public @interface DELETE {
+public @interface Delete {
   String value() default "";
 }

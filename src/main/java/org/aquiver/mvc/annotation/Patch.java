@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Path(method = HttpMethod.HEAD)
-public @interface HEAD {
+@Path(method = HttpMethod.PATCH)
+public @interface Patch {
   String value() default "";
 }
