@@ -23,7 +23,7 @@
  */
 package example.route;
 
-import org.aquiver.mvc.annotation.GET;
+import org.aquiver.mvc.annotation.Get;
 import org.aquiver.mvc.annotation.RestPath;
 
 /**
@@ -33,13 +33,13 @@ import org.aquiver.mvc.annotation.RestPath;
 @RestPath("/index")
 public class IndexRoute {
 
-  @GET("/index")
+  @Get("/index")
   public String index() {
     return "index";
   }
 
 
-  @GET
+  @Get
   public String get() {
     return "get";
   }

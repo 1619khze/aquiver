@@ -108,25 +108,25 @@ public class ApiRoute {
   }
 
   @View
-  @GET(value = "/getHtml")
+  @Get(value = "/getHtml")
   public String getHtml() {
     return "/index.html";
   }
 
   @View
-  @GET(value = "/getPeb")
+  @Get(value = "/getPeb")
   public String getPeb() {
     return "/templates/index.peb";
   }
 
   @View
-  @GET(value = "/get")
+  @Get(value = "/get")
   public String get() {
     return "/index";
   }
 
   @View
-  @GET(value = "/modelAndView")
+  @Get(value = "/modelAndView")
   public ModelAndView modelAndView() {
     ModelAndView modelAndView = new ModelAndView();
 
@@ -138,22 +138,22 @@ public class ApiRoute {
     return modelAndView;
   }
 
-  @GET(value = "/void")
+  @Get(value = "/void")
   public void testVoid() {
     log.info("void test");
   }
 
-  @GET(value = "/redirectaaaa")
+  @Get(value = "/redirectaaaa")
   public String redirect() {
     return "redirect:http://www.baidu.com";
   }
 
-  @GET(value = "/forwardaaaa")
+  @Get(value = "/forwardaaaa")
   public String forward() {
     return "forward:http://localhost:9999/controller/void";
   }
 
-  @GET(value = "/doc.xml")
+  @Get(value = "/doc.xml")
   public Document document() {
     DocumentBuilder builder;
     try {
@@ -179,32 +179,32 @@ public class ApiRoute {
     return doc;
   }
 
-  @GET(value = "xml")
+  @Get(value = "xml")
   public String xml() {
     return "xml:<node/>";
   }
 
-  @GET(value = "/session")
+  @Get(value = "/session")
   public void session(Session session) {
     String id = session.getId();
     System.out.println(id);
     session.setAttribute("loginName", "WangYi");
   }
 
-  @GET(value = "/session2")
+  @Get(value = "/session2")
   public void session2(Session session) {
     Object loginName = session.getAttribute("loginName");
     System.out.println(loginName);
   }
 
-  @POST(value = "/uploadFile")
+  @Post(value = "/uploadFile")
   public String uploadFile(@FileUpload MultipartFile file) throws IOException {
     log.info("fileName:{}", file.fileName());
     System.out.println(file.readFileContent());
     return "controller/uploadFile";
   }
 
-  @POST(value = "/uploadFiles")
+  @Post(value = "/uploadFiles")
   public void uploadFileS(@MultiFileUpload List<MultipartFile> files) throws IOException {
     log.info("file size:{}", files.size());
     for (MultipartFile multipartFile : files) {
@@ -213,22 +213,22 @@ public class ApiRoute {
     }
   }
 
-  @GET(value = "/downloadFile")
+  @Get(value = "/downloadFile")
   public void downloadFile(MultipartFile multipartFile) {
     multipartFile.download("D:\\desktop\\aa.png");
   }
 
-  @GET(value = "/downloadFilea")
+  @Get(value = "/downloadFilea")
   public void downloadFilea(ChannelHandlerContext multipartFile) {
     System.out.println(multipartFile);
   }
 
-  @GET(value = "/exception")
+  @Get(value = "/exception")
   public void exception() {
     throw new NullPointerException("aaa");
   }
 
-  @GET(value = "/rc")
+  @Get(value = "/rc")
   public void requestContext(RequestContext requestContext) {
     System.out.println(requestContext.request().uri());
   }
