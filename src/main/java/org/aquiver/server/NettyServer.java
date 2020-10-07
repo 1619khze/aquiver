@@ -153,10 +153,28 @@ public class NettyServer implements Server {
   }
 
   /**
-   * init ioc container
+   * Initialize apex
    */
   private void initApex() throws Exception {
     WebInitializer webInitializer = new WebInitializer();
+    final ApexContext apexContext = initApexContext();
+
+    log.info("ApexContext initialization completed");
+    log.info("Environment initialization completed");
+
+    apexContext.addBean(ResultHandlerResolver.class);
+    apexContext.addBean(ViewHandlerResolver.class);
+    apexContext.addBean(ArgumentGetterResolver.class);
+    apexContext.addBean(AnnotationArgumentGetterResolver.class);
+
+    final Map<String, Object> instances = apexContext.getInstanceMap();
+    webInitializer.initialize(instances, aquiver);
+  }
+
+  /**
+   * Initialize apex context
+   */
+  private ApexContext initApexContext() throws Exception {
     final String scanPath = aquiver.bootCls().getPackage().getName();
 
     final List<Class<? extends Annotation>> typeAnnotations = new ArrayList<>();
@@ -174,17 +192,7 @@ public class NettyServer implements Server {
     apex.mainArgs(aquiver.mainArgs());
     ApexContext apexContext = aquiver.apexContext();
     apexContext.init(apex);
-
-    log.info("ApexContext initialization completed");
-    log.info("Environment initialization completed");
-
-    apexContext.addBean(ResultHandlerResolver.class);
-    apexContext.addBean(ViewHandlerResolver.class);
-    apexContext.addBean(ArgumentGetterResolver.class);
-    apexContext.addBean(AnnotationArgumentGetterResolver.class);
-
-    final Map<String, Object> instances = apexContext.getInstanceMap();
-    webInitializer.initialize(instances, aquiver);
+    return apexContext;
   }
 
   /**
