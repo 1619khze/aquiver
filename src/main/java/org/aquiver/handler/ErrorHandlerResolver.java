@@ -45,14 +45,11 @@ public class ErrorHandlerResolver {
   }
 
   public void handlerException(Throwable throwable, RequestContext requestContext) {
-    if (exceptionHandlerMap.isEmpty()) {
+    if (exceptionHandlerMap.isEmpty() || !exceptionHandlerMap.containsKey(throwable.getClass())) {
       requestContext.request().channelHandlerContext().channel().close();
     }
-    if (!exceptionHandlerMap.containsKey(throwable.getClass())) {
-      return;
-    }
-    ErrorHandler errorHandler = exceptionHandlerMap.get(throwable.getClass());
     try {
+      final ErrorHandler errorHandler = exceptionHandlerMap.get(throwable.getClass());
       this.context.addBean(context);
       errorHandler.handle(throwable);
     } catch (Exception e) {

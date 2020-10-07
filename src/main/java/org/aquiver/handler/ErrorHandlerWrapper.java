@@ -48,7 +48,6 @@ public class ErrorHandlerWrapper implements ErrorHandler {
   private final Map<Class<? extends Throwable>, Method> handlerMethod = new ConcurrentHashMap<>();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
   private Class<?> exceptionHandler;
-  private MethodArgumentGetter methodArgumentGetter;
 
   public void initialize(Class<?> exceptionHandler) {
     if (!exceptionHandler.isAnnotationPresent(RouteAdvice.class)) {
@@ -71,28 +70,14 @@ public class ErrorHandlerWrapper implements ErrorHandler {
 
   @Override
   public void handle(Throwable throwable) {
-    if (handlerMethod.isEmpty()) {
-      return;
-    }
-
-    if (!handlerMethod.containsKey(throwable.getClass())) {
-      return;
-    }
-    Method method = handlerMethod.get(throwable.getClass());
-    if (method.getParameterCount() == 0) {
-      return;
-    }
-
-    this.handle(method);
-  }
-
-  private void handle(Method method) {
-    if (Objects.isNull(methodArgumentGetter)) {
-      this.methodArgumentGetter = context.getBean(MethodArgumentGetter.class);
-    }
-
+    final MethodArgumentGetter methodArgumentGetter = context.getBean(MethodArgumentGetter.class);
     if (Objects.isNull(methodArgumentGetter)) {
       throw new IllegalArgumentException("methodArgumentGetter can't be null");
+    }
+    final Method method = handlerMethod.get(throwable.getClass());
+    if (handlerMethod.isEmpty() || !handlerMethod.containsKey(throwable.getClass())
+            || (Objects.isNull(method) || method.getParameterCount() == 0)) {
+      return;
     }
     try {
       final List<Object> invokeArguments = methodArgumentGetter.getParams(method.getParameters());
