@@ -195,9 +195,9 @@ public class Aquiver {
     String decode = "/";
     try {
       if (isWindows()) {
-        decode = decode(path.replaceFirst("^/(.:/)", "$1"));
+        decode = urlDecode(path.replaceFirst("^/(.:/)", "$1"));
       } else {
-        decode = decode(path);
+        decode = urlDecode(path);
       }
     } catch (UnsupportedEncodingException e) {
       log.info("Un supported encoding", e);
@@ -205,7 +205,7 @@ public class Aquiver {
     return decode;
   }
 
-  public static String decode(String path) throws UnsupportedEncodingException {
+  public static String urlDecode(String path) throws UnsupportedEncodingException {
     return java.net.URLDecoder.decode(path, StandardCharsets.UTF_8.name());
   }
 
