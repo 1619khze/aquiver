@@ -19,7 +19,7 @@
         <netty.version>4.1.50.Final</netty.version>
         <logback.version>1.2.3</logback.version>
         <pebble.version>3.1.4</pebble.version>
-        <apex.version>1.0-SNAPSHOT</apex.version>
+        <apex.version>1.0</apex.version>
         <common-lang3.version>3.11</common-lang3.version>
         <java.version>8</java.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
@@ -27,6 +27,32 @@
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <licenses>
+        <license>
+            <name>The MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>everknwon</name>
+            <email>1517262320@qq.com</email>
+        </developer>
+    </developers>
+    <scm>
+        <connection>scm:git@github.com:AquiverV/aquiver.git</connection>
+        <developerConnection>scm:git@github.com:AquiverV/aquiver.git</developerConnection>
+        <url>git@github.com:AquiverV/aquiver.git</url>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>aquiver</name>
+            <url>https://maven.pkg.github.com/AquiverV/aquiver</url>
+        </repository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
