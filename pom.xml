@@ -21,6 +21,7 @@
         <pebble.version>3.1.4</pebble.version>
         <apex.version>1.0</apex.version>
         <common-lang3.version>3.11</common-lang3.version>
+        <jackson.version>2.11.1</jackson.version>
         <java.version>8</java.version>
         <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
         <maven-license-plugin.version>1.9.0</maven-license-plugin.version>
@@ -121,6 +122,21 @@
             <groupId>org.apex</groupId>
             <artifactId>apex</artifactId>
             <version>${apex.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
     </dependencies>
 
