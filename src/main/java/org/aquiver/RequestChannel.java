@@ -23,30 +23,22 @@
  */
 package org.aquiver;
 
-import io.netty.handler.codec.http.FullHttpResponse;
-
 /**
  * @author WangYi
- * @since 2020/10/19
+ * @since 2020/10/20
  */
-public interface Response {
-  void tryPush(FullHttpResponse response);
+public interface RequestChannel {
+  void closeChannel();
 
-  void redirect(String redirectUrl);
+  boolean isOpen();
 
-  <T> void json(T t);
+  boolean isRegistered();
 
-  <T> void xml(T t);
+  boolean isActive();
 
-  void text(String text);
+  boolean isWritable();
 
-  void render(String renderTemplate);
+  long bytesBeforeUnwritable();
 
-  void html(String htmlTemplate);
-
-  void status(int httpStatus);
-
-  void contentType();
-
-  void contentType(String contentType);
+  long bytesBeforeWritable();
 }
