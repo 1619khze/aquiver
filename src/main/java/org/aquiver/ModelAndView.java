@@ -32,6 +32,7 @@ import java.util.Map;
 public class ModelAndView {
   private Map<String, Object> params;
   private String htmlPath;
+  private String redirectUrl;
 
   public ModelAndView() {
   }
@@ -55,6 +56,14 @@ public class ModelAndView {
 
   public void htmlPath(String htmlPath) {
     this.htmlPath = htmlPath;
+  }
+
+  public String redirectUrl() {
+    return redirectUrl;
+  }
+
+  public void redirect(String redirectUrl) {
+    this.redirectUrl = redirectUrl;
   }
 
   @Override
