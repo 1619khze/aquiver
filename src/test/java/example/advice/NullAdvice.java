@@ -40,7 +40,7 @@ public class NullAdvice {
   @ErrorAdvice(NullPointerException.class)
   public String nullExceptionHandler(NullPointerException exception, RequestContext requestContext) {
     log.info("nullExceptionHandler...");
-    log.info("request url {}", requestContext.request().uri());
+    log.info("request url {}", requestContext.uri());
     return exception.getMessage();
   }
 }

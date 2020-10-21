@@ -33,7 +33,7 @@ public class Main {
   public static void main(String[] args) {
     Aquiver.of().bind(9999)
             .get("/", ctx -> {
-              Object paramName = ctx.request().queryString("paramName");
+              Object paramName = ctx.param("paramName");
               System.out.println(paramName);
             })
             .start(Main.class, args);
