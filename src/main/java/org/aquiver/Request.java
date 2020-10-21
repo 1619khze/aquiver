@@ -78,6 +78,10 @@ public interface Request {
 
   Map<String, Cookie> cookies();
 
+  Cookie cookie(String key);
+
+  String sessionKey();
+
   String referer();
 
   String userAgent();
