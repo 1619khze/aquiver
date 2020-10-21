@@ -264,7 +264,7 @@ public class RequestContext implements Request, Response, RequestChannel {
   }
 
   @Override
-  public String header(String key) {
+  public Header header(String key) {
     return this.request().header(key);
   }
 

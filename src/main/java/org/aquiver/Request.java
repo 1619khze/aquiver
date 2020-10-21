@@ -57,7 +57,7 @@ public interface Request {
 
   Integer majorVersion();
 
-  String header(String key);
+  Header header(String key);
 
   String param(String key);
 

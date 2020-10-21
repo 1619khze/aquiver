@@ -209,8 +209,8 @@ public class HttpRequest implements Request {
   }
 
   @Override
-  public String header(String key) {
-    return header().get(key).getString();
+  public Header header(String key) {
+    return header().get(key);
   }
 
   @Override

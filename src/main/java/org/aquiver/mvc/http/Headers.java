@@ -26,12 +26,4 @@ public class Headers {
     }
     return Headers.headerMap;
   }
-
-  public String getValue(String key) {
-    if (headerMap.containsKey(key)){
-      Header header = headerMap.get(key);
-      return header.getString();
-    }
-    return null;
-  }
 }

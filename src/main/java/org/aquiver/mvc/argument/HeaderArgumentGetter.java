@@ -24,8 +24,10 @@
 package org.aquiver.mvc.argument;
 
 import org.aquiver.RequestContext;
+import org.aquiver.mvc.http.Header;
 
 import java.lang.reflect.Parameter;
+import java.util.Objects;
 
 /**
  * @author WangYi
@@ -37,6 +39,10 @@ public final class HeaderArgumentGetter implements AnnotationArgumentGetter {
   public Object get(ArgumentContext context) {
     RequestContext requestContext = context.getContext();
     Parameter parameter = context.getParameter();
-    return parameter.getType().cast(requestContext.header(parameter.getName()));
+    Header header = requestContext.header(parameter.getName());
+    if(Objects.isNull(header) || Objects.isNull(header.getValue())){
+      return null;
+    }
+    return parameter.getType().cast(header.getValue());
   }
 }
