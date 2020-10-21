@@ -46,7 +46,7 @@ public class ErrorHandlerResolver {
 
   public void handlerException(Throwable throwable, RequestContext requestContext) {
     if (exceptionHandlerMap.isEmpty() || !exceptionHandlerMap.containsKey(throwable.getClass())) {
-      requestContext.request().channelHandlerContext().channel().close();
+      requestContext.closeChannel();
     }
     try {
       final ErrorHandler errorHandler = exceptionHandlerMap.get(throwable.getClass());
@@ -54,6 +54,7 @@ public class ErrorHandlerResolver {
       errorHandler.handle(throwable);
     } catch (Exception e) {
       e.printStackTrace();
+      requestContext.channelContext().close();
     }
   }
 }

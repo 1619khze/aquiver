@@ -67,7 +67,7 @@ public class AspectInterceptorChain implements InterceptorChain {
   }
 
   private void executeAction(RequestContext ctx) throws Throwable {
-    RouteInfo routeInfo = ctx.route();
+    final RouteInfo routeInfo = ctx.routeInfo();
     final Method method = routeInfo.getMethod();
     final Parameter[] parameters = method.getParameters();
     final List<Object> invokeArguments = methodArgumentGetter.getParams(parameters);

@@ -23,7 +23,8 @@
  */
 package org.aquiver.mvc.router.session;
 
-import org.aquiver.Request;
+import io.netty.channel.ChannelHandlerContext;
+import org.aquiver.mvc.http.HttpRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,12 +43,12 @@ public final class SessionManager {
     return this.sessionPool.get(sessionId);
   }
 
-  public Session createSession(Request request) {
-    Objects.requireNonNull(request, "request can't be null");
-    Session httpSession = getSession(request);
+  public Session createSession(HttpRequest httpRequest, ChannelHandlerContext context) {
+    Objects.requireNonNull(httpRequest, "request can't be null");
+    Session httpSession = getSession(httpRequest);
     if (Objects.isNull(httpSession)) {
       long l = ThreadLocalRandom.current().nextLong();
-      httpSession = new HttpSession(request.channelHandlerContext(), String.valueOf(l)
+      httpSession = new HttpSession(context, String.valueOf(l)
               .replaceFirst("-", ""));
       this.sessionPool.put(httpSession.getId(), httpSession);
     }
@@ -59,8 +60,8 @@ public final class SessionManager {
     this.sessionPool.clear();
   }
 
-  private Session getSession(Request request) {
-    Object cookieHeader = request.cookies(request.sessionKey());
+  private Session getSession(HttpRequest httpRequest) {
+    Object cookieHeader = httpRequest.cookie(httpRequest.sessionKey());
     if (Objects.isNull(cookieHeader)) {
       return null;
     }
