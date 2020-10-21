@@ -40,6 +40,8 @@ import org.aquiver.mvc.router.session.Session;
 import java.util.Map;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * @author WangYi
  * @since 2020/6/27
@@ -55,9 +57,10 @@ public class RequestContext implements Request, Response, RequestChannel {
   public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
     Validate.notNull(httpRequest, "FullHttpRequest can't be null");
     Validate.notNull(context, "ChannelHandlerContext can't be null");
+
     this.context = context;
-    this.httpRequest = new HttpRequest(httpRequest, this.context);
-    this.response = new HttpResponse(this.context);
+    this.httpRequest = HttpRequest.of(httpRequest, this.context);
+    this.response = HttpResponse.of(this.context);
   }
 
   public static RequestContext current() {
@@ -66,12 +69,12 @@ public class RequestContext implements Request, Response, RequestChannel {
 
   public void routeInfo(RouteInfo routeInfo) {
     Validate.notNull(routeInfo, "RouteInfo can't be null");
-    this.routeInfo = routeInfo;
+    this.routeInfo = requireNonNull(routeInfo);
   }
 
   public void throwable(Throwable throwable) {
     Validate.notNull(throwable, "throwable can't be null");
-    this.throwable = throwable;
+    this.throwable = requireNonNull(throwable);
   }
 
   private Channel getChannel() {
@@ -312,6 +315,16 @@ public class RequestContext implements Request, Response, RequestChannel {
   @Override
   public Map<String, Cookie> cookies() {
     return this.request().cookies();
+  }
+
+  @Override
+  public Cookie cookie(String key) {
+    return this.request().cookie(key);
+  }
+
+  @Override
+  public String sessionKey() {
+    return this.request().sessionKey();
   }
 
   @Override
