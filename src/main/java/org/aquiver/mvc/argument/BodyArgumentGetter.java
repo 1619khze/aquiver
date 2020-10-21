@@ -23,25 +23,17 @@
  */
 package org.aquiver.mvc.argument;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.aquiver.RequestContext;
-
-import java.util.Map;
 
 /**
  * @author WangYi
  * @since 2020/8/26
  */
 public final class BodyArgumentGetter implements AnnotationArgumentGetter {
+
   @Override
   public Object get(ArgumentContext context) throws Exception {
     RequestContext requestContext = context.getContext();
-    Map<String, Object> jsonData = requestContext.request().formData();
-    String jsonString = JSON.toJSONString(jsonData);
-    if (jsonData.isEmpty() || !JSONObject.isValid(jsonString)) {
-      return null;
-    }
-    return JSONObject.parseObject(jsonString, context.getParameter().getType());
+    return requestContext.body(context.getParameter().getType());
   }
 }

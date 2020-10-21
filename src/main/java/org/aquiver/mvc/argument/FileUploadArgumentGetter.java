@@ -39,12 +39,12 @@ public final class FileUploadArgumentGetter implements AnnotationArgumentGetter 
   @Override
   public Object get(ArgumentContext context) throws Exception {
     RequestContext requestContext = context.getContext();
-    Map<String, FileUpload> fileUploads = requestContext.request().fileUpload();
+    Map<String, FileUpload> fileUploads = requestContext.request().fileUploads();
     Parameter parameter = context.getParameter();
     String name = parameter.getName();
     if (MultipartFile.class.isAssignableFrom(parameter.getType()) && fileUploads.containsKey(name)) {
       io.netty.handler.codec.http.multipart.FileUpload fileUpload = fileUploads.get(name);
-      return MultipartFileUtils.createMultipartFile(fileUpload, requestContext.request().channelHandlerContext());
+      return MultipartFileUtils.createMultipartFile(fileUpload, requestContext.channelContext());
     }
     return null;
   }

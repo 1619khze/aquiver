@@ -38,17 +38,18 @@ import java.util.Map;
  * @since 2020/8/26
  */
 public final class MultiFileUploadArgumentGetter implements AnnotationArgumentGetter {
+
   @Override
   public Object get(ArgumentContext context) throws Exception {
     RequestContext requestContext = context.getContext();
-    Map<String, FileUpload> fileUploads = requestContext.request().fileUpload();
+    Map<String, FileUpload> fileUploads = requestContext.request().fileUploads();
     List<MultipartFile> multipartFiles = new ArrayList<>();
     Parameter parameter = context.getParameter();
     if (List.class.isAssignableFrom(parameter.getType())) {
       for (Map.Entry<String, FileUpload> entry : fileUploads.entrySet()) {
         FileUpload value = entry.getValue();
         MultipartFile multipartFile = MultipartFileUtils.createMultipartFile(
-                value, requestContext.request().channelHandlerContext());
+                value, requestContext.channelContext());
         multipartFiles.add(multipartFile);
       }
     }

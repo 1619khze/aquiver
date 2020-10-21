@@ -24,8 +24,8 @@
 package org.aquiver.mvc.argument;
 
 import org.aquiver.Request;
-import org.aquiver.mvc.http.HttpRequest;
 import org.aquiver.RequestContext;
+import org.aquiver.mvc.http.HttpRequest;
 
 /**
  * @author WangYi

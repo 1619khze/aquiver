@@ -23,6 +23,8 @@
  */
 package org.aquiver.mvc.http;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -30,19 +32,25 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
+import io.netty.handler.codec.http.multipart.FileUpload;
 import io.netty.handler.codec.http.multipart.HttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
+import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.util.CharsetUtil;
 import org.apache.commons.lang3.Validate;
 import org.aquiver.Aquiver;
 import org.aquiver.Request;
 import org.aquiver.mvc.router.session.Session;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
@@ -67,30 +75,31 @@ public class HttpRequest implements Request {
   private final ChannelHandlerContext context;
   private final Map<String, Cookie> cookies;
   private final Map<String, Header> headers;
+  private final Map<String,FileUpload> fileUploads;
   private final QueryStringDecoder paramDecoder;
   private final HttpPostRequestDecoder postDecoder;
-  private final ByteBuf body = EMPTY_BUF;
+  private ByteBuf body = EMPTY_BUF;
   private Session session;
-
 
   private HttpRequest(FullHttpRequest fullHttpRequest, ChannelHandlerContext context) {
     this.nettyRequest = fullHttpRequest;
     this.context = context;
     this.cookies = Cookies.parse(nettyRequest.headers());
     this.headers = Headers.parse(nettyRequest.headers());
+    this.fileUploads = new HashMap<>();
     this.paramDecoder = new QueryStringDecoder(nettyRequest.uri());
     this.postDecoder = new HttpPostRequestDecoder(HTTP_DATA_FACTORY, nettyRequest);
-    this.of();
+    this.init();
   }
 
-  public static HttpRequest of(FullHttpRequest fullHttpRequest, ChannelHandlerContext context){
-    Validate.notNull(fullHttpRequest,"FullHttpRequest can't be null");
-    Validate.notNull(context,"ChannelHandlerContext can't be null");
+  public static HttpRequest of(FullHttpRequest fullHttpRequest, ChannelHandlerContext context) {
+    Validate.notNull(fullHttpRequest, "FullHttpRequest can't be null");
+    Validate.notNull(context, "ChannelHandlerContext can't be null");
 
-    return new HttpRequest(fullHttpRequest,context);
+    return new HttpRequest(fullHttpRequest, context);
   }
 
-  private void of() {
+  private void init() {
     final Map<String, List<String>> parameters = this.paramDecoder.parameters();
     for (Map.Entry<String, List<String>> entry : parameters.entrySet()) {
       final String key = entry.getKey();
@@ -99,7 +108,41 @@ public class HttpRequest implements Request {
     }
 
     if (Aquiver.of().sessionEnable()) {
-      this.session = Aquiver.of().sessionManager().createSession(this,context);
+      this.session = Aquiver.of().sessionManager()
+              .createSession(this, context);
+    }
+    this.body = nettyRequest.content();
+
+    final Object contentType = header("Content-Type");
+    if (!Objects.isNull(contentType) && body != null
+            && String.valueOf(contentType)
+            .equals(MediaType.APPLICATION_JSON_VALUE)) {
+
+      final byte[] reqContent = new byte[body.readableBytes()];
+      this.body.readBytes(reqContent);
+      final String bodyContent = new String(reqContent, StandardCharsets.UTF_8);
+
+      final JSONObject jsonParams = JSONObject.parseObject(bodyContent);
+      for (Object key : jsonParams.keySet()) {
+        jsonParams.put(key.toString(), jsonParams.get(key.toString()));
+      }
+      this.httpData.putAll(jsonParams);
+    }
+
+    try {
+      this.postDecoder.offer(nettyRequest);
+      final List<InterfaceHttpData> bodyHttpDatas = postDecoder.getBodyHttpDatas();
+      for (InterfaceHttpData httpData : bodyHttpDatas) {
+        if (InterfaceHttpData.HttpDataType.FileUpload.equals(httpData.getHttpDataType())) {
+          final FileUpload fileUpload = (FileUpload) httpData;
+          this.fileUploads.put(fileUpload.getName(), fileUpload);
+        } else {
+          final Attribute data = (Attribute) httpData;
+          this.httpData.put(data.getName(), data.getValue());
+        }
+      }
+    } catch (IOException e) {
+      throw new IllegalArgumentException("resolver request exception", e);
     }
   }
 
@@ -112,13 +155,32 @@ public class HttpRequest implements Request {
   }
 
   @Override
+  public Map<String, FileUpload> fileUploads() {
+    return this.fileUploads;
+  }
+
+  @Override
+  public FileUpload fileUploads(String fileKey) {
+    return this.fileUploads().get(fileKey);
+  }
+
+  @Override
   public Boolean isMultipart() {
-    return postDecoder.isMultipart();
+    return this.postDecoder.isMultipart();
   }
 
   @Override
   public ByteBuf body() {
     return this.body;
+  }
+
+  @Override
+  public <T> T body(Class<T> type) {
+    String jsonString = JSON.toJSONString(httpData);
+    if (httpData.isEmpty() || !JSONObject.isValid(jsonString)) {
+      return null;
+    }
+    return JSONObject.parseObject(jsonString, type);
   }
 
   @Override
