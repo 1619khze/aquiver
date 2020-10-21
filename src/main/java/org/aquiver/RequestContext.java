@@ -23,44 +23,70 @@
  */
 package org.aquiver;
 
-import io.netty.channel.ChannelFutureListener;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpResponseStatus;
+import org.apache.commons.lang3.Validate;
+import org.aquiver.mvc.http.Cookie;
+import org.aquiver.mvc.http.Header;
+import org.aquiver.mvc.http.HttpRequest;
+import org.aquiver.mvc.http.HttpResponse;
 import org.aquiver.mvc.router.RouteInfo;
+import org.aquiver.mvc.router.session.Session;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author WangYi
  * @since 2020/6/27
  */
-public class RequestContext {
-  private final Request request;
-  private final Response response;
+public class RequestContext implements Request, Response, RequestChannel {
+  private final static ThreadLocal<RequestContext> threadContext = new InheritableThreadLocal<>();
+  private final HttpRequest httpRequest;
+  private final HttpResponse response;
+  private final ChannelHandlerContext context;
   private Throwable throwable;
   private RouteInfo routeInfo;
 
   public RequestContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
-    this.request = new Request(httpRequest, context);
-    this.response = new Response();
+    Validate.notNull(httpRequest, "FullHttpRequest can't be null");
+    Validate.notNull(context, "ChannelHandlerContext can't be null");
+    this.context = context;
+    this.httpRequest = new HttpRequest(httpRequest, this.context);
+    this.response = new HttpResponse(this.context);
   }
 
-  public RouteInfo route() {
-    return routeInfo;
+  public static RequestContext current() {
+    return threadContext.get();
   }
 
-  public void route(RouteInfo routeInfo) {
+  public void routeInfo(RouteInfo routeInfo) {
+    Validate.notNull(routeInfo, "RouteInfo can't be null");
     this.routeInfo = routeInfo;
   }
 
-  public Request request() {
-    return request;
+  public void throwable(Throwable throwable) {
+    Validate.notNull(throwable, "throwable can't be null");
+    this.throwable = throwable;
   }
 
-  public Response response() {
+  private Channel getChannel() {
+    return this.context.channel();
+  }
+
+  public RouteInfo routeInfo() {
+    return routeInfo;
+  }
+
+  public HttpRequest request() {
+    return httpRequest;
+  }
+
+  public HttpResponse response() {
     return response;
   }
 
@@ -68,21 +94,248 @@ public class RequestContext {
     return throwable;
   }
 
-  public void throwable(Throwable throwable) {
-    this.throwable = throwable;
+  @Override
+  public ChannelHandlerContext channelContext() {
+    return this.context;
   }
 
+  @Override
+  public void closeChannel() {
+    this.getChannel().close();
+  }
+
+  @Override
+  public boolean isOpen() {
+    return this.getChannel().isOpen();
+  }
+
+  @Override
+  public boolean isRegistered() {
+    return this.getChannel().isRegistered();
+  }
+
+  @Override
+  public boolean isActive() {
+    return this.getChannel().isActive();
+  }
+
+  @Override
+  public boolean isWritable() {
+    return this.getChannel().isWritable();
+  }
+
+  @Override
+  public long bytesBeforeUnwritable() {
+    return this.getChannel().bytesBeforeUnwritable();
+  }
+
+  @Override
+  public long bytesBeforeWritable() {
+    return this.getChannel().bytesBeforeWritable();
+  }
+
+  @Override
+  public void tryPush(FullHttpResponse response) {
+    this.response().tryPush(response);
+  }
+
+  @Override
+  public ChannelFuture tryWrite(Object object) {
+    return this.response().tryWrite(object);
+  }
+
+  @Override
+  public void tryPush(Object msg) {
+    this.response().tryPush(msg);
+  }
+
+  @Override
   public void redirect(String redirectUrl) {
-    final HttpHeaders headers = new DefaultHttpHeaders();
-    headers.set(HttpHeaderNames.LOCATION, redirectUrl);
-
-    final FullHttpResponse response = ResultResponseBuilder.forResponse(
-            HttpResponseStatus.PERMANENT_REDIRECT).headers(headers).build();
-
-    this.writeAndFlush(response);
+    this.response().redirect(redirectUrl);
   }
 
-  public void writeAndFlush(FullHttpResponse fullHttpResponse) {
-    request().channelHandlerContext().writeAndFlush(fullHttpResponse).addListener(ChannelFutureListener.CLOSE);
+  @Override
+  public <T> void json(T t) {
+    this.response().json(t);
+  }
+
+  @Override
+  public <T> void xml(T t) {
+    this.response().xml(t);
+  }
+
+  @Override
+  public void text(String text) {
+    this.response().text(text);
+  }
+
+  @Override
+  public void render(String renderTemplate) {
+    this.response().render(renderTemplate);
+  }
+
+  @Override
+  public void html(String htmlTemplate) {
+    this.response().html(htmlTemplate);
+  }
+
+  @Override
+  public void status(int httpStatus) {
+    this.response().status(httpStatus);
+  }
+
+  @Override
+  public void contentType() {
+    this.response().contentType();
+  }
+
+  @Override
+  public void contentType(String contentType) {
+    this.response().contentType(contentType);
+  }
+
+  @Override
+  public void notFound() {
+    this.response().notFound();
+  }
+
+  @Override
+  public void badRequest(){
+    this.response().badRequest();
+  }
+
+  @Override
+  public void serverInternalError() {
+    this.response().serverInternalError();
+  }
+
+  @Override
+  public Boolean isMultipart() {
+    return this.request().isMultipart();
+  }
+
+  @Override
+  public ByteBuf body() {
+    return this.request().body();
+  }
+
+  @Override
+  public Session session() {
+    return this.request().session();
+  }
+
+  @Override
+  public String method() {
+    return this.request().method();
+  }
+
+  @Override
+  public String protocol() {
+    return this.request().protocol();
+  }
+
+  @Override
+  public Integer minorVersion() {
+    return this.request().minorVersion();
+  }
+
+  @Override
+  public Integer majorVersion() {
+    return this.request().majorVersion();
+  }
+
+  @Override
+  public String header(String key) {
+    return this.request().header(key);
+  }
+
+  @Override
+  public String param(String key) {
+    return this.request().param(key);
+  }
+
+  @Override
+  public Set<String> paramNames() {
+    return this.request().paramNames();
+  }
+
+  @Override
+  public Set<String> headerNames() {
+    return this.request().headerNames();
+  }
+
+  @Override
+  public String uri() {
+    return this.request().uri();
+  }
+
+  @Override
+  public String path() {
+    return this.request().path();
+  }
+
+  @Override
+  public String rawPath() {
+    return this.request().rawPath();
+  }
+
+  @Override
+  public String rawQuery() {
+    return this.request().rawQuery();
+  }
+
+  @Override
+  public Integer port() {
+    return this.request().port();
+  }
+
+  @Override
+  public String remoteAddress() {
+    return this.request().remoteAddress();
+  }
+
+  @Override
+  public String host() {
+    return this.request().host();
+  }
+
+  @Override
+  public String accept() {
+    return this.request().accept();
+  }
+
+  @Override
+  public String connection() {
+    return this.request().connection();
+  }
+
+  @Override
+  public Map<String, Cookie> cookies() {
+    return this.request().cookies();
+  }
+
+  @Override
+  public String referer() {
+    return this.request().referer();
+  }
+
+  @Override
+  public String userAgent() {
+    return this.request().userAgent();
+  }
+
+  @Override
+  public Map<String, Header> header() {
+    return this.request().header();
+  }
+
+  @Override
+  public Boolean isKeepAlive() {
+    return this.request().isKeepAlive();
+  }
+
+  @Override
+  public Boolean is100ContinueExpected() {
+    return this.request().is100ContinueExpected();
   }
 }
