@@ -41,6 +41,8 @@ import io.netty.util.ReferenceCountUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apex.ApexContext;
 import org.aquiver.mvc.argument.MethodArgumentGetter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -50,6 +52,8 @@ import java.util.concurrent.CompletableFuture;
  * @since 2020/7/5
  */
 public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
+  private static final Logger log = LoggerFactory.getLogger(WebSocketHandler.class);
+
   private final ApexContext apexContext = ApexContext.instance();
   private final WebSocketResolver webSocketResolver;
   private WebSocketContext webSocketContext;
@@ -172,6 +176,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
    */
   @Override
   public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) {
+    log.error("An exception occurred", cause);
     if (null != webSocketChannel) {
       webSocketContext.setError(new WebSocketContext.Error(cause, webSocketContext));
       CompletableFuture.completedFuture(webSocketContext)
