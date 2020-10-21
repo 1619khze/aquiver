@@ -29,13 +29,11 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.DefaultFileRegion;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.ssl.SslHandler;
@@ -52,32 +50,26 @@ import java.util.Objects;
  * @since 2020/5/28
  */
 public class StaticFileServerHandler {
-  private static void send100Continue(ChannelHandlerContext ctx) {
-    FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE);
-    ctx.writeAndFlush(response);
-  }
-
   public void handle(RequestContext requestContext) throws Exception {
-    FullHttpRequest request = requestContext.request().httpRequest();
-    ChannelHandlerContext ctx = requestContext.request().channelHandlerContext();
-    String uri = request.uri();
-    if ("favicon.ico".equals(uri)) {
-      return;
-    }
-    URL resource = this.getClass().getClassLoader().getResource(uri.replaceFirst("/", ""));
-
-    if (Objects.isNull(resource)) {
+    String uri = requestContext.uri();
+    final URL resource = this.getClass().getClassLoader().getResource(uri
+                    .replaceFirst("/", ""));
+    if (Objects.isNull(resource) || "favicon.ico".equals(uri)) {
       return;
     }
 
-    File html = new File(resource.toURI());
+    final ChannelHandlerContext ctx = requestContext.channelContext();
+    final File html = new File(resource.toURI());
 
-    if (HttpUtil.is100ContinueExpected(request)) {
-      send100Continue(ctx);
+    if (requestContext.is100ContinueExpected()) {
+      FullHttpResponse response = new DefaultFullHttpResponse(
+              HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE);
+
+      requestContext.tryPush(response);
     }
 
     try (RandomAccessFile file = new RandomAccessFile(html, "r")) {
-      HttpResponse response = new DefaultHttpResponse(request.protocolVersion(), HttpResponseStatus.OK);
+      HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_0, HttpResponseStatus.OK);
 
       if (uri.endsWith(".html")) {
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html; charset=UTF-8");
@@ -87,7 +79,7 @@ public class StaticFileServerHandler {
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/css; charset=UTF-8");
       }
 
-      boolean keepAlive = HttpUtil.isKeepAlive(request);
+      Boolean keepAlive = requestContext.isKeepAlive();
 
       if (keepAlive) {
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, file.length());

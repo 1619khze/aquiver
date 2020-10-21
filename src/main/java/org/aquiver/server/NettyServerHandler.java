@@ -93,14 +93,27 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
     log.error("An exception occurred when calling the mapping method", cause);
     this.requestContext.throwable(cause);
     this.errorHandlerResolver.handlerException(cause, requestContext);
-    ctx.close();
   }
 
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
-    this.mergeRequest(msg);
+    if (msg instanceof HttpRequest) {
+      HttpRequest request = (HttpRequest) msg;
+      this.request = new DefaultFullHttpRequest(
+              request.protocolVersion(),
+              request.method(), request.uri());
+    }
+
+    if (msg instanceof FullHttpRequest) {
+      this.request = (FullHttpRequest) msg;
+    }
+
     try {
-      this.buildRequestContext(ctx);
+      this.requestContext = new RequestContext(request, ctx);
+      final MethodArgumentGetter methodArgumentGetter
+              = new MethodArgumentGetter(requestContext);
+
+      this.context.addBean(methodArgumentGetter);
 
       if (Objects.isNull(bypassRequestUrls)) {
         this.bypassRequestUrls = new RegexBypassRequestUrls();
@@ -115,22 +128,29 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
       if (Objects.isNull(routeInfo)) {
         throw handlerException();
       } else {
-        this.requestContext.route(routeInfo);
+        this.requestContext.routeInfo(routeInfo);
       }
 
-      final RequestResult result = executeLogic();
+      final List<Interceptor> interceptors
+              = Aquiver.interceptors();
+      final AspectInterceptorChain interceptorChain
+              = new AspectInterceptorChain(interceptors, requestContext);
+
+      interceptorChain.invoke();
+      final RequestResult result = interceptorChain.getResult();
+
       this.handleResult(result);
     } catch (Throwable throwable) {
-      exceptionCaught(ctx, throwable);
+      this.exceptionCaught(ctx, throwable);
     }
   }
 
   private NoRouteFoundException handlerException() {
     final NoRouteFoundException exception = new NoRouteFoundException
-            (requestContext.request().httpMethodName(), requestContext.request().uri());
+            (requestContext.request().method(), requestContext.uri());
     final FullHttpResponse response = ResultResponseBuilder.forResponse(
             HttpResponseStatus.NOT_FOUND, exception.getMessage()).build();
-    requestContext.writeAndFlush(response);
+    requestContext.tryPush(response);
     return exception;
   }
 
@@ -144,37 +164,5 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
         handler.handle(requestContext, result);
       }
     }
-  }
-
-  private RequestResult executeLogic() throws Throwable {
-    final List<Interceptor> interceptors = Aquiver.interceptors();
-    final AspectInterceptorChain interceptorChain =
-            new AspectInterceptorChain(interceptors, requestContext);
-
-    interceptorChain.invoke();
-    return interceptorChain.getResult();
-  }
-
-  private void buildRequestContext(ChannelHandlerContext ctx) throws Exception {
-    this.requestContext = this.buildRequestContext(request, ctx);
-  }
-
-  private void mergeRequest(Object msg) {
-    if (msg instanceof HttpRequest) {
-      HttpRequest request = (HttpRequest) msg;
-      this.request = new DefaultFullHttpRequest(
-              request.protocolVersion(), request.method(), request.uri());
-    }
-
-    if (msg instanceof FullHttpRequest) {
-      this.request = (FullHttpRequest) msg;
-    }
-  }
-
-  private RequestContext buildRequestContext(FullHttpRequest request, ChannelHandlerContext ctx) {
-    RequestContext requestContext = new RequestContext(request, ctx);
-    MethodArgumentGetter methodArgumentGetter = new MethodArgumentGetter(requestContext);
-    this.context.addBean(methodArgumentGetter);
-    return requestContext;
   }
 }
