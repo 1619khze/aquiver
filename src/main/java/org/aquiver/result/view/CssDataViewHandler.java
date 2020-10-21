@@ -23,7 +23,7 @@
  */
 package org.aquiver.result.view;
 
-import org.aquiver.mvc.http.HttpRequest;
+import org.aquiver.Request;
 import org.aquiver.mvc.http.MediaType;
 
 /**
@@ -31,8 +31,9 @@ import org.aquiver.mvc.http.MediaType;
  * @since 2020/8/22
  */
 public final class CssDataViewHandler extends AbstractDataViewHandler {
+
   @Override
-  public String getMimeType(HttpRequest httpRequest) {
+  public String getMimeType(Request request) {
     return MediaType.TEXT_CSS_VALUE;
   }
 
