@@ -24,6 +24,7 @@
 package org.aquiver;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.http.multipart.FileUpload;
 import org.aquiver.mvc.http.Cookie;
 import org.aquiver.mvc.http.Header;
 import org.aquiver.mvc.router.session.Session;
@@ -36,9 +37,15 @@ import java.util.Set;
  * @since 2020/10/17
  */
 public interface Request {
+  Map<String, FileUpload> fileUploads();
+
+  FileUpload fileUploads(String fileKey);
+
   Boolean isMultipart();
 
   ByteBuf body();
+
+  <T> T body(Class<T> type);
 
   Session session();
 

@@ -29,6 +29,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.multipart.FileUpload;
 import org.apache.commons.lang3.Validate;
 import org.aquiver.mvc.http.Cookie;
 import org.aquiver.mvc.http.Header;
@@ -213,6 +214,16 @@ public class RequestContext implements Request, Response, RequestChannel {
   }
 
   @Override
+  public Map<String, FileUpload> fileUploads() {
+    return this.request().fileUploads();
+  }
+
+  @Override
+  public FileUpload fileUploads(String fileKey) {
+    return this.request().fileUploads(fileKey);
+  }
+
+  @Override
   public Boolean isMultipart() {
     return this.request().isMultipart();
   }
@@ -220,6 +231,11 @@ public class RequestContext implements Request, Response, RequestChannel {
   @Override
   public ByteBuf body() {
     return this.request().body();
+  }
+
+  @Override
+  public <T> T body(Class<T> type) {
+    return this.request().body(type);
   }
 
   @Override
