@@ -23,6 +23,8 @@
  */
 package org.aquiver.mvc.annotation;
 
+import org.aquiver.mvc.http.HttpMethod;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

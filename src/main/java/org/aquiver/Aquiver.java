@@ -29,7 +29,7 @@ import org.apex.ApexContext;
 import org.apex.Environment;
 import org.aquiver.handler.ErrorHandler;
 import org.aquiver.handler.ErrorHandlerResolver;
-import org.aquiver.mvc.annotation.HttpMethod;
+import org.aquiver.mvc.http.HttpMethod;
 import org.aquiver.mvc.interceptor.Interceptor;
 import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.session.SessionManager;

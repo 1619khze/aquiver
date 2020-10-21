@@ -21,15 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.annotation;
+package org.aquiver.mvc.http;
 
-public enum HttpMethod {
-  GET,
-  HEAD,
-  POST,
-  PUT,
-  PATCH,
-  DELETE,
-  OPTIONS,
-  TRACE
+import io.netty.handler.codec.http.HttpHeaderNames;
+
+/**
+ * @author WangYi
+ * @since 2020/10/20
+ */
+public interface HttpConst {
+  String ACCEPT = HttpHeaderNames.ACCEPT.toString();
+  String USER_AGENT = HttpHeaderNames.USER_AGENT.toString();
+  String REFERER = HttpHeaderNames.REFERER.toString();
+  String CONNECTION = HttpHeaderNames.CONNECTION.toString();
+  String HOST = HttpHeaderNames.HOST.toString();
 }

@@ -24,6 +24,7 @@
 package org.aquiver.mvc.router.session;
 
 import io.netty.channel.ChannelHandlerContext;
+import org.aquiver.mvc.http.Cookie;
 import org.aquiver.mvc.http.HttpRequest;
 
 import java.util.HashMap;
@@ -61,10 +62,10 @@ public final class SessionManager {
   }
 
   private Session getSession(HttpRequest httpRequest) {
-    Object cookieHeader = httpRequest.cookie(httpRequest.sessionKey());
-    if (Objects.isNull(cookieHeader)) {
+    Cookie cookie = httpRequest.cookie(httpRequest.sessionKey());
+    if (Objects.isNull(cookie)) {
       return null;
     }
-    return session(String.valueOf(cookieHeader));
+    return session(cookie.getValue());
   }
 }

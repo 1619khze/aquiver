@@ -26,7 +26,7 @@ package org.aquiver.mvc.router;
 import org.aquiver.RequestContext;
 import org.aquiver.RequestHandler;
 import org.aquiver.RouteRepeatException;
-import org.aquiver.mvc.annotation.HttpMethod;
+import org.aquiver.mvc.http.HttpMethod;
 import org.aquiver.mvc.annotation.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

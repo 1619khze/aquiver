@@ -24,7 +24,7 @@
 package org.aquiver.mvc.router;
 
 import org.aquiver.RequestHandler;
-import org.aquiver.mvc.annotation.HttpMethod;
+import org.aquiver.mvc.http.HttpMethod;
 
 /**
  * @author WangYi

@@ -21,21 +21,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.mvc.annotation;
+package org.aquiver.mvc.http;
 
-import org.aquiver.mvc.http.HttpMethod;
+import org.apache.commons.lang3.Validate;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+/**
+ * @author WangYi
+ * @since 2020/10/19
+ */
+public class Header {
+  private final String key;
+  private final Object value;
 
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Path {
-  String value() default "";
+  private Header(String key, String value) {
+    Validate.notNull(key, "Header key can't be null");
+    Validate.notNull(value, "Header value can't be null");
+    this.key = key;
+    this.value = value;
+  }
 
-  HttpMethod method() default HttpMethod.GET;
+  protected static Header init(String key, String value) {
+    return new Header(key, value);
+  }
+
+  public String getKey() {
+    return key;
+  }
+
+  public Object getValue() {
+    return value;
+  }
+
+  public String getString() {
+    return String.valueOf(value);
+  }
 }

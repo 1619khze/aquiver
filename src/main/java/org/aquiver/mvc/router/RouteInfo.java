@@ -24,7 +24,7 @@
 package org.aquiver.mvc.router;
 
 import org.apache.commons.lang3.Validate;
-import org.aquiver.mvc.annotation.HttpMethod;
+import org.aquiver.mvc.http.HttpMethod;
 
 import java.lang.reflect.Method;
 
