@@ -23,9 +23,12 @@
  */
 package org.aquiver;
 
-import org.aquiver.mvc.http.Cookies;
+import io.netty.buffer.ByteBuf;
+import org.aquiver.mvc.http.Cookie;
 import org.aquiver.mvc.http.Header;
+import org.aquiver.mvc.router.session.Session;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -33,6 +36,12 @@ import java.util.Set;
  * @since 2020/10/17
  */
 public interface Request {
+  Boolean isMultipart();
+
+  ByteBuf body();
+
+  Session session();
+
   String method();
 
   String protocol();
@@ -43,13 +52,13 @@ public interface Request {
 
   String header(String key);
 
-  String parameter(String key);
+  String param(String key);
 
-  Set<String> parameterNames();
+  Set<String> paramNames();
 
   Set<String> headerNames();
 
-  String requestURI();
+  String uri();
 
   String path();
 
@@ -67,11 +76,15 @@ public interface Request {
 
   String connection();
 
-  Cookies cookies();
+  Map<String, Cookie> cookies();
 
   String referer();
 
   String userAgent();
 
-  Header header();
+  Map<String, Header> header();
+
+  Boolean isKeepAlive();
+
+  Boolean is100ContinueExpected();
 }

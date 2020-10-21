@@ -23,11 +23,15 @@
  */
 package org.aquiver;
 
+import io.netty.channel.ChannelHandlerContext;
+
 /**
  * @author WangYi
  * @since 2020/10/20
  */
 public interface RequestChannel {
+  ChannelHandlerContext channelContext();
+
   void closeChannel();
 
   boolean isOpen();
