@@ -51,6 +51,6 @@ public final class ModelAndViewResultHandler implements ResultHandler {
     ModelAndView modelAndView = (ModelAndView) result.getResultObject();
     String renderView = this.htmlView.renderView(modelAndView.htmlPath(), modelAndView.params());
     final FullHttpResponse responseView = ResultResponseBuilder.forResponse(renderView).build();
-    ctx.writeAndFlush(responseView);
+    ctx.tryPush(responseView);
   }
 }

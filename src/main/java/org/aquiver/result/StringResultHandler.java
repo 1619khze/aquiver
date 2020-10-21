@@ -78,7 +78,7 @@ public final class StringResultHandler implements ResultHandler {
         url = result.substring(idx + 1);
         viewHandler = viewHandlerResolver.lookup(type);
         if (viewHandler == null) {
-          ctx.writeAndFlush(ResultResponseBuilder.forResponse(result).build());
+          ctx.tryPush(ResultResponseBuilder.forResponse(result).build());
           return;
         }
       } else {
@@ -92,7 +92,7 @@ public final class StringResultHandler implements ResultHandler {
       if (suffix != null) {
         viewHandler = viewHandlerResolver.lookup(suffix);
         if (viewHandler == null) {
-          ctx.writeAndFlush(ResultResponseBuilder.forResponse(result).build());
+          ctx.tryPush(ResultResponseBuilder.forResponse(result).build());
           return;
         }
       }
@@ -103,7 +103,7 @@ public final class StringResultHandler implements ResultHandler {
       if (defaultViewHandler == null) {
         defaultViewHandler = viewHandlerResolver.lookup(SERVER_VIEW_SUFFIX);
         if (defaultViewHandler == null) {
-          ctx.writeAndFlush(ResultResponseBuilder.forResponse(result).build());
+          ctx.tryPush(ResultResponseBuilder.forResponse(result).build());
           return;
         }
       }

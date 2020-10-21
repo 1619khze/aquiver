@@ -49,7 +49,7 @@ public final class PebbleTemplateViewHandler extends AbstractTemplateViewHandler
   protected void doRender(RequestContext ctx, String viewPathName) throws IOException {
     String renderView = this.htmlView.renderView(viewPathName, new HashMap<>());
     final FullHttpResponse responseView = ResultResponseBuilder.forResponse(renderView).build();
-    ctx.writeAndFlush(responseView);
+    ctx.tryPush(responseView);
   }
 
   @Override

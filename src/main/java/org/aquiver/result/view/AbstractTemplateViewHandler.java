@@ -57,7 +57,7 @@ public abstract class AbstractTemplateViewHandler implements ViewHandler {
 
     URL viewUrl = this.getClass().getClassLoader().getResource(viewPath);
     if (Objects.isNull(viewUrl)) {
-      ctx.writeAndFlush(ResultResponseBuilder.forResponse(viewPathName).build());
+      ctx.tryPush(ResultResponseBuilder.forResponse(viewPathName).build());
     } else {
       doRender(ctx, viewPath);
     }

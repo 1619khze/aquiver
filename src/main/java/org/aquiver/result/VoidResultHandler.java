@@ -43,6 +43,6 @@ public final class VoidResultHandler implements ResultHandler {
   @Override
   public void handle(RequestContext ctx, RequestResult result) {
     FullHttpResponse voidResponse = ResultResponseBuilder.forResponse().build();
-    ctx.writeAndFlush(voidResponse);
+    ctx.tryPush(voidResponse);
   }
 }

@@ -55,6 +55,6 @@ public final class JsonResultHandler implements ResultHandler {
     HttpHeaders httpHeaders = new DefaultHttpHeaders();
     httpHeaders.add(HttpHeaderNames.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
     FullHttpResponse jsonResponse = ResultResponseBuilder.forResponse(httpHeaders, jsonString).build();
-    ctx.writeAndFlush(jsonResponse);
+    ctx.tryPush(jsonResponse);
   }
 }

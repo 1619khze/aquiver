@@ -27,7 +27,7 @@ import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
-import org.aquiver.Request;
+import org.aquiver.mvc.http.HttpRequest;
 import org.aquiver.RequestContext;
 import org.aquiver.ResultResponseBuilder;
 import org.aquiver.ViewHandler;
@@ -37,13 +37,13 @@ import org.aquiver.ViewHandler;
  * @since 2020/8/22
  */
 public abstract class AbstractDataViewHandler implements ViewHandler {
-  public abstract String getMimeType(Request request);
+  public abstract String getMimeType(HttpRequest httpRequest);
 
   @Override
   public void render(RequestContext ctx, String viewPathName) {
     final HttpHeaders httpHeaders = new DefaultHttpHeaders();
     httpHeaders.add(HttpHeaderNames.CONTENT_TYPE, getMimeType(ctx.request()));
     final FullHttpResponse response = ResultResponseBuilder.forResponse(httpHeaders, viewPathName).build();
-    ctx.writeAndFlush(response);
+    ctx.tryPush(response);
   }
 }

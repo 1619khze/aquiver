@@ -56,7 +56,7 @@ public final class HtmlTemplateViewHandler extends AbstractTemplateViewHandler {
     Resource resource = new FileBaseResource(Paths.get(viewUrl.toURI()));
     String htmlContent = new String(Files.readAllBytes(resource.getPath()));
     FullHttpResponse response = ResultResponseBuilder.forResponse(htmlContent).build();
-    ctx.writeAndFlush(response);
+    ctx.tryPush(response);
   }
 
   @Override

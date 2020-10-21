@@ -23,7 +23,7 @@
  */
 package org.aquiver.result.view;
 
-import org.aquiver.Request;
+import org.aquiver.mvc.http.HttpRequest;
 import org.aquiver.mvc.http.MediaType;
 
 /**
@@ -33,7 +33,7 @@ import org.aquiver.mvc.http.MediaType;
 public final class XmlDataViewHandler extends AbstractDataViewHandler {
 
   @Override
-  public String getMimeType(Request request) {
+  public String getMimeType(HttpRequest httpRequest) {
     return MediaType.TEXT_XML_VALUE;
   }
 
