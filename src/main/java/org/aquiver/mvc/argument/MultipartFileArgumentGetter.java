@@ -31,10 +31,11 @@ import org.aquiver.mvc.router.multipart.MultipartFile;
  * @since 2020/8/26
  */
 public final class MultipartFileArgumentGetter implements TypeArgumentGetter<MultipartFile> {
+
   @Override
   public MultipartFile get(RequestContext context) {
     final MultipartFile multipartFile = new MultipartFile();
-    multipartFile.channelContext(context.request().channelHandlerContext());
+    multipartFile.channelContext(context.channelContext());
     return multipartFile;
   }
 

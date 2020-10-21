@@ -24,6 +24,7 @@
 package org.aquiver.mvc.argument;
 
 import org.aquiver.RequestContext;
+import org.aquiver.mvc.http.Cookie;
 
 import java.lang.reflect.Parameter;
 import java.util.Map;
@@ -33,11 +34,12 @@ import java.util.Map;
  * @since 2020/8/26
  */
 public final class CookiesArgumentGetter implements AnnotationArgumentGetter {
+
   @Override
-  public Object get(ArgumentContext context) throws Exception {
+  public Object get(ArgumentContext context) {
     RequestContext requestContext = context.getContext();
-    Map<String, Object> cookies = requestContext.request().cookies();
+    Map<String, Cookie> cookies = requestContext.request().cookies();
     Parameter parameter = context.getParameter();
-    return parameter.getType().cast(cookies.get(parameter.getName()));
+    return parameter.getType().cast(cookies.get(parameter.getName()).getValue());
   }
 }

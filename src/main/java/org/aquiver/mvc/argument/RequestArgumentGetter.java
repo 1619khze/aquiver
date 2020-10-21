@@ -24,6 +24,7 @@
 package org.aquiver.mvc.argument;
 
 import org.aquiver.Request;
+import org.aquiver.mvc.http.HttpRequest;
 import org.aquiver.RequestContext;
 
 /**
@@ -31,6 +32,7 @@ import org.aquiver.RequestContext;
  * @since 2020/8/26
  */
 public final class RequestArgumentGetter implements TypeArgumentGetter<Request> {
+
   @Override
   public Request get(RequestContext context) {
     return context.request();
@@ -38,6 +40,6 @@ public final class RequestArgumentGetter implements TypeArgumentGetter<Request> 
 
   @Override
   public boolean support(Class<?> cls) {
-    return cls.isAssignableFrom(Request.class);
+    return cls.isAssignableFrom(HttpRequest.class);
   }
 }

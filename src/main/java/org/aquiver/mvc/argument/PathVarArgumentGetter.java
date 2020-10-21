@@ -31,10 +31,11 @@ import org.aquiver.mvc.router.PathVarMatcher;
  * @since 2020/8/26
  */
 public final class PathVarArgumentGetter implements AnnotationArgumentGetter {
+
   @Override
-  public Object get(ArgumentContext context) throws Exception {
+  public Object get(ArgumentContext context) {
     RequestContext requestContext = context.getContext();
-    return PathVarMatcher.getPathVariable(requestContext.request().uri(),
-            requestContext.route().getUrl(), context.getParameter().getName());
+    return PathVarMatcher.getPathVariable(requestContext.uri(),
+            requestContext.routeInfo().getUrl(), context.getParameter().getName());
   }
 }

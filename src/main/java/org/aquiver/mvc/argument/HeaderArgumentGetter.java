@@ -32,10 +32,11 @@ import java.lang.reflect.Parameter;
  * @since 2020/8/26
  */
 public final class HeaderArgumentGetter implements AnnotationArgumentGetter {
+
   @Override
-  public Object get(ArgumentContext context) throws Exception {
+  public Object get(ArgumentContext context) {
     RequestContext requestContext = context.getContext();
     Parameter parameter = context.getParameter();
-    return parameter.getType().cast(requestContext.request().headers().get(parameter.getName()));
+    return parameter.getType().cast(requestContext.header(parameter.getName()));
   }
 }
