@@ -85,11 +85,11 @@ public class RequestContext implements Request, Response, RequestChannel {
     return routeInfo;
   }
 
-  public HttpRequest request() {
+  public Request request() {
     return httpRequest;
   }
 
-  public HttpResponse response() {
+  public Response response() {
     return response;
   }
 
