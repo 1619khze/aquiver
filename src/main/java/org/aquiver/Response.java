@@ -24,6 +24,7 @@
 package org.aquiver;
 
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.FullHttpResponse;
 
 /**
@@ -33,9 +34,13 @@ import io.netty.handler.codec.http.FullHttpResponse;
 public interface Response {
   void tryPush(FullHttpResponse response);
 
-  ChannelFuture tryWrite(Object object);
+  ChannelFuture tryPush(Object msg);
 
-  void tryPush(Object msg);
+  ChannelFuture tryPush(Object msg, ChannelPromise promise);
+
+  ChannelFuture tryWrite(Object msg);
+
+  ChannelFuture tryWrite(Object msg, ChannelPromise promise);
 
   void redirect(String redirectUrl);
 

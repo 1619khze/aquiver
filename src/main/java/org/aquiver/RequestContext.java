@@ -27,6 +27,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.multipart.FileUpload;
@@ -149,8 +150,18 @@ public class RequestContext implements Request, Response, RequestChannel {
   }
 
   @Override
-  public void tryPush(Object msg) {
-    this.response().tryPush(msg);
+  public ChannelFuture tryWrite(Object msg, ChannelPromise promise) {
+    return null;
+  }
+
+  @Override
+  public ChannelFuture tryPush(Object msg) {
+    return this.response().tryPush(msg);
+  }
+
+  @Override
+  public ChannelFuture tryPush(Object msg, ChannelPromise promise) {
+    return this.response().tryPush(msg, promise);
   }
 
   @Override
@@ -204,7 +215,7 @@ public class RequestContext implements Request, Response, RequestChannel {
   }
 
   @Override
-  public void badRequest(){
+  public void badRequest() {
     this.response().badRequest();
   }
 

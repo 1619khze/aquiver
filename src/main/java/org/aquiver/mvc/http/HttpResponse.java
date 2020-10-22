@@ -26,6 +26,7 @@ package org.aquiver.mvc.http;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -52,8 +53,8 @@ public class HttpResponse implements Response {
     this.context = context;
   }
 
-  public static HttpResponse of(ChannelHandlerContext context){
-    Validate.notNull(context,"ChannelHandlerContext can't be null");
+  public static HttpResponse of(ChannelHandlerContext context) {
+    Validate.notNull(context, "ChannelHandlerContext can't be null");
 
     return new HttpResponse(context);
   }
@@ -79,6 +80,7 @@ public class HttpResponse implements Response {
   }
 
   public void setMediaType(String mediaType) {
+    Validate.notNull(mediaType, "MediaType can't be null");
     this.mediaType = mediaType;
   }
 
@@ -88,13 +90,23 @@ public class HttpResponse implements Response {
   }
 
   @Override
-  public ChannelFuture tryWrite(Object object) {
-    return null;
+  public ChannelFuture tryPush(Object msg) {
+    return this.context.writeAndFlush(msg);
   }
 
   @Override
-  public void tryPush(Object msg) {
+  public ChannelFuture tryWrite(Object msg) {
+    return this.context.write(msg);
+  }
 
+  @Override
+  public ChannelFuture tryWrite(Object msg, ChannelPromise promise) {
+    return this.context.write(msg, promise);
+  }
+
+  @Override
+  public ChannelFuture tryPush(Object msg, ChannelPromise promise) {
+    return this.context.writeAndFlush(msg, promise);
   }
 
   @Override
