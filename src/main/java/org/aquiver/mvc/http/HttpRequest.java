@@ -75,7 +75,7 @@ public class HttpRequest implements Request {
   private final ChannelHandlerContext context;
   private final Map<String, Cookie> cookies;
   private final Map<String, Header> headers;
-  private final Map<String,FileUpload> fileUploads;
+  private final Map<String, FileUpload> fileUploads;
   private final QueryStringDecoder paramDecoder;
   private final HttpPostRequestDecoder postDecoder;
   private ByteBuf body = EMPTY_BUF;
