@@ -114,7 +114,7 @@ public class HttpRequest implements Request {
     this.body = nettyRequest.content();
 
     final Object contentType = header("Content-Type");
-    if (!Objects.isNull(contentType) && body != null
+    if (Objects.nonNull(contentType) && Objects.nonNull(body)
             && String.valueOf(contentType)
             .equals(MediaType.APPLICATION_JSON_VALUE)) {
 
