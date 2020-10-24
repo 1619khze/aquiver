@@ -92,7 +92,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     log.error("An exception occurred when calling the mapping method", cause);
     this.requestContext.throwable(cause);
-    this.errorHandlerResolver.handlerException(cause, requestContext);
+    this.errorHandlerResolver.handleException(cause, requestContext);
   }
 
   @Override

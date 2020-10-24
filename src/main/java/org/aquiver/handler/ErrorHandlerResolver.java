@@ -44,7 +44,7 @@ public class ErrorHandlerResolver {
     this.exceptionHandlerMap.put(throwableCls, errorHandler);
   }
 
-  public void handlerException(Throwable throwable, RequestContext requestContext) {
+  public void handleException(Throwable throwable, RequestContext requestContext) {
     if (exceptionHandlerMap.isEmpty() || !exceptionHandlerMap.containsKey(throwable.getClass())) {
       requestContext.closeChannel();
     }
