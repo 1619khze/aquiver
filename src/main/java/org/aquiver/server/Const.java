@@ -53,11 +53,7 @@ public interface Const {
   String PATH_SERVER_ADDRESS = "server.address";
   String PATH_SERVER_CORS = "server.cors";
   String PATH_SERVER_CONTENT_COMPRESSOR = "server.autoCompression";
-  String PATH_SERVER_PROFILE = "server.profile";
-  String PATH_SERVER_BOOT_CONFIG = "server.boot.conf";
   String PATH_ENV_WATCHER = "server.env.watcher";
-  String PATH_SCANNER_VERBOSE = "server.scanner.verbose";
-  String PATH_SCANNER_LOGGING = "server.scanner.logging";
   String PATH_SERVER_VIEW_PREFIX = "server.view.prefix";
   String PATH_SERVER_VIEW_SUFFIX = "server.view.suffix";
   String PATH_SERVER_SESSION_KEY = "server.session.key";

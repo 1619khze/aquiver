@@ -25,6 +25,7 @@ package org.aquiver;
 
 import org.apache.commons.lang3.StringUtils;
 import org.aquiver.mvc.BypassRequestUrls;
+import org.aquiver.server.Const;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +45,7 @@ public class RegexBypassRequestUrls implements BypassRequestUrls {
 
   public RegexBypassRequestUrls() {
     if (cache != null) {
-      cache.put("/favicon.ico", Boolean.TRUE);
+      cache.put(Const.FAVICON_PATH, Boolean.TRUE);
     }
 
     if (patterns != null && patterns.length() > 0) {
@@ -76,7 +77,7 @@ public class RegexBypassRequestUrls implements BypassRequestUrls {
       }
     } else {
       // special code for no-cache
-      if ("/favicon.ico".equals(path)) {
+      if (Const.FAVICON_PATH.equals(path)) {
         return true;
       }
     }
