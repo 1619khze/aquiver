@@ -109,17 +109,23 @@ import static org.aquiver.server.Const.SERVER_THREAD_NAME;
  */
 public class Aquiver {
   private static final Logger log = LoggerFactory.getLogger(Aquiver.class);
-
+  private static final List<Interceptor> interceptors = new ArrayList<>();
   // Components needed to start the service.
   private final Server nettyServer = new NettyServer();
   private final Set<String> packages = new LinkedHashSet<>();
   private final List<Class<?>> eventPool = new LinkedList<>();
   private final CountDownLatch countDownLatch = new CountDownLatch(1);
   private final SessionManager sessionManager = new SessionManager();
+  // Components needed for dependency injection
+  private final Apex apex = Apex.of();
+  private final ApexContext apexContext = ApexContext.instance();
+  // A series of components used
+  private final RestfulRouter restfulRouter = apexContext.addBean(RestfulRouter.class);
+  private final WebSocketResolver webSocketResolver = apexContext.addBean(WebSocketResolver.class);
+  private final ErrorHandlerResolver errorHandlerResolver = apexContext.addBean(ErrorHandlerResolver.class);
   private Environment environment = Apex.of().environment();
   private String bootConfName = PATH_CONFIG_PROPERTIES;
   private boolean started = false;
-
   // Some content that may be needed.
   private int port;
   private Class<?> bootCls;
@@ -129,27 +135,15 @@ public class Aquiver {
   private String sessionKey;
   private Integer sessionTimeout;
   private String[] mainArgs;
-
   // Thread pool setting param
   private int corePoolSize = 5;
   private int maximumPoolSize = 200;
   private int keepAliveTime = 0;
-
   private String viewSuffix;
   private String templateFolder;
 
-  // Components needed for dependency injection
-  private final Apex apex = Apex.of();
-  private final ApexContext apexContext = ApexContext.instance();
-
-  // A series of components used
-  private final RestfulRouter restfulRouter = apexContext.addBean(RestfulRouter.class);
-  private final WebSocketResolver webSocketResolver = apexContext.addBean(WebSocketResolver.class);
-  private final ErrorHandlerResolver errorHandlerResolver = apexContext.addBean(ErrorHandlerResolver.class);
-
-  private static final List<Interceptor> interceptors = new ArrayList<>();
-
-  private Aquiver() {}
+  private Aquiver() {
+  }
 
   /**
    * Return Aquiver instants
@@ -556,8 +550,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver get(String path, RequestHandler requestHandler) {
-    this.route(path, requestHandler, HttpMethod.GET);
-    return this;
+    return this.route(path, requestHandler, HttpMethod.GET);
   }
 
   /**
@@ -568,8 +561,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver post(String path, RequestHandler requestHandler) {
-    this.route(path, requestHandler, HttpMethod.POST);
-    return this;
+    return this.route(path, requestHandler, HttpMethod.POST);
   }
 
   /**
@@ -580,8 +572,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver head(String path, RequestHandler requestHandler) {
-    this.route(path, requestHandler, HttpMethod.HEAD);
-    return this;
+    return this.route(path, requestHandler, HttpMethod.HEAD);
   }
 
   /**
@@ -592,8 +583,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver put(String path, RequestHandler requestHandler) {
-    this.route(path, requestHandler, HttpMethod.PUT);
-    return this;
+    return this.route(path, requestHandler, HttpMethod.PUT);
   }
 
   /**
@@ -604,8 +594,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver patch(String path, RequestHandler requestHandler) {
-    this.route(path, requestHandler, HttpMethod.PATCH);
-    return this;
+    return this.route(path, requestHandler, HttpMethod.PATCH);
   }
 
   /**
@@ -616,8 +605,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver delete(String path, RequestHandler requestHandler) {
-    this.route(path, requestHandler, HttpMethod.DELETE);
-    return this;
+    return this.route(path, requestHandler, HttpMethod.DELETE);
   }
 
   /**
@@ -628,8 +616,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver options(String path, RequestHandler requestHandler) {
-    this.route(path, requestHandler, HttpMethod.OPTIONS);
-    return this;
+    return this.route(path, requestHandler, HttpMethod.OPTIONS);
   }
 
   /**
@@ -640,8 +627,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver trace(String path, RequestHandler requestHandler) {
-    this.route(path, requestHandler, HttpMethod.TRACE);
-    return this;
+    return this.route(path, requestHandler, HttpMethod.TRACE);
   }
 
   /**
