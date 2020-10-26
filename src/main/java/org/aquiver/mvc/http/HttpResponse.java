@@ -23,6 +23,9 @@
  */
 package org.aquiver.mvc.http;
 
+import com.alibaba.fastjson.JSONObject;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -32,9 +35,16 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.apache.commons.lang3.Validate;
 import org.aquiver.Response;
 import org.aquiver.ResultResponseBuilder;
+
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Response class based on Netty-based Full Http Response
@@ -43,50 +53,49 @@ import org.aquiver.ResultResponseBuilder;
  * @since 2020/6/27
  */
 public class HttpResponse implements Response {
+  private final Map<String, String> headers = new HashMap<>();
+  private final Set<io.netty.handler.codec.http.cookie.Cookie> cookies = new HashSet<>();
   private final ChannelHandlerContext context;
-  private FullHttpResponse nettyResponse;
-  private Object result;
-  private boolean jsonResponse;
-  private String mediaType;
 
   private HttpResponse(ChannelHandlerContext context) {
+    Validate.notNull(context, "ChannelHandlerContext can't be null");
     this.context = context;
   }
 
   public static HttpResponse of(ChannelHandlerContext context) {
     Validate.notNull(context, "ChannelHandlerContext can't be null");
-
     return new HttpResponse(context);
   }
 
-  public Object getResult() {
-    return result;
+  @Override
+  public void cookie(String key, String value) {
+    Validate.notNull(key, "Cookie key can't be null");
+    Validate.notNull(value, "Cookie value can't be null");
+    this.cookies.add(new DefaultCookie(key, value));
   }
 
-  public void setResult(Object result) {
-    this.result = result;
+  @Override
+  public void removeCookie(String key) {
+    Validate.notNull(key, "Cookie key can't be null");
+    this.headers.remove(key);
   }
 
-  public boolean isJsonResponse() {
-    return jsonResponse;
+  @Override
+  public void header(String key, String value) {
+    Validate.notNull(key, "Header key can't be null");
+    Validate.notNull(value, "Header value can't be null");
+    this.headers.put(key, value);
   }
 
-  public void setJsonResponse(boolean jsonResponse) {
-    this.jsonResponse = jsonResponse;
-  }
-
-  public String getMediaType() {
-    return mediaType;
-  }
-
-  public void setMediaType(String mediaType) {
-    Validate.notNull(mediaType, "MediaType can't be null");
-    this.mediaType = mediaType;
+  @Override
+  public void removeHeader(String key) {
+    Validate.notNull(key, "Header key can't be null");
+    this.headers.remove(key);
   }
 
   @Override
   public void tryPush(FullHttpResponse response) {
-    context.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+    this.context.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
   }
 
   @Override
@@ -113,16 +122,25 @@ public class HttpResponse implements Response {
   public void redirect(String redirectUrl) {
     final HttpHeaders headers = new DefaultHttpHeaders();
     headers.set(HttpHeaderNames.LOCATION, redirectUrl);
-    this.nettyResponse = ResultResponseBuilder
+    FullHttpResponse response = ResultResponseBuilder
             .forResponse(HttpResponseStatus.PERMANENT_REDIRECT)
             .headers(headers)
             .build();
-    this.tryPush(nettyResponse);
+    this.tryPush(response);
   }
 
   @Override
   public <T> void json(T t) {
-
+    final HttpHeaders headers = new DefaultHttpHeaders();
+    headers.set(HttpHeaderNames.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+    String json = JSONObject.toJSONString(t);
+    ByteBuf byteBuf = Unpooled.copiedBuffer(json, Charset.defaultCharset());
+    FullHttpResponse response = ResultResponseBuilder
+            .forResponse(HttpResponseStatus.OK)
+            .headers(headers)
+            .byteBuf(byteBuf)
+            .build();
+    this.tryPush(response);
   }
 
   @Override
@@ -173,16 +191,5 @@ public class HttpResponse implements Response {
   @Override
   public void serverInternalError() {
 
-  }
-
-  @Override
-  public String toString() {
-    return "Response{" +
-            "context=" + context +
-            ", nettyResponse=" + nettyResponse +
-            ", result=" + result +
-            ", jsonResponse=" + jsonResponse +
-            ", mediaType='" + mediaType + '\'' +
-            '}';
   }
 }

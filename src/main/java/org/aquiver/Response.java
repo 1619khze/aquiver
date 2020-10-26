@@ -32,6 +32,14 @@ import io.netty.handler.codec.http.FullHttpResponse;
  * @since 2020/10/19
  */
 public interface Response {
+  void cookie(String key, String value);
+
+  void removeCookie(String key);
+
+  void header(String key, String value);
+
+  void removeHeader(String key);
+
   void tryPush(FullHttpResponse response);
 
   ChannelFuture tryPush(Object msg);

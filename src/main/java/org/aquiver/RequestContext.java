@@ -140,6 +140,26 @@ public class RequestContext implements Request, Response, RequestChannel {
   }
 
   @Override
+  public void cookie(String key, String value) {
+    this.response().cookie(key, value);
+  }
+
+  @Override
+  public void removeCookie(String key) {
+    this.response().removeCookie(key);
+  }
+
+  @Override
+  public void header(String key, String value) {
+    this.response().header(key, value);
+  }
+
+  @Override
+  public void removeHeader(String key) {
+    this.response().removeHeader(key);
+  }
+
+  @Override
   public void tryPush(FullHttpResponse response) {
     this.response().tryPush(response);
   }
@@ -151,7 +171,7 @@ public class RequestContext implements Request, Response, RequestChannel {
 
   @Override
   public ChannelFuture tryWrite(Object msg, ChannelPromise promise) {
-    return null;
+    return this.response().tryWrite(msg, promise);
   }
 
   @Override
