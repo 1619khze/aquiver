@@ -100,7 +100,7 @@ public class HttpResponse implements Response {
 
   @Override
   public void tryPush(FullHttpResponse response) {
-    this.context.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+    this.context.writeAndFlush(response.retain()).addListener(ChannelFutureListener.CLOSE);
   }
 
   @Override
