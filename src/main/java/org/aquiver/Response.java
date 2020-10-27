@@ -54,8 +54,6 @@ public interface Response {
 
   <T> void json(T t);
 
-  <T> void xml(T t);
-
   void text(String text);
 
   void render(String renderTemplate);
@@ -64,13 +62,11 @@ public interface Response {
 
   void status(int httpStatus);
 
-  void contentType();
-
-  void contentType(String contentType);
-
   void notFound();
 
   void badRequest();
 
   void serverInternalError();
+
+  void error(int status, String errorMsg);
 }

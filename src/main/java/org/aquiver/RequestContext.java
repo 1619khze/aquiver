@@ -195,11 +195,6 @@ public class RequestContext implements Request, Response, RequestChannel {
   }
 
   @Override
-  public <T> void xml(T t) {
-    this.response().xml(t);
-  }
-
-  @Override
   public void text(String text) {
     this.response().text(text);
   }
@@ -220,16 +215,6 @@ public class RequestContext implements Request, Response, RequestChannel {
   }
 
   @Override
-  public void contentType() {
-    this.response().contentType();
-  }
-
-  @Override
-  public void contentType(String contentType) {
-    this.response().contentType(contentType);
-  }
-
-  @Override
   public void notFound() {
     this.response().notFound();
   }
@@ -242,6 +227,11 @@ public class RequestContext implements Request, Response, RequestChannel {
   @Override
   public void serverInternalError() {
     this.response().serverInternalError();
+  }
+
+  @Override
+  public void error(int status, String errorMsg) {
+    this.response().error(status, errorMsg);
   }
 
   @Override
