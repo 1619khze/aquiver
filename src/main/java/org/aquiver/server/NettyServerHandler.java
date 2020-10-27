@@ -28,10 +28,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpMessage;
 import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponseStatus;
 import org.apex.ApexContext;
 import org.aquiver.Aquiver;
 import org.aquiver.NoRouteFoundException;
@@ -39,11 +37,11 @@ import org.aquiver.RegexBypassRequestUrls;
 import org.aquiver.RequestContext;
 import org.aquiver.ResultHandler;
 import org.aquiver.ResultHandlerResolver;
-import org.aquiver.ResultResponseBuilder;
 import org.aquiver.handler.ErrorHandlerResolver;
 import org.aquiver.mvc.BypassRequestUrls;
 import org.aquiver.mvc.RequestResult;
 import org.aquiver.mvc.argument.MethodArgumentGetter;
+import org.aquiver.mvc.http.HttpStatus;
 import org.aquiver.mvc.interceptor.AspectInterceptorChain;
 import org.aquiver.mvc.interceptor.Interceptor;
 import org.aquiver.mvc.router.RestfulRouter;
@@ -148,9 +146,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private NoRouteFoundException handlerException() {
     final NoRouteFoundException exception = new NoRouteFoundException
             (requestContext.request().method(), requestContext.uri());
-    final FullHttpResponse response = ResultResponseBuilder.forResponse(
-            HttpResponseStatus.NOT_FOUND, exception.getMessage()).build();
-    requestContext.tryPush(response);
+    this.requestContext.error(HttpStatus.NOT_FOUND, exception.getMessage());
     return exception;
   }
 

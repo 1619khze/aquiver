@@ -25,7 +25,7 @@ package org.aquiver.result.view;
 
 import io.netty.handler.codec.http.FullHttpResponse;
 import org.aquiver.RequestContext;
-import org.aquiver.ResultResponseBuilder;
+import org.aquiver.ResponseBuilder;
 import org.aquiver.mvc.router.views.HTMLView;
 import org.aquiver.mvc.router.views.PebbleHTMLView;
 import org.aquiver.server.Const;
@@ -48,7 +48,7 @@ public final class PebbleTemplateViewHandler extends AbstractTemplateViewHandler
   @Override
   protected void doRender(RequestContext ctx, String viewPathName) throws IOException {
     String renderView = this.htmlView.renderView(viewPathName, new HashMap<>());
-    final FullHttpResponse responseView = ResultResponseBuilder.forResponse(renderView).build();
+    final FullHttpResponse responseView = ResponseBuilder.builder().body(renderView).build();
     ctx.tryPush(responseView);
   }
 

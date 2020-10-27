@@ -26,16 +26,17 @@ package org.aquiver.result;
 import com.alibaba.fastjson.JSONObject;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.aquiver.RequestContext;
+import org.aquiver.ResponseBuilder;
 import org.aquiver.ResultHandler;
-import org.aquiver.ResultResponseBuilder;
 import org.aquiver.mvc.RequestResult;
 import org.aquiver.mvc.annotation.JSON;
-import org.aquiver.mvc.http.MediaType;
 
 import java.lang.reflect.Method;
+
+import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
+import static org.aquiver.mvc.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
  * @author WangYi
@@ -50,11 +51,12 @@ public final class JsonResultHandler implements ResultHandler {
   }
 
   @Override
-  public void handle(RequestContext ctx, RequestResult result) throws Exception {
+  public void handle(RequestContext ctx, RequestResult result) {
     String jsonString = JSONObject.toJSONString(result.getResultObject());
     HttpHeaders httpHeaders = new DefaultHttpHeaders();
-    httpHeaders.add(HttpHeaderNames.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-    FullHttpResponse jsonResponse = ResultResponseBuilder.forResponse(httpHeaders, jsonString).build();
+    httpHeaders.add(CONTENT_TYPE, APPLICATION_JSON_VALUE);
+    final FullHttpResponse jsonResponse = ResponseBuilder.builder()
+            .header(httpHeaders).body(jsonString).build();
     ctx.tryPush(jsonResponse);
   }
 }

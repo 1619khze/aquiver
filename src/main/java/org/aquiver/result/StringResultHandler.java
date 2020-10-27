@@ -24,8 +24,8 @@
 package org.aquiver.result;
 
 import org.aquiver.RequestContext;
+import org.aquiver.ResponseBuilder;
 import org.aquiver.ResultHandler;
-import org.aquiver.ResultResponseBuilder;
 import org.aquiver.ViewHandler;
 import org.aquiver.ViewHandlerResolver;
 import org.aquiver.mvc.RequestResult;
@@ -78,7 +78,7 @@ public final class StringResultHandler implements ResultHandler {
         url = result.substring(idx + 1);
         viewHandler = viewHandlerResolver.lookup(type);
         if (viewHandler == null) {
-          ctx.tryPush(ResultResponseBuilder.forResponse(result).build());
+          ctx.tryPush(ResponseBuilder.builder().body(result).build());
           return;
         }
       } else {
@@ -92,7 +92,7 @@ public final class StringResultHandler implements ResultHandler {
       if (suffix != null) {
         viewHandler = viewHandlerResolver.lookup(suffix);
         if (viewHandler == null) {
-          ctx.tryPush(ResultResponseBuilder.forResponse(result).build());
+          ctx.tryPush(ResponseBuilder.builder().body(result).build());
           return;
         }
       }
@@ -103,7 +103,7 @@ public final class StringResultHandler implements ResultHandler {
       if (defaultViewHandler == null) {
         defaultViewHandler = viewHandlerResolver.lookup(SERVER_VIEW_SUFFIX);
         if (defaultViewHandler == null) {
-          ctx.tryPush(ResultResponseBuilder.forResponse(result).build());
+          ctx.tryPush(ResponseBuilder.builder().body(result).build());
           return;
         }
       }

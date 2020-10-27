@@ -30,21 +30,26 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.apache.commons.lang3.Validate;
 import org.aquiver.Response;
-import org.aquiver.ResultResponseBuilder;
+import org.aquiver.ResponseBuilder;
 
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
+import static io.netty.handler.codec.http.HttpHeaderNames.LOCATION;
+import static io.netty.handler.codec.http.HttpResponseStatus.PERMANENT_REDIRECT;
+import static io.netty.util.CharsetUtil.UTF_8;
+
+import static org.aquiver.mvc.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.aquiver.mvc.http.MediaType.TEXT_HTML_VALUE;
+import static org.aquiver.mvc.http.MediaType.TEXT_PLAIN_VALUE;
 
 /**
  * Response class based on Netty-based Full Http Response
@@ -120,76 +125,86 @@ public class HttpResponse implements Response {
 
   @Override
   public void redirect(String redirectUrl) {
-    final HttpHeaders headers = new DefaultHttpHeaders();
-    headers.set(HttpHeaderNames.LOCATION, redirectUrl);
-    FullHttpResponse response = ResultResponseBuilder
-            .forResponse(HttpResponseStatus.PERMANENT_REDIRECT)
-            .headers(headers)
-            .build();
-    this.tryPush(response);
+    this.tryPush(ResponseBuilder.builder()
+            .header(LOCATION, redirectUrl)
+            .status(PERMANENT_REDIRECT.code())
+            .build());
   }
 
   @Override
   public <T> void json(T t) {
-    final HttpHeaders headers = new DefaultHttpHeaders();
-    headers.set(HttpHeaderNames.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-    String json = JSONObject.toJSONString(t);
-    ByteBuf byteBuf = Unpooled.copiedBuffer(json, Charset.defaultCharset());
-    FullHttpResponse response = ResultResponseBuilder
-            .forResponse(HttpResponseStatus.OK)
-            .headers(headers)
+    Validate.notNull(t, "JSON Object can't be null");
+    final String json = JSONObject.toJSONString(t);
+    final ByteBuf byteBuf = Unpooled.copiedBuffer(json, UTF_8);
+    this.tryPush(ResponseBuilder.builder()
+            .header(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+            .status(HttpStatus.OK)
             .byteBuf(byteBuf)
-            .build();
-    this.tryPush(response);
-  }
-
-  @Override
-  public <T> void xml(T t) {
-
+            .build());
   }
 
   @Override
   public void text(String text) {
-
+    Validate.notNull(text, "Text can't be null");
+    this.tryPush(ResponseBuilder.builder()
+            .header(CONTENT_TYPE, TEXT_PLAIN_VALUE)
+            .status(HttpStatus.OK)
+            .body(text)
+            .build());
   }
 
   @Override
   public void render(String renderTemplate) {
-
+    Validate.notNull(renderTemplate, "Template can't be null");
+    this.tryPush(ResponseBuilder.builder()
+            .header(CONTENT_TYPE, TEXT_PLAIN_VALUE)
+            .status(HttpStatus.OK)
+            .body(renderTemplate)
+            .build());
   }
 
   @Override
   public void html(String htmlTemplate) {
-
+    Validate.notNull(htmlTemplate, "Html can't be null");
+    this.tryPush(ResponseBuilder.builder()
+            .header(CONTENT_TYPE, TEXT_HTML_VALUE)
+            .status(HttpStatus.OK)
+            .body(htmlTemplate)
+            .build());
   }
 
   @Override
   public void status(int httpStatus) {
-
-  }
-
-  @Override
-  public void contentType() {
-
-  }
-
-  @Override
-  public void contentType(String contentType) {
-
+    Validate.notNull(HttpResponseStatus.valueOf(httpStatus), "Http status not support");
+    this.tryPush(ResponseBuilder.builder()
+            .header(CONTENT_TYPE, TEXT_PLAIN_VALUE)
+            .status(httpStatus)
+            .build());
   }
 
   @Override
   public void notFound() {
-
+    this.error(HttpStatus.NOT_FOUND, HttpResponseStatus.NOT_FOUND.reasonPhrase());
   }
 
   @Override
   public void badRequest() {
-
+    this.error(HttpStatus.BAD_REQUEST, HttpResponseStatus.BAD_REQUEST.reasonPhrase());
   }
 
   @Override
   public void serverInternalError() {
+    this.error(HttpStatus.INTERNAL_SERVER_ERROR, HttpResponseStatus.INTERNAL_SERVER_ERROR.reasonPhrase());
+  }
 
+  @Override
+  public void error(int httpStatus, String errorMsg) {
+    Validate.notNull(HttpResponseStatus.valueOf(httpStatus), "Http status not support");
+    Validate.notNull(errorMsg, "Error msg can't be null");
+    this.tryPush(ResponseBuilder.builder()
+            .header(CONTENT_TYPE, TEXT_PLAIN_VALUE)
+            .status(httpStatus)
+            .body(errorMsg)
+            .build());
   }
 }

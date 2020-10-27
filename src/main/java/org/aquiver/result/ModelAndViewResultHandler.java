@@ -26,8 +26,8 @@ package org.aquiver.result;
 import io.netty.handler.codec.http.FullHttpResponse;
 import org.aquiver.ModelAndView;
 import org.aquiver.RequestContext;
+import org.aquiver.ResponseBuilder;
 import org.aquiver.ResultHandler;
-import org.aquiver.ResultResponseBuilder;
 import org.aquiver.mvc.RequestResult;
 import org.aquiver.mvc.router.views.HTMLView;
 import org.aquiver.mvc.router.views.PebbleHTMLView;
@@ -50,7 +50,7 @@ public final class ModelAndViewResultHandler implements ResultHandler {
   public void handle(RequestContext ctx, RequestResult result) throws IOException {
     ModelAndView modelAndView = (ModelAndView) result.getResultObject();
     String renderView = this.htmlView.renderView(modelAndView.htmlPath(), modelAndView.params());
-    final FullHttpResponse responseView = ResultResponseBuilder.forResponse(renderView).build();
+    final FullHttpResponse responseView = ResponseBuilder.builder().body(renderView).build();
     ctx.tryPush(responseView);
   }
 }

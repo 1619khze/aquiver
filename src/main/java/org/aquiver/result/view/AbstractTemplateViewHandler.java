@@ -26,7 +26,7 @@ package org.aquiver.result.view;
 import org.apex.Environment;
 import org.aquiver.Aquiver;
 import org.aquiver.RequestContext;
-import org.aquiver.ResultResponseBuilder;
+import org.aquiver.ResponseBuilder;
 import org.aquiver.ViewHandler;
 import org.aquiver.server.Const;
 
@@ -57,7 +57,7 @@ public abstract class AbstractTemplateViewHandler implements ViewHandler {
 
     URL viewUrl = this.getClass().getClassLoader().getResource(viewPath);
     if (Objects.isNull(viewUrl)) {
-      ctx.tryPush(ResultResponseBuilder.forResponse(viewPathName).build());
+      ctx.tryPush(ResponseBuilder.builder().body(viewPathName).build());
     } else {
       doRender(ctx, viewPath);
     }
