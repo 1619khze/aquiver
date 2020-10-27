@@ -1,6 +1,6 @@
 # Aquiver
 
-<p align="left">The aquifer is a java web framework based on jdk11 and netty</p>
+<p align="left">Aquiver是一个基于Java8和Netty的MVC框架</p>
 <p align="left">
    <img src="https://img.shields.io/badge/JDK-8+-green.svg" alt="Build Status">
    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="Build Status">
@@ -11,11 +11,9 @@
  </a>
  </p>
 
-### Quick Start
+### 快速开始
 
-Create a basic `Maven` or `Gradle` project.
-
-> Do not create a `webapp` project, Aquiver does not require much trouble.
+通过 `Maven` 或 `Gradle` 创建项目，因为还未上传到Maven中心仓库，所以目前暂时通过clone代码进行安装
 
 ```git
 git clone https://github.com/AquiverV/apex.git
@@ -31,94 +29,30 @@ cd aquiver
 mvn clean install
 ```
 
-Run with `Maven`:
+在 `Maven` 中使用：
 
 ```xml
 <dependency>
     <groupId>org.aquiver</groupId>
     <artifactId>aquiver</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.3.BETA</version>
 </dependency>
 ```
 
-#### Create Http Server
+#### 尝试
 
  ```java
-public class Application {
+public class Main {
   public static void main(String[] args) {
-    Aquiver.run(Main.class, args);
+    Aquiver.of().bind(9999).get("/", ctx -> {
+      Object username = ctx.param("username");
+      System.out.println(paramName);
+    }).start(Main.class, args);
   }
 }
  ```
+在浏览器打开：`http://localhost:9999/?username=1619kHz` 查看效果
 
-#### Route Register
-```java
-@GET(value = "/get")
-public String get() {
-    //todo
-}
-```
-
-#### Or Use @Path
-```java
-@Path(value = "/path",method = PathMethod.GET)
-public String path(){
-    //todo
-}
-```
-
-#### Get Param
-```java
-@Path(value = "/path", method = PathMethod.GET)
-public String path(@Param String paramName){
-    //todo
-}
-```
-
-#### Get Cookie
-```java
-@Path(value = "/path", method = PathMethod.GET)
-public String path(@Param String cookieName){
-    //todo
-}
-```
-
-#### Get Body
-```java
-@Path(value = "/path", method = PathMethod.POST)
-public String path(@Body User user){
-    //todo
-}
-```
-
-#### File Upload
-```java
-@POST(value = "/uploadFile")
-public void uploadFile(@FileUpload MultipartFile file) {
-  log.info("fileName:{}", file.getFileName());
-  try {
-    System.out.println(multipartFile.readFileContent());
-  } catch (IOException e) {
-    e.printStackTrace();
-  }
-}
-```
-
-#### Multi File Upload
-```java
-@POST(value = "/uploadFiles")
-public void uploadFileS(@MultiFileUpload List<MultipartFile> files) {
-  log.info("file size:{}", files.size());
-  for (MultipartFile multipartFile : files) {
-    log.info("fileName:{}", multipartFile.getFileName());
-    try {
-      System.out.println(multipartFile.readFileContent());
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-}
-```
 ## License
 [MIT](https://opensource.org/licenses/MIT "MIT")
 
