@@ -59,12 +59,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLException;
 import java.io.File;
-import java.lang.annotation.Annotation;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Paths;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
