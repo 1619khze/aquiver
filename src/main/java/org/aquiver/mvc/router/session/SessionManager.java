@@ -27,9 +27,9 @@ import io.netty.channel.ChannelHandlerContext;
 import org.aquiver.mvc.http.Cookie;
 import org.aquiver.mvc.http.HttpRequest;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -37,7 +37,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @since 2020/6/19
  */
 public final class SessionManager {
-  private final Map<String, Session> sessionPool = new HashMap<>();
+  private final Map<String, Session> sessionPool = new ConcurrentHashMap<>();
 
   public Session session(String sessionId) {
     Objects.requireNonNull(sessionId, "sessionId can't be null");
