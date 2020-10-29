@@ -176,18 +176,15 @@ public class NettyServer implements Server {
    */
   private ApexContext initApexContext() throws Exception {
     final String scanPath = aquiver.bootCls().getPackage().getName();
+    apex.typeAnnotation(Path.class);
+    apex.typeAnnotation(RouteAdvice.class);
+    apex.typeAnnotation(RestPath.class);
+    apex.typeAnnotation(WebSocket.class);
+    apex.typeAnnotation(Singleton.class);
+    apex.typeAnnotation(ConfigBean.class);
+    apex.typeAnnotation(PropertyBean.class);
+    apex.typeAnnotation(Scheduled.class);
 
-    final List<Class<? extends Annotation>> typeAnnotations = new ArrayList<>();
-    typeAnnotations.add(Path.class);
-    typeAnnotations.add(RouteAdvice.class);
-    typeAnnotations.add(RestPath.class);
-    typeAnnotations.add(WebSocket.class);
-    typeAnnotations.add(Singleton.class);
-    typeAnnotations.add(ConfigBean.class);
-    typeAnnotations.add(PropertyBean.class);
-    typeAnnotations.add(Scheduled.class);
-
-    apex.typeAnnotation(typeAnnotations);
     apex.packages().add(scanPath);
     apex.mainArgs(aquiver.mainArgs());
     ApexContext apexContext = aquiver.apexContext();
