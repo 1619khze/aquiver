@@ -30,7 +30,6 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 public interface Const {
-
   Integer SERVER_PORT = 8080;
   Integer SERVER_SESSION_TIMEOUT = 1800;
   Boolean SERVER_SSL = false;
@@ -38,6 +37,7 @@ public interface Const {
   Boolean SERVER_CONTENT_COMPRESSOR = false;
   Boolean SERVER_SESSION_ENABLE = true;
   Integer STRAP_LINE_SIZE = 42;
+
   String SERVER_ADDRESS = "localhost";
   String CRISPY_VERSION = "(v1.0.0 RELEASE)";
   String BANNER_TEXT = "aquiver";
