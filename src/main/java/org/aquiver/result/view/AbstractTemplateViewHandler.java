@@ -54,8 +54,7 @@ public abstract class AbstractTemplateViewHandler implements ViewHandler {
     if (!viewPath.endsWith(getSuffix())) {
       viewPath = viewPath + "." + getSuffix();
     }
-
-    URL viewUrl = this.getClass().getClassLoader().getResource(viewPath);
+    URL viewUrl = Thread.currentThread().getContextClassLoader().getResource(viewPath);
     if (Objects.isNull(viewUrl)) {
       ctx.tryPush(ResponseBuilder.builder().body(viewPathName).build());
     } else {

@@ -23,6 +23,7 @@
  */
 package org.aquiver.result;
 
+import org.apex.ApexContext;
 import org.aquiver.RequestContext;
 import org.aquiver.ResponseBuilder;
 import org.aquiver.ResultHandler;
@@ -43,7 +44,8 @@ public final class StringResultHandler implements ResultHandler {
   private ViewHandler defaultViewHandler;
 
   public StringResultHandler() {
-    this.viewHandlerResolver = new ViewHandlerResolver();
+    final ApexContext instance = ApexContext.instance();
+    this.viewHandlerResolver = instance.getBean(ViewHandlerResolver.class);
   }
 
   private static int getFileSeparatorIndex(String path) {
