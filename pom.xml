@@ -16,7 +16,7 @@
         <snakeyaml.version>1.24</snakeyaml.version>
         <junit.version>4.13.1</junit.version>
         <logback.version>1.2.3</logback.version>
-        <netty.version>4.1.50.Final</netty.version>
+        <netty.version>4.1.53.Final</netty.version>
         <logback.version>1.2.3</logback.version>
         <pebble.version>3.1.4</pebble.version>
         <apex.version>1.0</apex.version>
@@ -80,6 +80,26 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-transport-native-epoll</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http2</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-resolver-dns</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler-proxy</artifactId>
+            <version>${netty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-transport-native-kqueue</artifactId>
             <version>${netty.version}</version>
         </dependency>
         <dependency>
