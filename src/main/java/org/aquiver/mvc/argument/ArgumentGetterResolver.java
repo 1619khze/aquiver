@@ -23,6 +23,7 @@
  */
 package org.aquiver.mvc.argument;
 
+import org.apache.commons.lang3.Validate;
 import org.apex.ApexContext;
 import org.aquiver.Request;
 import org.aquiver.RequestContext;
@@ -64,8 +65,8 @@ public final class ArgumentGetterResolver implements GetterResolver<ArgumentGett
 
   @Override
   public void registerArgumentGetter(Class<?> bindClass, Class<?> argumentClass) {
-    Objects.requireNonNull(bindClass, "bindClass can't be null");
-    Objects.requireNonNull(argumentClass, "argumentClass can't be null");
+    Validate.notNull(bindClass, "bindClass can't be null");
+    Validate.notNull(argumentClass, "argumentClass can't be null");
 
     if (!TypeArgumentGetter.class.isAssignableFrom(argumentClass)) {
       throw new IllegalArgumentException(argumentClass.getName() + "can't assignable from TypeArgumentGetter");
