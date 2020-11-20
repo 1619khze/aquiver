@@ -23,7 +23,6 @@
  */
 package org.aquiver.mvc.argument;
 
-import org.apex.ApexContext;
 import org.aquiver.RequestContext;
 
 import java.lang.annotation.Annotation;
