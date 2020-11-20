@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.cors;
+package org.aquiver.mvc.cors;
 
 import io.netty.util.AsciiString;
 import org.apache.commons.lang3.ArrayUtils;
