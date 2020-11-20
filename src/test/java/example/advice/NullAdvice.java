@@ -24,8 +24,8 @@
 package example.advice;
 
 import org.aquiver.RequestContext;
-import org.aquiver.handler.annotation.ErrorAdvice;
-import org.aquiver.handler.annotation.RouteAdvice;
+import org.aquiver.mvc.annotation.HandleAdvice;
+import org.aquiver.mvc.annotation.RouteAdvice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 public class NullAdvice {
   private static final Logger log = LoggerFactory.getLogger(NullAdvice.class);
 
-  @ErrorAdvice(NullPointerException.class)
+  @HandleAdvice(NullPointerException.class)
   public String nullExceptionHandler(NullPointerException exception, RequestContext requestContext) {
     log.info("nullExceptionHandler...");
     log.info("request url {}", requestContext.uri());
