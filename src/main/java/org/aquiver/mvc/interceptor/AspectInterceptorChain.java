@@ -62,7 +62,7 @@ public class AspectInterceptorChain implements InterceptorChain {
     }
   }
 
-  public RequestResult getResult() {
+  public RequestResult result() {
     return result;
   }
 
