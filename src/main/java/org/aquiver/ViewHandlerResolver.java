@@ -25,12 +25,12 @@ package org.aquiver;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apex.ApexContext;
-import org.aquiver.result.view.CssDataViewHandler;
-import org.aquiver.result.view.HtmlDataViewHandler;
-import org.aquiver.result.view.HtmlTemplateViewHandler;
-import org.aquiver.result.view.PebbleTemplateViewHandler;
-import org.aquiver.result.view.RedirectViewHandler;
-import org.aquiver.result.view.XmlDataViewHandler;
+import org.aquiver.mvc.result.view.CssDataViewHandler;
+import org.aquiver.mvc.result.view.HtmlDataViewHandler;
+import org.aquiver.mvc.result.view.HtmlTemplateViewHandler;
+import org.aquiver.mvc.result.view.PebbleTemplateViewHandler;
+import org.aquiver.mvc.result.view.RedirectViewHandler;
+import org.aquiver.mvc.result.view.XmlDataViewHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

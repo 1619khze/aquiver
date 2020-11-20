@@ -21,28 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.result;
+package org.aquiver.mvc.result.view;
 
-import io.netty.handler.codec.http.FullHttpResponse;
-import org.aquiver.RequestContext;
-import org.aquiver.ResponseBuilder;
-import org.aquiver.ResultHandler;
-import org.aquiver.mvc.RequestResult;
+import org.aquiver.Request;
+import org.aquiver.mvc.http.MediaType;
 
 /**
  * @author WangYi
  * @since 2020/8/22
  */
-public final class VoidResultHandler implements ResultHandler {
+public final class HtmlDataViewHandler extends AbstractDataViewHandler {
 
   @Override
-  public boolean support(RequestResult requestResult) {
-    return Void.TYPE.isAssignableFrom(requestResult.getResultType());
+  public String getMimeType(Request request) {
+    return MediaType.TEXT_HTML_VALUE;
   }
 
   @Override
-  public void handle(RequestContext ctx, RequestResult result) {
-    FullHttpResponse voidResponse = ResponseBuilder.builder().build();
-    ctx.tryPush(voidResponse);
+  public String getType() {
+    return "html";
+  }
+
+  @Override
+  public ViewHandlerType getHandlerType() {
+    return ViewHandlerType.DATA_VIEW;
   }
 }

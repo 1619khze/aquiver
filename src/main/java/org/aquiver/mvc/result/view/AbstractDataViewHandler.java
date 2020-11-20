@@ -21,42 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.result;
+package org.aquiver.mvc.result.view;
 
-import com.alibaba.fastjson.JSONObject;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
+import org.aquiver.Request;
 import org.aquiver.RequestContext;
 import org.aquiver.ResponseBuilder;
-import org.aquiver.ResultHandler;
-import org.aquiver.mvc.RequestResult;
-import org.aquiver.mvc.annotation.JSON;
-
-import java.lang.reflect.Method;
-
-import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
-import static org.aquiver.mvc.http.MediaType.APPLICATION_JSON_VALUE;
+import org.aquiver.ViewHandler;
 
 /**
  * @author WangYi
- * @since 2020/8/31
+ * @since 2020/8/22
  */
-public final class JsonResultHandler implements ResultHandler {
+public abstract class AbstractDataViewHandler implements ViewHandler {
+  public abstract String getMimeType(Request request);
 
   @Override
-  public boolean support(RequestResult requestResult) {
-    Method method = requestResult.getMethod();
-    return method.isAnnotationPresent(JSON.class);
-  }
-
-  @Override
-  public void handle(RequestContext ctx, RequestResult result) {
-    String jsonString = JSONObject.toJSONString(result.getResultObject());
-    HttpHeaders httpHeaders = new DefaultHttpHeaders();
-    httpHeaders.add(CONTENT_TYPE, APPLICATION_JSON_VALUE);
-    final FullHttpResponse jsonResponse = ResponseBuilder.builder()
-            .header(httpHeaders).body(jsonString).build();
-    ctx.tryPush(jsonResponse);
+  public void render(RequestContext ctx, String viewPathName) {
+    final HttpHeaders httpHeaders = new DefaultHttpHeaders();
+    httpHeaders.add(HttpHeaderNames.CONTENT_TYPE, getMimeType(ctx.request()));
+    ctx.tryPush(ResponseBuilder.builder().
+            header(httpHeaders).body(viewPathName).build());
   }
 }

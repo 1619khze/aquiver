@@ -21,24 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.result.view;
+package org.aquiver.mvc.result;
 
+import io.netty.handler.codec.http.FullHttpResponse;
 import org.aquiver.RequestContext;
-import org.aquiver.ViewHandler;
+import org.aquiver.ResponseBuilder;
+import org.aquiver.ResultHandler;
+import org.aquiver.mvc.RequestResult;
 
 /**
  * @author WangYi
  * @since 2020/8/22
  */
-public final class RedirectViewHandler implements ViewHandler {
+public final class VoidResultHandler implements ResultHandler {
 
   @Override
-  public String getType() {
-    return "redirect";
+  public boolean support(RequestResult requestResult) {
+    return Void.TYPE.isAssignableFrom(requestResult.getResultType());
   }
 
   @Override
-  public void render(RequestContext ctx, String viewPathName) {
-    ctx.redirect(viewPathName);
+  public void handle(RequestContext ctx, RequestResult result) {
+    FullHttpResponse voidResponse = ResponseBuilder.builder().build();
+    ctx.tryPush(voidResponse);
   }
 }

@@ -21,28 +21,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.result.view;
+package org.aquiver.mvc.result.view;
 
-import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaders;
-import org.aquiver.Request;
+import io.netty.handler.codec.http.FullHttpResponse;
+import org.apex.io.FileBaseResource;
+import org.apex.io.Resource;
 import org.aquiver.RequestContext;
 import org.aquiver.ResponseBuilder;
-import org.aquiver.ViewHandler;
+import org.aquiver.server.Const;
+
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * @author WangYi
- * @since 2020/8/22
+ * @since 2020/8/27
  */
-public abstract class AbstractDataViewHandler implements ViewHandler {
-  public abstract String getMimeType(Request request);
+public final class HtmlTemplateViewHandler extends AbstractTemplateViewHandler {
 
   @Override
-  public void render(RequestContext ctx, String viewPathName) {
-    final HttpHeaders httpHeaders = new DefaultHttpHeaders();
-    httpHeaders.add(HttpHeaderNames.CONTENT_TYPE, getMimeType(ctx.request()));
-    ctx.tryPush(ResponseBuilder.builder().
-            header(httpHeaders).body(viewPathName).build());
+  public String getPrefix() {
+    return environment.get(Const.PATH_SERVER_VIEW_PREFIX, "");
+  }
+
+  @Override
+  public String getSuffix() {
+    return environment.get(Const.PATH_SERVER_VIEW_SUFFIX, Const.SERVER_VIEW_SUFFIX);
+  }
+
+  @Override
+  protected void doRender(RequestContext ctx, String viewPathName) throws Exception {
+    URL viewUrl = this.getClass().getClassLoader().getResource(viewPathName);
+    Resource resource = new FileBaseResource(Paths.get(viewUrl.toURI()));
+    String htmlContent = new String(Files.readAllBytes(resource.getPath()));
+    FullHttpResponse response = ResponseBuilder.builder().body(htmlContent).build();
+    ctx.tryPush(response);
+  }
+
+  @Override
+  public String getType() {
+    return "html";
+  }
+
+  @Override
+  public ViewHandlerType getHandlerType() {
+    return ViewHandlerType.TEMPLATE_VIEW;
   }
 }

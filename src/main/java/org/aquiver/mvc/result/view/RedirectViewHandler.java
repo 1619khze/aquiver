@@ -21,49 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.result.view;
+package org.aquiver.mvc.result.view;
 
-import io.netty.handler.codec.http.FullHttpResponse;
 import org.aquiver.RequestContext;
-import org.aquiver.ResponseBuilder;
-import org.aquiver.mvc.router.views.HTMLView;
-import org.aquiver.mvc.router.views.PebbleHTMLView;
-import org.aquiver.server.Const;
-
-import java.io.IOException;
-import java.util.HashMap;
+import org.aquiver.ViewHandler;
 
 /**
  * @author WangYi
- * @since 2020/8/23
+ * @since 2020/8/22
  */
-public final class PebbleTemplateViewHandler extends AbstractTemplateViewHandler {
-  private final HTMLView htmlView = new PebbleHTMLView();
-
-  @Override
-  public String getPrefix() {
-    return environment.get(Const.PATH_SERVER_VIEW_PREFIX, "");
-  }
-
-  @Override
-  protected void doRender(RequestContext ctx, String viewPathName) throws IOException {
-    String renderView = this.htmlView.renderView(viewPathName, new HashMap<>());
-    final FullHttpResponse responseView = ResponseBuilder.builder().body(renderView).build();
-    ctx.tryPush(responseView);
-  }
-
-  @Override
-  public String getSuffix() {
-    return ".peb";
-  }
+public final class RedirectViewHandler implements ViewHandler {
 
   @Override
   public String getType() {
-    return "peb";
+    return "redirect";
   }
 
   @Override
-  public ViewHandlerType getHandlerType() {
-    return ViewHandlerType.TEMPLATE_VIEW;
+  public void render(RequestContext ctx, String viewPathName) {
+    ctx.redirect(viewPathName);
   }
 }

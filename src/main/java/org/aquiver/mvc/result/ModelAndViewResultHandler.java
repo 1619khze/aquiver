@@ -21,51 +21,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.result.view;
+package org.aquiver.mvc.result;
 
 import io.netty.handler.codec.http.FullHttpResponse;
-import org.apex.io.FileBaseResource;
-import org.apex.io.Resource;
+import org.aquiver.ModelAndView;
 import org.aquiver.RequestContext;
 import org.aquiver.ResponseBuilder;
-import org.aquiver.server.Const;
+import org.aquiver.ResultHandler;
+import org.aquiver.mvc.RequestResult;
+import org.aquiver.mvc.router.views.HTMLView;
+import org.aquiver.mvc.router.views.PebbleHTMLView;
 
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.IOException;
 
 /**
  * @author WangYi
- * @since 2020/8/27
+ * @since 2020/8/25
  */
-public final class HtmlTemplateViewHandler extends AbstractTemplateViewHandler {
+public final class ModelAndViewResultHandler implements ResultHandler {
+  private final HTMLView htmlView = new PebbleHTMLView();
 
   @Override
-  public String getPrefix() {
-    return environment.get(Const.PATH_SERVER_VIEW_PREFIX, "");
+  public boolean support(RequestResult requestResult) {
+    return ModelAndView.class.isAssignableFrom(requestResult.getResultType());
   }
 
   @Override
-  public String getSuffix() {
-    return environment.get(Const.PATH_SERVER_VIEW_SUFFIX, Const.SERVER_VIEW_SUFFIX);
-  }
-
-  @Override
-  protected void doRender(RequestContext ctx, String viewPathName) throws Exception {
-    URL viewUrl = this.getClass().getClassLoader().getResource(viewPathName);
-    Resource resource = new FileBaseResource(Paths.get(viewUrl.toURI()));
-    String htmlContent = new String(Files.readAllBytes(resource.getPath()));
-    FullHttpResponse response = ResponseBuilder.builder().body(htmlContent).build();
-    ctx.tryPush(response);
-  }
-
-  @Override
-  public String getType() {
-    return "html";
-  }
-
-  @Override
-  public ViewHandlerType getHandlerType() {
-    return ViewHandlerType.TEMPLATE_VIEW;
+  public void handle(RequestContext ctx, RequestResult result) throws IOException {
+    ModelAndView modelAndView = (ModelAndView) result.getResultObject();
+    String renderView = this.htmlView.renderView(modelAndView.htmlPath(), modelAndView.params());
+    final FullHttpResponse responseView = ResponseBuilder.builder().body(renderView).build();
+    ctx.tryPush(responseView);
   }
 }

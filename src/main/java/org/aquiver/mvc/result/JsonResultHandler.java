@@ -21,36 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.result;
+package org.aquiver.mvc.result;
 
+import com.alibaba.fastjson.JSONObject;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpResponse;
-import org.aquiver.ModelAndView;
+import io.netty.handler.codec.http.HttpHeaders;
 import org.aquiver.RequestContext;
 import org.aquiver.ResponseBuilder;
 import org.aquiver.ResultHandler;
 import org.aquiver.mvc.RequestResult;
-import org.aquiver.mvc.router.views.HTMLView;
-import org.aquiver.mvc.router.views.PebbleHTMLView;
+import org.aquiver.mvc.annotation.JSON;
 
-import java.io.IOException;
+import java.lang.reflect.Method;
+
+import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
+import static org.aquiver.mvc.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
  * @author WangYi
- * @since 2020/8/25
+ * @since 2020/8/31
  */
-public final class ModelAndViewResultHandler implements ResultHandler {
-  private final HTMLView htmlView = new PebbleHTMLView();
+public final class JsonResultHandler implements ResultHandler {
 
   @Override
   public boolean support(RequestResult requestResult) {
-    return ModelAndView.class.isAssignableFrom(requestResult.getResultType());
+    Method method = requestResult.getMethod();
+    return method.isAnnotationPresent(JSON.class);
   }
 
   @Override
-  public void handle(RequestContext ctx, RequestResult result) throws IOException {
-    ModelAndView modelAndView = (ModelAndView) result.getResultObject();
-    String renderView = this.htmlView.renderView(modelAndView.htmlPath(), modelAndView.params());
-    final FullHttpResponse responseView = ResponseBuilder.builder().body(renderView).build();
-    ctx.tryPush(responseView);
+  public void handle(RequestContext ctx, RequestResult result) {
+    String jsonString = JSONObject.toJSONString(result.getResultObject());
+    HttpHeaders httpHeaders = new DefaultHttpHeaders();
+    httpHeaders.add(CONTENT_TYPE, APPLICATION_JSON_VALUE);
+    final FullHttpResponse jsonResponse = ResponseBuilder.builder()
+            .header(httpHeaders).body(jsonString).build();
+    ctx.tryPush(jsonResponse);
   }
 }

@@ -21,9 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.result;
+package org.aquiver.mvc.result;
 
-import org.apex.ApexContext;
 import org.aquiver.RequestContext;
 import org.aquiver.ResponseBuilder;
 import org.aquiver.ResultHandler;
@@ -44,8 +43,7 @@ public final class StringResultHandler implements ResultHandler {
   private ViewHandler defaultViewHandler;
 
   public StringResultHandler() {
-    final ApexContext instance = ApexContext.instance();
-    this.viewHandlerResolver = instance.getBean(ViewHandlerResolver.class);
+    this.viewHandlerResolver = new ViewHandlerResolver();
   }
 
   private static int getFileSeparatorIndex(String path) {

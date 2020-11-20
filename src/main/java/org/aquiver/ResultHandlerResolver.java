@@ -25,10 +25,10 @@ package org.aquiver;
 
 import org.apex.ApexContext;
 import org.aquiver.mvc.RequestResult;
-import org.aquiver.result.JsonResultHandler;
-import org.aquiver.result.ModelAndViewResultHandler;
-import org.aquiver.result.StringResultHandler;
-import org.aquiver.result.VoidResultHandler;
+import org.aquiver.mvc.result.JsonResultHandler;
+import org.aquiver.mvc.result.ModelAndViewResultHandler;
+import org.aquiver.mvc.result.StringResultHandler;
+import org.aquiver.mvc.result.VoidResultHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

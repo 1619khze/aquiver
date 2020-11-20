@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.result.view;
+package org.aquiver.mvc.result.view;
 
 import org.aquiver.Request;
 import org.aquiver.mvc.http.MediaType;

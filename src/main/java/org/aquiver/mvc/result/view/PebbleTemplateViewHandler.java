@@ -21,29 +21,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.result.view;
+package org.aquiver.mvc.result.view;
 
-import org.aquiver.Request;
-import org.aquiver.mvc.http.MediaType;
+import io.netty.handler.codec.http.FullHttpResponse;
+import org.aquiver.RequestContext;
+import org.aquiver.ResponseBuilder;
+import org.aquiver.mvc.router.views.HTMLView;
+import org.aquiver.mvc.router.views.PebbleHTMLView;
+import org.aquiver.server.Const;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * @author WangYi
- * @since 2020/8/22
+ * @since 2020/8/23
  */
-public final class HtmlDataViewHandler extends AbstractDataViewHandler {
+public final class PebbleTemplateViewHandler extends AbstractTemplateViewHandler {
+  private final HTMLView htmlView = new PebbleHTMLView();
 
   @Override
-  public String getMimeType(Request request) {
-    return MediaType.TEXT_HTML_VALUE;
+  public String getPrefix() {
+    return environment.get(Const.PATH_SERVER_VIEW_PREFIX, "");
+  }
+
+  @Override
+  protected void doRender(RequestContext ctx, String viewPathName) throws IOException {
+    String renderView = this.htmlView.renderView(viewPathName, new HashMap<>());
+    final FullHttpResponse responseView = ResponseBuilder.builder().body(renderView).build();
+    ctx.tryPush(responseView);
+  }
+
+  @Override
+  public String getSuffix() {
+    return ".peb";
   }
 
   @Override
   public String getType() {
-    return "html";
+    return "peb";
   }
 
   @Override
   public ViewHandlerType getHandlerType() {
-    return ViewHandlerType.DATA_VIEW;
+    return ViewHandlerType.TEMPLATE_VIEW;
   }
 }
