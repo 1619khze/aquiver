@@ -26,10 +26,10 @@ package org.aquiver.loader;
 import org.apex.ApexContext;
 import org.aquiver.Aquiver;
 import org.aquiver.ReflectionHelper;
-import org.aquiver.handler.ErrorHandlerResolver;
-import org.aquiver.handler.ErrorHandlerWrapper;
-import org.aquiver.handler.annotation.ErrorAdvice;
-import org.aquiver.handler.annotation.RouteAdvice;
+import org.aquiver.mvc.annotation.HandleAdvice;
+import org.aquiver.mvc.annotation.RouteAdvice;
+import org.aquiver.mvc.handler.RouteAdviceHandlerResolver;
+import org.aquiver.mvc.handler.RouteAdviceHandlerWrapper;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -39,7 +39,7 @@ import java.util.Objects;
  * @author WangYi
  * @since 2020/8/12
  */
-public class ExceptionHandlerLoader implements WebLoader {
+public class RouteAdviceLoader implements WebLoader {
   /**
    * Filter the Advice class from the scanned result
    * set and add it to the Advice Manager
@@ -48,7 +48,7 @@ public class ExceptionHandlerLoader implements WebLoader {
    */
   @Override
   public void load(Map<String, Object> instances, Aquiver aquiver) {
-    final ApexContext context = ApexContext.instance();
+    final ApexContext context = aquiver.apexContext();
     for (Object object : instances.values()) {
       Class<?> cls = object.getClass();
       Method[] declaredMethods = cls.getDeclaredMethods();
@@ -58,14 +58,14 @@ public class ExceptionHandlerLoader implements WebLoader {
         continue;
       }
       for (Method method : declaredMethods) {
-        ErrorAdvice handler = method.getDeclaredAnnotation(ErrorAdvice.class);
+        HandleAdvice handler = method.getDeclaredAnnotation(HandleAdvice.class);
         if (Objects.isNull(handler)) {
           continue;
         }
-        ErrorHandlerWrapper errorHandlerWrapper = new ErrorHandlerWrapper();
+        RouteAdviceHandlerWrapper errorHandlerWrapper = new RouteAdviceHandlerWrapper();
         errorHandlerWrapper.initialize(cls);
-        context.getBean(ErrorHandlerResolver.class)
-                .registerErrorHandler(handler.value(), errorHandlerWrapper);
+        context.getBean(RouteAdviceHandlerResolver.class)
+                .registerAdviceHandler(handler.value(), errorHandlerWrapper);
       }
     }
   }
