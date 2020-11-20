@@ -33,8 +33,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Param {
-
   String value() default "";
+
+  String defaultValue() default "";
 
   boolean required() default true;
 }
