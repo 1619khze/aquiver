@@ -35,7 +35,6 @@ import org.aquiver.mvc.annotation.bind.PathVar;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author WangYi
@@ -79,7 +78,7 @@ public final class AnnotationArgumentGetterResolver implements GetterResolver<An
 
   @Override
   public AnnotationArgumentGetter lookup(Class<?> bindClass) {
-    Objects.requireNonNull(bindClass, "bindClass can't be null");
+    Validate.notNull(bindClass, "bindClass can't be null");
     if (!Annotation.class.isAssignableFrom(bindClass)) {
       throw new IllegalArgumentException(bindClass.getName() + "can't assignable from Annotation");
     }

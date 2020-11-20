@@ -24,6 +24,7 @@
 package org.aquiver.mvc.argument;
 
 import org.aquiver.RequestContext;
+import org.aquiver.mvc.annotation.bind.Param;
 
 /**
  * @author WangYi
@@ -34,6 +35,9 @@ public final class ParamArgumentGetter implements AnnotationArgumentGetter {
   @Override
   public Object get(ArgumentContext context) {
     RequestContext requestContext = context.getContext();
+    Param annotation = (Param) context.getAnnotation();
+    String s = annotation.defaultValue();
+    System.out.println(s);
     return context.getParameter().getType().cast(requestContext
             .param(context.getParameter().getName()));
   }

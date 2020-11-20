@@ -42,9 +42,8 @@ public class MethodArgumentGetter {
   private final RequestContext requestContext;
 
   public MethodArgumentGetter(RequestContext requestContext) {
-    final ApexContext context = ApexContext.instance();
-    this.annotationResolver = context.getBean(AnnotationArgumentGetterResolver.class);
-    this.argumentGetterResolver = context.getBean(ArgumentGetterResolver.class);
+    this.annotationResolver = new AnnotationArgumentGetterResolver();
+    this.argumentGetterResolver = new ArgumentGetterResolver();
     this.requestContext = requestContext;
   }
 
