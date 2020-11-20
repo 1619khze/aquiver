@@ -23,6 +23,7 @@
  */
 package org.aquiver.mvc.argument;
 
+import org.apache.commons.lang3.StringUtils;
 import org.aquiver.RequestContext;
 import org.aquiver.mvc.annotation.bind.Param;
 
@@ -35,10 +36,23 @@ public final class ParamArgumentGetter implements AnnotationArgumentGetter {
   @Override
   public Object get(ArgumentContext context) {
     RequestContext requestContext = context.getContext();
-    Param annotation = (Param) context.getAnnotation();
-    String s = annotation.defaultValue();
-    System.out.println(s);
-    return context.getParameter().getType().cast(requestContext
-            .param(context.getParameter().getName()));
+    Param param = (Param) context.getAnnotation();
+    String paramKey = context.getParameter().getName();
+    if (!"".equals(param.value())) {
+      paramKey = param.value();
+    }
+    String requestParam = requestContext.param(paramKey);
+    if (StringUtils.isNotEmpty(requestParam)) {
+      return context.getParameter().getType().cast(requestParam);
+    } else {
+      if (!"".equals(param.defaultValue())) {
+        return context.getParameter().getType().cast(param.defaultValue());
+      }
+      if (param.required()) {
+        throw new IllegalArgumentException("This parameter is required: "
+                + context.getParameter().getName());
+      }
+    }
+    return null;
   }
 }
