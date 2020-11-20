@@ -27,8 +27,8 @@ import org.apache.commons.lang3.Validate;
 import org.apex.Apex;
 import org.apex.ApexContext;
 import org.apex.Environment;
-import org.aquiver.handler.ErrorHandler;
-import org.aquiver.handler.ErrorHandlerResolver;
+import org.aquiver.mvc.handler.RouteAdviceHandler;
+import org.aquiver.mvc.handler.RouteAdviceHandlerResolver;
 import org.aquiver.mvc.http.HttpMethod;
 import org.aquiver.mvc.interceptor.Interceptor;
 import org.aquiver.mvc.router.RestfulRouter;
@@ -145,7 +145,7 @@ public class Aquiver {
   // A series of components used
   private final RestfulRouter restfulRouter = apexContext.addBean(RestfulRouter.class);
   private final WebSocketResolver webSocketResolver = apexContext.addBean(WebSocketResolver.class);
-  private final ErrorHandlerResolver errorHandlerResolver = apexContext.addBean(ErrorHandlerResolver.class);
+  private final RouteAdviceHandlerResolver errorHandlerResolver = apexContext.addBean(RouteAdviceHandlerResolver.class);
 
   private static final List<Interceptor> interceptors = new ArrayList<>();
 
@@ -658,8 +658,8 @@ public class Aquiver {
    * @param errorHandler exception handler
    * @return this
    */
-  public Aquiver errorHandler(Class<? extends Throwable> throwableCls, ErrorHandler errorHandler) {
-    this.errorHandlerResolver.registerErrorHandler(throwableCls, errorHandler);
+  public Aquiver errorHandler(Class<? extends Throwable> throwableCls, RouteAdviceHandler adviceHandler) {
+    this.errorHandlerResolver.registerAdviceHandler(throwableCls, adviceHandler);
     return this;
   }
 

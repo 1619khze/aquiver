@@ -35,7 +35,6 @@ import io.netty.util.ResourceLeakDetector;
 import org.apache.commons.lang3.JavaVersion;
 import org.apache.commons.lang3.SystemUtils;
 import org.apex.Apex;
-import org.apex.ApexContext;
 import org.apex.Environment;
 import org.apex.annotation.ConfigBean;
 import org.apex.annotation.PropertyBean;
@@ -45,7 +44,7 @@ import org.aquiver.Aquiver;
 import org.aquiver.ResultHandlerResolver;
 import org.aquiver.ViewHandlerResolver;
 import org.aquiver.WebInitializer;
-import org.aquiver.handler.annotation.RouteAdvice;
+import org.aquiver.mvc.annotation.RouteAdvice;
 import org.aquiver.mvc.annotation.Path;
 import org.aquiver.mvc.annotation.RestPath;
 import org.aquiver.mvc.argument.AnnotationArgumentGetterResolver;
@@ -94,11 +93,15 @@ import static org.aquiver.server.Const.SERVER_WATCHER_PATH;
 public class NettyServer implements Server {
   private static final Logger log = LoggerFactory.getLogger(NettyServer.class);
 
-  /** Banner and bootstrap when service starts. */
+  /**
+   * Banner and bootstrap when service starts.
+   */
   private final Banner defaultBanner = new NettyServerBanner();
   private final ServerBootstrap serverBootstrap = new ServerBootstrap();
 
-  /** Netty builds long connection service. */
+  /**
+   * Netty builds long connection service.
+   */
   private EventLoopGroup bossGroup;
   private EventLoopGroup workerGroup;
   private Environment environment;
@@ -107,7 +110,9 @@ public class NettyServer implements Server {
   private Channel channel;
   private SslContext sslContext;
 
-  /** Service startup status, using volatile to ensure threads are visible. */
+  /**
+   * Service startup status, using volatile to ensure threads are visible.
+   */
   private volatile boolean stop = false;
 
   /**
@@ -154,24 +159,20 @@ public class NettyServer implements Server {
    */
   private void initApex() throws Exception {
     WebInitializer webInitializer = new WebInitializer();
-    final ApexContext apexContext = initApexContext();
+    this.initApexContext();
 
     log.info("ApexContext initialization completed");
     log.info("Environment initialization completed");
 
-    apexContext.addBean(ResultHandlerResolver.class);
-    apexContext.addBean(ViewHandlerResolver.class);
-    apexContext.addBean(ArgumentGetterResolver.class);
-    apexContext.addBean(AnnotationArgumentGetterResolver.class);
-
-    final Map<String, Object> instances = apexContext.instances();
+    final Map<String, Object> instances =
+            aquiver.apexContext().instances();
     webInitializer.initialize(instances, aquiver);
   }
 
   /**
    * Initialize apex context
    */
-  private ApexContext initApexContext() throws Exception {
+  private void initApexContext() throws Exception {
     final String scanPath = aquiver.bootCls().getPackage().getName();
     apex.typeAnnotation(Path.class);
     apex.typeAnnotation(RouteAdvice.class);
@@ -184,9 +185,12 @@ public class NettyServer implements Server {
 
     apex.packages().add(scanPath);
     apex.mainArgs(aquiver.mainArgs());
-    ApexContext apexContext = aquiver.apexContext();
-    apexContext.init(apex);
-    return apexContext;
+    aquiver.apexContext().init(apex);
+
+    aquiver.apexContext().addBean(ResultHandlerResolver.class);
+    aquiver.apexContext().addBean(ViewHandlerResolver.class);
+    aquiver.apexContext().addBean(ArgumentGetterResolver.class);
+    aquiver.apexContext().addBean(AnnotationArgumentGetterResolver.class);
   }
 
   /**

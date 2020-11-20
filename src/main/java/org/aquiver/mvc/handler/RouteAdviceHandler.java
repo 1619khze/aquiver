@@ -21,21 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.handler.annotation;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package org.aquiver.mvc.handler;
 
 /**
  * @author WangYi
- * @since 2020/7/1
+ * @since 2020/8/29
  */
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface ErrorAdvice {
-  Class<? extends Throwable> value();
+public interface RouteAdviceHandler {
+  void handle(Throwable throwable) throws Exception;
 }

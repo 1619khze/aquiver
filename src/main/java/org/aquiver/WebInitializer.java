@@ -23,7 +23,7 @@
  */
 package org.aquiver;
 
-import org.aquiver.loader.ExceptionHandlerLoader;
+import org.aquiver.loader.RouteAdviceLoader;
 import org.aquiver.loader.RestfulRouterLoader;
 import org.aquiver.loader.WebLoader;
 import org.aquiver.loader.WebSocketLoader;
@@ -41,7 +41,7 @@ public class WebInitializer {
   public WebInitializer() {
     this.registerWebLoader(new RestfulRouterLoader());
     this.registerWebLoader(new WebSocketLoader());
-    this.registerWebLoader(new ExceptionHandlerLoader());
+    this.registerWebLoader(new RouteAdviceLoader());
   }
 
   public void registerWebLoader(WebLoader webLoader) {

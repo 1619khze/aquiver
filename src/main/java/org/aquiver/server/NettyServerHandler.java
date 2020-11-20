@@ -37,10 +37,10 @@ import org.aquiver.RegexBypassRequestUrls;
 import org.aquiver.RequestContext;
 import org.aquiver.ResultHandler;
 import org.aquiver.ResultHandlerResolver;
-import org.aquiver.handler.ErrorHandlerResolver;
 import org.aquiver.mvc.BypassRequestUrls;
 import org.aquiver.mvc.RequestResult;
 import org.aquiver.mvc.argument.MethodArgumentGetter;
+import org.aquiver.mvc.handler.RouteAdviceHandlerResolver;
 import org.aquiver.mvc.http.HttpStatus;
 import org.aquiver.mvc.interceptor.AspectInterceptorChain;
 import org.aquiver.mvc.interceptor.Interceptor;
@@ -60,7 +60,7 @@ import java.util.Objects;
 public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private static final Logger log = LoggerFactory.getLogger(NettyServerHandler.class);
   private final RestfulRouter restfulRouter;
-  private final ErrorHandlerResolver errorHandlerResolver;
+  private final RouteAdviceHandlerResolver routeAdviceHandlerResolver;
   private final ResultHandlerResolver resultHandlerResolver;
   private final ApexContext context = ApexContext.instance();
   private final StaticFileServerHandler fileServerHandler;
@@ -69,11 +69,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   private BypassRequestUrls bypassRequestUrls;
 
   public NettyServerHandler() {
-    this.errorHandlerResolver = context.getBean(ErrorHandlerResolver.class);
+    this.routeAdviceHandlerResolver = context.getBean(RouteAdviceHandlerResolver.class);
     this.restfulRouter = context.getBean(RestfulRouter.class);
     this.resultHandlerResolver = context.getBean(ResultHandlerResolver.class);
-    this.fileServerHandler = new StaticFileServerHandler();
     this.bypassRequestUrls = context.getBean(BypassRequestUrls.class);
+    this.fileServerHandler = new StaticFileServerHandler();
   }
 
   @Override
@@ -90,7 +90,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
     log.error("An exception occurred when calling the mapping method", cause);
     this.requestContext.throwable(cause);
-    this.errorHandlerResolver.handleException(cause, requestContext);
+    this.routeAdviceHandlerResolver.handleException(cause, requestContext);
+    ctx.close();
   }
 
   @Override
@@ -129,13 +130,12 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Object> {
         this.requestContext.routeInfo(routeInfo);
       }
 
-      final List<Interceptor> interceptors
-              = Aquiver.interceptors();
-      final AspectInterceptorChain interceptorChain
+      final List<Interceptor> interceptors = Aquiver.interceptors();
+      final AspectInterceptorChain chain
               = new AspectInterceptorChain(interceptors, requestContext);
 
-      interceptorChain.invoke();
-      final RequestResult result = interceptorChain.getResult();
+      chain.invoke();
+      final RequestResult result = chain.result();
 
       this.handleResult(result);
     } catch (Throwable throwable) {

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.handler;
+package org.aquiver.mvc.handler;
 
 import org.apache.commons.lang3.Validate;
 import org.apex.ApexContext;
@@ -34,14 +34,14 @@ import java.util.Map;
  * @author WangYi
  * @since 2020/7/3
  */
-public class ErrorHandlerResolver {
-  private final Map<Class<? extends Throwable>, ErrorHandler> exceptionHandlerMap = new HashMap<>();
+public class RouteAdviceHandlerResolver {
+  private final Map<Class<? extends Throwable>, RouteAdviceHandler> exceptionHandlerMap = new HashMap<>();
   private final ApexContext context = ApexContext.instance();
 
-  public void registerErrorHandler(Class<? extends Throwable> throwableCls, ErrorHandler errorHandler) {
+  public void registerAdviceHandler(Class<? extends Throwable> throwableCls, RouteAdviceHandler routeAdviceHandler) {
     Validate.notNull(throwableCls, "throwableCls can' be null");
-    Validate.notNull(errorHandler, "errorHandler can' be null");
-    this.exceptionHandlerMap.put(throwableCls, errorHandler);
+    Validate.notNull(routeAdviceHandler, "errorHandler can' be null");
+    this.exceptionHandlerMap.put(throwableCls, routeAdviceHandler);
   }
 
   public void handleException(Throwable throwable, RequestContext requestContext) {
@@ -49,9 +49,9 @@ public class ErrorHandlerResolver {
       requestContext.closeChannel();
     }
     try {
-      final ErrorHandler errorHandler = exceptionHandlerMap.get(throwable.getClass());
+      final RouteAdviceHandler routeAdviceHandler = exceptionHandlerMap.get(throwable.getClass());
       this.context.addBean(context);
-      errorHandler.handle(throwable);
+      routeAdviceHandler.handle(throwable);
     } catch (Exception e) {
       e.printStackTrace();
       requestContext.channelContext().close();

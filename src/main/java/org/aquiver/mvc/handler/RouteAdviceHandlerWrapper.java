@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.handler;
+package org.aquiver.mvc.handler;
 
 import org.apex.ApexContext;
-import org.aquiver.handler.annotation.ErrorAdvice;
-import org.aquiver.handler.annotation.RouteAdvice;
+import org.aquiver.mvc.annotation.HandleAdvice;
+import org.aquiver.mvc.annotation.RouteAdvice;
 import org.aquiver.mvc.argument.MethodArgumentGetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +41,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author WangYi
  * @since 2020/8/29
  */
-public class ErrorHandlerWrapper implements ErrorHandler {
-  private static final Logger log = LoggerFactory.getLogger(ErrorHandlerWrapper.class);
+public class RouteAdviceHandlerWrapper implements RouteAdviceHandler {
+  private static final Logger log = LoggerFactory.getLogger(RouteAdviceHandlerWrapper.class);
 
   private final ApexContext context = ApexContext.instance();
   private final Map<Class<? extends Throwable>, Method> handlerMethod = new ConcurrentHashMap<>();
@@ -60,11 +60,11 @@ public class ErrorHandlerWrapper implements ErrorHandler {
       return;
     }
     for (final Method method : methods) {
-      if (!method.isAnnotationPresent(ErrorAdvice.class)) {
+      if (!method.isAnnotationPresent(HandleAdvice.class)) {
         continue;
       }
-      final ErrorAdvice errorAdvice = method.getAnnotation(ErrorAdvice.class);
-      this.handlerMethod.put(errorAdvice.value(), method);
+      final HandleAdvice handleAdvice = method.getAnnotation(HandleAdvice.class);
+      this.handlerMethod.put(handleAdvice.value(), method);
     }
   }
 
