@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.loader;
+package org.aquiver.hook;
 
 import org.apex.ApexContext;
 import org.aquiver.Aquiver;
@@ -38,8 +38,8 @@ import java.util.Map;
  * @author WangYi
  * @since 2020/8/12
  */
-public class RestfulRouterLoader implements WebLoader {
-  private static final Logger log = LoggerFactory.getLogger(RestfulRouterLoader.class);
+public class RestfulRouterHook implements WebHook {
+  private static final Logger log = LoggerFactory.getLogger(RestfulRouterHook.class);
 
   /**
    * Filter out the routing class from the scanned

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.loader;
+package org.aquiver.hook;
 
 import org.aquiver.Aquiver;
 
@@ -32,6 +32,6 @@ import java.util.Map;
  * @since 2020/8/12
  */
 @FunctionalInterface
-public interface WebLoader {
+public interface WebHook {
   void load(Map<String, Object> instances, Aquiver aquiver) throws Exception;
 }

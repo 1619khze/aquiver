@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.loader;
+package org.aquiver.hook;
 
 import org.apex.ApexContext;
 import org.aquiver.Aquiver;
@@ -39,7 +39,7 @@ import java.util.Objects;
  * @author WangYi
  * @since 2020/8/12
  */
-public class RouteAdviceLoader implements WebLoader {
+public class RouteAdviceHook implements WebHook {
   /**
    * Filter the Advice class from the scanned result
    * set and add it to the Advice Manager

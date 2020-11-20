@@ -23,10 +23,10 @@
  */
 package org.aquiver;
 
-import org.aquiver.loader.RouteAdviceLoader;
-import org.aquiver.loader.RestfulRouterLoader;
-import org.aquiver.loader.WebLoader;
-import org.aquiver.loader.WebSocketLoader;
+import org.aquiver.hook.RouteAdviceHook;
+import org.aquiver.hook.RestfulRouterHook;
+import org.aquiver.hook.WebHook;
+import org.aquiver.hook.WebSocketHook;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,27 +36,27 @@ import java.util.Map;
  * @since 2020/8/23
  */
 public class WebInitializer {
-  private final Map<String, WebLoader> webLoaderMap = new HashMap<>();
+  private final Map<String, WebHook> webHookMap = new HashMap<>();
 
   public WebInitializer() {
-    this.registerWebLoader(new RestfulRouterLoader());
-    this.registerWebLoader(new WebSocketLoader());
-    this.registerWebLoader(new RouteAdviceLoader());
+    this.registerWebHook(new RestfulRouterHook());
+    this.registerWebHook(new WebSocketHook());
+    this.registerWebHook(new RouteAdviceHook());
   }
 
-  public void registerWebLoader(WebLoader webLoader) {
-    this.webLoaderMap.put(webLoader.getClass().getName(), webLoader);
+  public void registerWebHook(WebHook webHook) {
+    this.webHookMap.put(webHook.getClass().getName(), webHook);
   }
 
-  public void lookupWebLoader(String className) {
-    this.webLoaderMap.getOrDefault(className, null);
+  public void lookupWebHook(String className) {
+    this.webHookMap.getOrDefault(className, null);
   }
 
   public void initialize(Map<String, Object> instances, Aquiver aquiver) throws Exception {
     if (instances.isEmpty()) {
       return;
     }
-    for (Map.Entry<String, WebLoader> entry : webLoaderMap.entrySet()) {
+    for (Map.Entry<String, WebHook> entry : webHookMap.entrySet()) {
       entry.getValue().load(instances, aquiver);
     }
   }
