@@ -43,7 +43,7 @@ import org.apex.annotation.Singleton;
 import org.aquiver.Aquiver;
 import org.aquiver.ResultHandlerResolver;
 import org.aquiver.ViewHandlerResolver;
-import org.aquiver.WebInitializer;
+import org.aquiver.WebHookInitializer;
 import org.aquiver.mvc.annotation.RouteAdvice;
 import org.aquiver.mvc.annotation.Path;
 import org.aquiver.mvc.annotation.RestPath;
@@ -158,7 +158,7 @@ public class NettyServer implements Server {
    * Initialize apex
    */
   private void initApex() throws Exception {
-    WebInitializer webInitializer = new WebInitializer();
+    WebHookInitializer webHookInitializer = new WebHookInitializer();
     this.initApexContext();
 
     log.info("ApexContext initialization completed");
@@ -166,7 +166,7 @@ public class NettyServer implements Server {
 
     final Map<String, Object> instances =
             aquiver.apexContext().instances();
-    webInitializer.initialize(instances, aquiver);
+    webHookInitializer.initialize(instances, aquiver);
   }
 
   /**

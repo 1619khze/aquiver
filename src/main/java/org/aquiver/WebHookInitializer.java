@@ -35,10 +35,10 @@ import java.util.Map;
  * @author WangYi
  * @since 2020/8/23
  */
-public class WebInitializer {
+public class WebHookInitializer {
   private final Map<String, WebHook> webHookMap = new HashMap<>();
 
-  public WebInitializer() {
+  public WebHookInitializer() {
     this.registerWebHook(new RestfulRouterHook());
     this.registerWebHook(new WebSocketHook());
     this.registerWebHook(new RouteAdviceHook());
