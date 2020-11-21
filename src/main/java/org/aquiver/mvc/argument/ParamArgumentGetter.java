@@ -42,9 +42,7 @@ public final class ParamArgumentGetter implements AnnotationArgumentGetter {
       paramKey = param.value();
     }
     String requestParam = requestContext.param(paramKey);
-    if (StringUtils.isNotEmpty(requestParam)) {
-      return context.getParameter().getType().cast(requestParam);
-    } else {
+    if (StringUtils.isEmpty(requestParam) || "null".equals(requestParam)) {
       if (!"".equals(param.defaultValue())) {
         return context.getParameter().getType().cast(param.defaultValue());
       }
@@ -52,6 +50,8 @@ public final class ParamArgumentGetter implements AnnotationArgumentGetter {
         throw new IllegalArgumentException("This parameter is required: "
                 + context.getParameter().getName());
       }
+    } else {
+      return context.getParameter().getType().cast(requestParam);
     }
     return null;
   }
