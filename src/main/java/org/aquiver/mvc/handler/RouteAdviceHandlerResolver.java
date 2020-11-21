@@ -26,6 +26,7 @@ package org.aquiver.mvc.handler;
 import org.apache.commons.lang3.Validate;
 import org.apex.ApexContext;
 import org.aquiver.RequestContext;
+import org.aquiver.mvc.http.HttpStatus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,15 +47,15 @@ public class RouteAdviceHandlerResolver {
 
   public void handleException(Throwable throwable, RequestContext requestContext) {
     if (exceptionHandlerMap.isEmpty() || !exceptionHandlerMap.containsKey(throwable.getClass())) {
-      requestContext.closeChannel();
+      requestContext.error(HttpStatus.INTERNAL_SERVER_ERROR, throwable.getLocalizedMessage());
     }
     try {
       final RouteAdviceHandler routeAdviceHandler = exceptionHandlerMap.get(throwable.getClass());
-      this.context.addBean(context);
-      routeAdviceHandler.handle(throwable);
+      if (null != routeAdviceHandler) {
+        routeAdviceHandler.handle(throwable);
+      }
     } catch (Exception e) {
-      e.printStackTrace();
-      requestContext.channelContext().close();
+      handleException(e, requestContext);
     }
   }
 }
