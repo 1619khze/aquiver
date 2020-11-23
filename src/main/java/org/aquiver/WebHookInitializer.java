@@ -26,7 +26,7 @@ package org.aquiver;
 import org.aquiver.hook.RouteAdviceHook;
 import org.aquiver.hook.RestfulRouterHook;
 import org.aquiver.hook.InitializeHook;
-import org.aquiver.hook.InitializeSocketHook;
+import org.aquiver.hook.InitializeWebSocketHook;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +40,7 @@ public class WebHookInitializer {
 
   public WebHookInitializer() {
     this.registerWebHook(new RestfulRouterHook());
-    this.registerWebHook(new InitializeSocketHook());
+    this.registerWebHook(new InitializeWebSocketHook());
     this.registerWebHook(new RouteAdviceHook());
   }
 

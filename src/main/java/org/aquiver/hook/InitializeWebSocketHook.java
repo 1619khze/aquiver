@@ -36,7 +36,7 @@ import java.util.Map;
  * @author WangYi
  * @since 2020/8/12
  */
-public class InitializeSocketHook implements InitializeHook {
+public class InitializeWebSocketHook implements InitializeHook {
   /**
    * Filter out the classes marked with Web Socket annotations
    * from the scan result set and reduce them to the Web Socket
