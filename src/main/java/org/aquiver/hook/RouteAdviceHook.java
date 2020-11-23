@@ -39,7 +39,7 @@ import java.util.Objects;
  * @author WangYi
  * @since 2020/8/12
  */
-public class RouteAdviceHook implements WebHook {
+public class RouteAdviceHook implements InitializeHook {
   /**
    * Filter the Advice class from the scanned result
    * set and add it to the Advice Manager

@@ -32,6 +32,6 @@ import java.util.Map;
  * @since 2020/8/12
  */
 @FunctionalInterface
-public interface WebHook {
+public interface InitializeHook {
   void load(Map<String, Object> instances, Aquiver aquiver) throws Exception;
 }

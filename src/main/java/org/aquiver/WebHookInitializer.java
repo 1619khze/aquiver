@@ -25,8 +25,8 @@ package org.aquiver;
 
 import org.aquiver.hook.RouteAdviceHook;
 import org.aquiver.hook.RestfulRouterHook;
-import org.aquiver.hook.WebHook;
-import org.aquiver.hook.WebSocketHook;
+import org.aquiver.hook.InitializeHook;
+import org.aquiver.hook.InitializeSocketHook;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,16 +36,16 @@ import java.util.Map;
  * @since 2020/8/23
  */
 public class WebHookInitializer {
-  private final Map<String, WebHook> webHookMap = new HashMap<>();
+  private final Map<String, InitializeHook> webHookMap = new HashMap<>();
 
   public WebHookInitializer() {
     this.registerWebHook(new RestfulRouterHook());
-    this.registerWebHook(new WebSocketHook());
+    this.registerWebHook(new InitializeSocketHook());
     this.registerWebHook(new RouteAdviceHook());
   }
 
-  public void registerWebHook(WebHook webHook) {
-    this.webHookMap.put(webHook.getClass().getName(), webHook);
+  public void registerWebHook(InitializeHook initializeHook) {
+    this.webHookMap.put(initializeHook.getClass().getName(), initializeHook);
   }
 
   public void lookupWebHook(String className) {
@@ -56,7 +56,7 @@ public class WebHookInitializer {
     if (instances.isEmpty()) {
       return;
     }
-    for (Map.Entry<String, WebHook> entry : webHookMap.entrySet()) {
+    for (Map.Entry<String, InitializeHook> entry : webHookMap.entrySet()) {
       entry.getValue().load(instances, aquiver);
     }
   }
