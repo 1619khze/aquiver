@@ -27,6 +27,7 @@ package org.aquiver.mvc.handler;
  * @author WangYi
  * @since 2020/8/29
  */
+@FunctionalInterface
 public interface RouteAdviceHandler {
   void handle(Throwable throwable) throws Exception;
 }
