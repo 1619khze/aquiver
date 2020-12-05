@@ -38,7 +38,7 @@ import java.util.Map;
  * @author WangYi
  * @since 2020/8/12
  */
-public class RestfulRouterHook implements InitializeHook {
+public class RestfulRouterHook implements InitializeHook<Map<String, Object>, Aquiver> {
   private static final Logger log = LoggerFactory.getLogger(RestfulRouterHook.class);
 
   /**

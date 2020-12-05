@@ -35,6 +35,7 @@ import java.util.Map;
  * @author WangYi
  * @since 2020/8/23
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class WebHookInitializer {
   private final Map<String, InitializeHook> webHookMap = new HashMap<>();
 

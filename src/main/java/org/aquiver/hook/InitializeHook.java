@@ -23,15 +23,11 @@
  */
 package org.aquiver.hook;
 
-import org.aquiver.Aquiver;
-
-import java.util.Map;
-
 /**
  * @author WangYi
  * @since 2020/8/12
  */
 @FunctionalInterface
-public interface InitializeHook {
-  void load(Map<String, Object> instances, Aquiver aquiver) throws Exception;
+public interface InitializeHook<K, V> {
+  void load(K k, V v) throws Exception;
 }
