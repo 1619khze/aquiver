@@ -61,8 +61,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
   private WebSocketChannel webSocketChannel;
 
   public WebSocketHandler() {
-    final ApexContext context = ApexContext.instance();
-    this.webSocketResolver = context.getBean(WebSocketResolver.class);
+    this.webSocketResolver = apexContext.getBean(WebSocketResolver.class);
   }
 
   @Override
@@ -96,9 +95,11 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
     this.webSocketContext = webSocketContext(fullHttpRequest, ctx);
     MethodArgumentGetter methodArgumentGetter = new MethodArgumentGetter(webSocketContext);
     this.apexContext.addBean(methodArgumentGetter);
+
     if (isWebSocketRequest(req)) {
       final WebSocketServerHandshakerFactory wsFactory =
-              new WebSocketServerHandshakerFactory(req.uri(), null, true);
+              new WebSocketServerHandshakerFactory(req.uri(),
+                      null, true);
       this.handshaker = wsFactory.newHandshaker(req);
       if (handshaker == null) {
         WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
@@ -145,12 +146,11 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
               "Unsupported frame type [" + frame.getClass().getName() + "]");
 
       this.handshaker.close(ctx.channel(), new CloseWebSocketFrame());
-      this.webSocketContext.setError(new WebSocketContext.Error(throwable, webSocketContext));
+      this.webSocketContext.setThrowable(throwable);
       CompletableFuture.completedFuture(webSocketContext)
               .thenAcceptAsync(webSocketChannel::onError, ctx.executor());
-    } else{
-      this.webSocketContext.setMessage(new WebSocketContext.Message
-              (((TextWebSocketFrame) frame).text(), webSocketContext));
+    } else {
+      this.webSocketContext.setMessage((((TextWebSocketFrame) frame).text()));
       CompletableFuture.completedFuture(webSocketContext)
               .thenAcceptAsync(webSocketChannel::onMessage, ctx.executor());
     }
@@ -180,7 +180,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
   public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) {
     log.error("An exception occurred", cause);
     if (null != webSocketChannel) {
-      this.webSocketContext.setError(new WebSocketContext.Error(cause, webSocketContext));
+      this.webSocketContext.setThrowable(cause);
       CompletableFuture.completedFuture(webSocketContext)
               .thenAcceptAsync(webSocketChannel::onError, ctx.executor());
     }

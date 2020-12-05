@@ -38,8 +38,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class WebSocketContext extends RequestContext {
   private final WebSocketSession session;
   private WebSocketChannel channel;
-  private Message message;
-  private Error error;
+  private Throwable throwable;
+  private String message;
 
   public WebSocketContext(FullHttpRequest httpRequest, ChannelHandlerContext context) {
     super(httpRequest, context);
@@ -75,69 +75,19 @@ public class WebSocketContext extends RequestContext {
     return channel;
   }
 
-  public Message getMessage() {
+  public Throwable getThrowable() {
+    return throwable;
+  }
+
+  public void setThrowable(Throwable throwable) {
+    this.throwable = throwable;
+  }
+
+  public String getMessage() {
     return message;
   }
 
-  public void setMessage(Message message) {
+  public void setMessage(String message) {
     this.message = message;
-  }
-
-  public Error getError() {
-    return error;
-  }
-
-  public void setError(Error error) {
-    this.error = error;
-  }
-
-  public static class Message {
-    private final String text;
-    private final WebSocketContext context;
-
-    Message(String text, WebSocketContext context) {
-      this.text = text;
-      this.context = context;
-    }
-
-    public String text() {
-      return text;
-    }
-
-    public WebSocketContext context() {
-      return context;
-    }
-
-    @Override
-    public String toString() {
-      return "Message{" +
-              "text='" + text + '\'' +
-              '}';
-    }
-  }
-
-  public static class Error {
-    private final Throwable cause;
-    private final WebSocketContext context;
-
-    Error(Throwable cause, WebSocketContext context) {
-      this.cause = cause;
-      this.context = context;
-    }
-
-    public Throwable cause() {
-      return cause;
-    }
-
-    public WebSocketContext context() {
-      return context;
-    }
-
-    @Override
-    public String toString() {
-      return "Error{" +
-              "cause=" + cause +
-              '}';
-    }
   }
 }
