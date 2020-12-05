@@ -41,7 +41,7 @@ public class WebSocketClient implements WebSocketChannel {
 
   @Override
   public void onMessage(WebSocketContext webSocketContext) {
-    System.out.println(webSocketContext.getMessage().text());
+    System.out.println(webSocketContext.getMessage());
     webSocketContext.message("测试消息回应");
   }
 
