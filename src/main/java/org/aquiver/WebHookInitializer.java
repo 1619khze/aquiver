@@ -23,10 +23,21 @@
  */
 package org.aquiver;
 
-import org.aquiver.hook.RouteAdviceHook;
-import org.aquiver.hook.RestfulRouterHook;
+import org.apex.Apex;
+import org.apex.annotation.ConfigBean;
+import org.apex.annotation.PropertyBean;
+import org.apex.annotation.Scheduled;
+import org.apex.annotation.Singleton;
 import org.aquiver.hook.InitializeHook;
 import org.aquiver.hook.InitializeWebSocketHook;
+import org.aquiver.hook.RestfulRouterHook;
+import org.aquiver.hook.RouteAdviceHook;
+import org.aquiver.mvc.annotation.Path;
+import org.aquiver.mvc.annotation.RestPath;
+import org.aquiver.mvc.annotation.RouteAdvice;
+import org.aquiver.mvc.argument.AnnotationArgumentGetterResolver;
+import org.aquiver.mvc.argument.ArgumentGetterResolver;
+import org.aquiver.websocket.WebSocket;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,9 +65,26 @@ public class WebHookInitializer {
   }
 
   public void initialize(Map<String, Object> instances, Aquiver aquiver) throws Exception {
-    if (instances.isEmpty()) {
-      return;
-    }
+    final String scanPath = aquiver.bootCls().getPackage().getName();
+    final Apex apex = aquiver.apex();
+
+    apex.typeAnnotation(Path.class);
+    apex.typeAnnotation(RouteAdvice.class);
+    apex.typeAnnotation(RestPath.class);
+    apex.typeAnnotation(WebSocket.class);
+    apex.typeAnnotation(Singleton.class);
+    apex.typeAnnotation(ConfigBean.class);
+    apex.typeAnnotation(PropertyBean.class);
+    apex.typeAnnotation(Scheduled.class);
+
+    apex.packages().add(scanPath);
+    apex.mainArgs(aquiver.mainArgs());
+    aquiver.apexContext().init(apex);
+
+    aquiver.apexContext().addBean(ResultHandlerResolver.class);
+    aquiver.apexContext().addBean(ViewHandlerResolver.class);
+    aquiver.apexContext().addBean(ArgumentGetterResolver.class);
+    aquiver.apexContext().addBean(AnnotationArgumentGetterResolver.class);
     for (Map.Entry<String, InitializeHook> entry : webHookMap.entrySet()) {
       entry.getValue().load(instances, aquiver);
     }

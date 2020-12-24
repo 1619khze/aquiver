@@ -34,25 +34,12 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.util.ResourceLeakDetector;
 import org.apache.commons.lang3.JavaVersion;
 import org.apache.commons.lang3.SystemUtils;
-import org.apex.Apex;
 import org.apex.Environment;
-import org.apex.annotation.ConfigBean;
-import org.apex.annotation.PropertyBean;
-import org.apex.annotation.Scheduled;
-import org.apex.annotation.Singleton;
 import org.aquiver.Aquiver;
-import org.aquiver.ResultHandlerResolver;
-import org.aquiver.ViewHandlerResolver;
 import org.aquiver.WebHookInitializer;
-import org.aquiver.mvc.annotation.RouteAdvice;
-import org.aquiver.mvc.annotation.Path;
-import org.aquiver.mvc.annotation.RestPath;
-import org.aquiver.mvc.argument.AnnotationArgumentGetterResolver;
-import org.aquiver.mvc.argument.ArgumentGetterResolver;
 import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvTask;
-import org.aquiver.websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,21 +51,7 @@ import java.security.cert.CertificateException;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.aquiver.server.Const.DEFAULT_ACCEPT_THREAD_COUNT;
-import static org.aquiver.server.Const.DEFAULT_IO_THREAD_COUNT;
-import static org.aquiver.server.Const.PATH_ENV_WATCHER;
-import static org.aquiver.server.Const.PATH_SERVER_ADDRESS;
-import static org.aquiver.server.Const.PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT;
-import static org.aquiver.server.Const.PATH_SERVER_NETTY_IO_THREAD_COUNT;
-import static org.aquiver.server.Const.PATH_SERVER_PORT;
-import static org.aquiver.server.Const.PATH_SERVER_SSL;
-import static org.aquiver.server.Const.PATH_SERVER_SSL_CERT;
-import static org.aquiver.server.Const.PATH_SERVER_SSL_PRIVATE_KEY;
-import static org.aquiver.server.Const.PATH_SERVER_SSL_PRIVATE_KEY_PASS;
-import static org.aquiver.server.Const.SERVER_ADDRESS;
-import static org.aquiver.server.Const.SERVER_PORT;
-import static org.aquiver.server.Const.SERVER_SSL;
-import static org.aquiver.server.Const.SERVER_WATCHER_PATH;
+import static org.aquiver.server.Const.*;
 
 /**
  * open ssl {@code initSSL}
@@ -106,7 +79,6 @@ public class NettyServer implements Server {
   private EventLoopGroup workerGroup;
   private Environment environment;
   private Aquiver aquiver;
-  private Apex apex;
   private Channel channel;
   private SslContext sslContext;
 
@@ -126,7 +98,6 @@ public class NettyServer implements Server {
     long startMs = System.currentTimeMillis();
 
     this.aquiver = aquiver;
-    this.apex = aquiver.apex();
     this.environment = this.aquiver.environment();
     this.printBanner();
 
@@ -148,7 +119,7 @@ public class NettyServer implements Server {
     log.info("The configuration file loaded by this application startup is {}", bootConfName);
 
     this.initSsl();
-    this.initApex();
+    this.initWebHook();
     this.startServer(startMs);
     this.watchEnv();
     this.shutdownHook();
@@ -157,40 +128,16 @@ public class NettyServer implements Server {
   /**
    * Initialize apex
    */
-  private void initApex() throws Exception {
-    WebHookInitializer webHookInitializer = new WebHookInitializer();
-    this.initApexContext();
+  private void initWebHook() throws Exception {
+    final WebHookInitializer webHookInitializer = new WebHookInitializer();
+
+    final Map<String, Object> instances
+            = aquiver.apexContext().instances();
 
     log.info("ApexContext initialization completed");
     log.info("Environment initialization completed");
 
-    final Map<String, Object> instances =
-            aquiver.apexContext().instances();
     webHookInitializer.initialize(instances, aquiver);
-  }
-
-  /**
-   * Initialize apex context
-   */
-  private void initApexContext() throws Exception {
-    final String scanPath = aquiver.bootCls().getPackage().getName();
-    apex.typeAnnotation(Path.class);
-    apex.typeAnnotation(RouteAdvice.class);
-    apex.typeAnnotation(RestPath.class);
-    apex.typeAnnotation(WebSocket.class);
-    apex.typeAnnotation(Singleton.class);
-    apex.typeAnnotation(ConfigBean.class);
-    apex.typeAnnotation(PropertyBean.class);
-    apex.typeAnnotation(Scheduled.class);
-
-    apex.packages().add(scanPath);
-    apex.mainArgs(aquiver.mainArgs());
-    aquiver.apexContext().init(apex);
-
-    aquiver.apexContext().addBean(ResultHandlerResolver.class);
-    aquiver.apexContext().addBean(ViewHandlerResolver.class);
-    aquiver.apexContext().addBean(ArgumentGetterResolver.class);
-    aquiver.apexContext().addBean(AnnotationArgumentGetterResolver.class);
   }
 
   /**
