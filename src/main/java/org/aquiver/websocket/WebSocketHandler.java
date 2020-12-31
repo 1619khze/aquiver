@@ -54,7 +54,7 @@ import java.util.concurrent.CompletableFuture;
 public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
   private static final Logger log = LoggerFactory.getLogger(WebSocketHandler.class);
 
-  private final ApexContext apexContext = ApexContext.instance();
+  private final ApexContext apexContext = ApexContext.of();
   private final WebSocketResolver webSocketResolver;
   private WebSocketContext webSocketContext;
   private WebSocketServerHandshaker handshaker;

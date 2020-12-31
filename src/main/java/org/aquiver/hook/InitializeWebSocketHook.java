@@ -46,7 +46,7 @@ public class InitializeWebSocketHook implements InitializeHook<Map<String, Objec
    */
   @Override
   public void load(Map<String, Object> instances, Aquiver aquiver) {
-    final ApexContext context = ApexContext.instance();
+    final ApexContext context = ApexContext.of();
     for (Object object : instances.values()) {
       Class<?> cls = object.getClass();
       Method[] declaredMethods = cls.getDeclaredMethods();

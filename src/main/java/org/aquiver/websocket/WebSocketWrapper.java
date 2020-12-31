@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 public class WebSocketWrapper implements WebSocketChannel {
   private static final Logger log = LoggerFactory.getLogger(WebSocketWrapper.class);
 
-  private final ApexContext apexContext = ApexContext.instance();
+  private final ApexContext apexContext = ApexContext.of();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
   private final Map<Class<? extends Annotation>, Method> methodCache;
   private MethodArgumentGetter methodArgumentGetter;

@@ -32,13 +32,6 @@ import java.util.Map;
  */
 public interface HTMLView {
   /**
-   * Get the support view type.
-   *
-   * @return ViewType
-   */
-  ViewType viewType();
-
-  /**
    * Get the content of the returned view
    *
    * @param htmlPath   html path

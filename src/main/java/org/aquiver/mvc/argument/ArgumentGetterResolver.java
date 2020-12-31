@@ -45,7 +45,7 @@ import java.util.Objects;
 public final class ArgumentGetterResolver implements GetterResolver<ArgumentGetter<?>> {
   private static final Logger log = LoggerFactory.getLogger(ArgumentGetterResolver.class);
   private final Map<Class<?>, TypeArgumentGetter<?>> mapping = new HashMap<>();
-  private final ApexContext context = ApexContext.instance();
+  private final ApexContext context = ApexContext.of();
 
   public ArgumentGetterResolver() {
     this.init();

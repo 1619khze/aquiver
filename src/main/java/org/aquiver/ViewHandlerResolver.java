@@ -28,7 +28,6 @@ import org.apex.ApexContext;
 import org.aquiver.mvc.result.view.CssDataViewHandler;
 import org.aquiver.mvc.result.view.HtmlDataViewHandler;
 import org.aquiver.mvc.result.view.HtmlTemplateViewHandler;
-import org.aquiver.mvc.result.view.PebbleTemplateViewHandler;
 import org.aquiver.mvc.result.view.RedirectViewHandler;
 import org.aquiver.mvc.result.view.XmlDataViewHandler;
 import org.slf4j.Logger;
@@ -45,7 +44,7 @@ import java.util.Objects;
 public class ViewHandlerResolver {
   private static final Logger log = LoggerFactory.getLogger(ViewHandlerResolver.class);
   private final Map<String, ViewHandler> viewHandlerMap = new HashMap<>();
-  private final ApexContext context = ApexContext.instance();
+  private final ApexContext context = ApexContext.of();
 
   public ViewHandlerResolver() {
     this.init();
@@ -61,7 +60,6 @@ public class ViewHandlerResolver {
     this.register(HtmlDataViewHandler.class);
     this.register(RedirectViewHandler.class);
     this.register(HtmlTemplateViewHandler.class);
-    this.register(PebbleTemplateViewHandler.class);
   }
 
   public void register(Class<? extends ViewHandler> viewHandlerClass) {

@@ -50,7 +50,7 @@ public class RestfulRouterHook implements InitializeHook<Map<String, Object>, Aq
    */
   @Override
   public void load(Map<String, Object> instances, Aquiver aquiver) {
-    final ApexContext context = ApexContext.instance();
+    final ApexContext context = ApexContext.of();
     for (Map.Entry<String, Object> entry : instances.entrySet()) {
       Class<?> next = entry.getValue().getClass();
       String url = "/";

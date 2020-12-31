@@ -44,7 +44,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RouteAdviceHandlerWrapper implements RouteAdviceHandler {
   private static final Logger log = LoggerFactory.getLogger(RouteAdviceHandlerWrapper.class);
 
-  private final ApexContext context = ApexContext.instance();
+  private final ApexContext context = ApexContext.of();
   private final Map<Class<? extends Throwable>, Method> handlerMethod = new ConcurrentHashMap<>();
   private final MethodHandles.Lookup lookup = MethodHandles.lookup();
   private Class<?> exceptionHandler;

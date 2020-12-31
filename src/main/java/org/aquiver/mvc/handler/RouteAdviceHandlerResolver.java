@@ -37,7 +37,6 @@ import java.util.Map;
  */
 public class RouteAdviceHandlerResolver {
   private final Map<Class<? extends Throwable>, RouteAdviceHandler> exceptionHandlerMap = new HashMap<>();
-  private final ApexContext context = ApexContext.instance();
 
   public void registerAdviceHandler(Class<? extends Throwable> throwableCls, RouteAdviceHandler routeAdviceHandler) {
     Validate.notNull(throwableCls, "throwableCls can' be null");

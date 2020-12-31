@@ -23,23 +23,25 @@
  */
 package org.aquiver.mvc.result;
 
-import io.netty.handler.codec.http.FullHttpResponse;
+import org.apex.Apex;
+import org.apex.ApexContext;
+import org.apex.Environment;
 import org.aquiver.ModelAndView;
 import org.aquiver.RequestContext;
-import org.aquiver.ResponseBuilder;
 import org.aquiver.ResultHandler;
+import org.aquiver.ViewHandler;
+import org.aquiver.ViewHandlerResolver;
 import org.aquiver.mvc.RequestResult;
-import org.aquiver.mvc.router.views.HTMLView;
-import org.aquiver.mvc.router.views.PebbleHTMLView;
-
-import java.io.IOException;
+import org.aquiver.server.Const;
 
 /**
  * @author WangYi
  * @since 2020/8/25
  */
 public final class ModelAndViewResultHandler implements ResultHandler {
-  private final HTMLView htmlView = new PebbleHTMLView();
+  private final ApexContext context = ApexContext.of();
+  private final Environment environment = Apex.of().environment();
+  private final ViewHandlerResolver viewHandlerResolver = context.getBean(ViewHandlerResolver.class);
 
   @Override
   public boolean support(RequestResult requestResult) {
@@ -47,10 +49,10 @@ public final class ModelAndViewResultHandler implements ResultHandler {
   }
 
   @Override
-  public void handle(RequestContext ctx, RequestResult result) throws IOException {
+  public void handle(RequestContext ctx, RequestResult result) throws Exception {
     ModelAndView modelAndView = (ModelAndView) result.getResultObject();
-    String renderView = this.htmlView.renderView(modelAndView.htmlPath(), modelAndView.params());
-    final FullHttpResponse responseView = ResponseBuilder.builder().body(renderView).build();
-    ctx.tryPush(responseView);
+    String suffix = this.environment.get(Const.PATH_SERVER_VIEW_SUFFIX, Const.SERVER_VIEW_SUFFIX);
+    ViewHandler lookup = this.viewHandlerResolver.lookup(suffix);
+    lookup.render(ctx, modelAndView.htmlPath());
   }
 }

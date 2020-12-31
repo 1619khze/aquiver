@@ -47,7 +47,7 @@ public final class HtmlTemplateViewHandler extends AbstractTemplateViewHandler {
 
   @Override
   public String getSuffix() {
-    return environment.get(Const.PATH_SERVER_VIEW_SUFFIX, Const.SERVER_VIEW_SUFFIX);
+    return Const.SERVER_VIEW_SUFFIX;
   }
 
   @Override
