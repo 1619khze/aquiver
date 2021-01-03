@@ -39,9 +39,9 @@ public interface Const {
   Integer STRAP_LINE_SIZE = 42;
 
   String SERVER_ADDRESS = "localhost";
-  String CRISPY_VERSION = "(v1.0.0 RELEASE)";
+  String AQUIVER_VERSION = "(v1.0.0 RELEASE)";
   String BANNER_TEXT = "aquiver";
-  String CRISPY_FRAMEWORK = " :: Aquiver Framework :: ";
+  String AQUIVER_FRAMEWORK = " :: Aquiver Framework :: ";
   String SPACE = " ";
   String FAVICON_PATH = "/favicon.ico";
   String SERVER_THREAD_NAME = "（'-'*)";
