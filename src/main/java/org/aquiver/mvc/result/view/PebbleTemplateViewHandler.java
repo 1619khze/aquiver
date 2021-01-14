@@ -28,7 +28,7 @@ import org.aquiver.RequestContext;
 import org.aquiver.ResponseBuilder;
 import org.aquiver.mvc.router.views.HTMLView;
 import org.aquiver.mvc.router.views.PebbleHTMLView;
-import org.aquiver.server.Const;
+import org.aquiver.ServerSpec;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -42,7 +42,7 @@ public final class PebbleTemplateViewHandler extends AbstractTemplateViewHandler
 
   @Override
   public String getPrefix() {
-    return environment.get(Const.PATH_SERVER_VIEW_PREFIX, "");
+    return environment.get(ServerSpec.PATH_SERVER_VIEW_PREFIX, "");
   }
 
   @Override

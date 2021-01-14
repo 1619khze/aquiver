@@ -32,7 +32,7 @@ import org.aquiver.mvc.RequestResult;
 
 import java.util.Objects;
 
-import static org.aquiver.server.Const.SERVER_VIEW_SUFFIX;
+import static org.aquiver.ServerSpec.SERVER_VIEW_SUFFIX;
 
 /**
  * @author WangYi

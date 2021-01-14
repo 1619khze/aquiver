@@ -62,25 +62,25 @@ import java.util.concurrent.atomic.LongAdder;
 
 import static io.netty.util.internal.PlatformDependent.isWindows;
 import static java.util.Objects.requireNonNull;
-import static org.aquiver.server.Const.BANNER_TEXT;
-import static org.aquiver.server.Const.PATH_APP_BANNER_FONT;
-import static org.aquiver.server.Const.PATH_APP_BANNER_TEXT;
-import static org.aquiver.server.Const.PATH_CONFIG_PROPERTIES;
-import static org.aquiver.server.Const.PATH_SERVER_CONTENT_COMPRESSOR;
-import static org.aquiver.server.Const.PATH_SERVER_CORS;
-import static org.aquiver.server.Const.PATH_SERVER_PORT;
-import static org.aquiver.server.Const.PATH_SERVER_SESSION_ENABLE;
-import static org.aquiver.server.Const.PATH_SERVER_SESSION_KEY;
-import static org.aquiver.server.Const.PATH_SERVER_SESSION_TIMEOUT;
-import static org.aquiver.server.Const.PATH_SERVER_TEMPLATES_FOLDER;
-import static org.aquiver.server.Const.PATH_SERVER_VIEW_SUFFIX;
-import static org.aquiver.server.Const.SERVER_CONTENT_COMPRESSOR;
-import static org.aquiver.server.Const.SERVER_CORS;
-import static org.aquiver.server.Const.SERVER_SESSION_ENABLE;
-import static org.aquiver.server.Const.SERVER_SESSION_KEY;
-import static org.aquiver.server.Const.SERVER_SESSION_TIMEOUT;
-import static org.aquiver.server.Const.SERVER_TEMPLATES_FOLDER;
-import static org.aquiver.server.Const.SERVER_THREAD_NAME;
+import static org.aquiver.ServerSpec.BANNER_TEXT;
+import static org.aquiver.ServerSpec.PATH_APP_BANNER_FONT;
+import static org.aquiver.ServerSpec.PATH_APP_BANNER_TEXT;
+import static org.aquiver.ServerSpec.PATH_CONFIG_PROPERTIES;
+import static org.aquiver.ServerSpec.PATH_SERVER_CONTENT_COMPRESSOR;
+import static org.aquiver.ServerSpec.PATH_SERVER_CORS;
+import static org.aquiver.ServerSpec.PATH_SERVER_PORT;
+import static org.aquiver.ServerSpec.PATH_SERVER_SESSION_ENABLE;
+import static org.aquiver.ServerSpec.PATH_SERVER_SESSION_KEY;
+import static org.aquiver.ServerSpec.PATH_SERVER_SESSION_TIMEOUT;
+import static org.aquiver.ServerSpec.PATH_SERVER_TEMPLATES_FOLDER;
+import static org.aquiver.ServerSpec.PATH_SERVER_VIEW_SUFFIX;
+import static org.aquiver.ServerSpec.SERVER_CONTENT_COMPRESSOR;
+import static org.aquiver.ServerSpec.SERVER_CORS;
+import static org.aquiver.ServerSpec.SERVER_SESSION_ENABLE;
+import static org.aquiver.ServerSpec.SERVER_SESSION_KEY;
+import static org.aquiver.ServerSpec.SERVER_SESSION_TIMEOUT;
+import static org.aquiver.ServerSpec.SERVER_TEMPLATES_FOLDER;
+import static org.aquiver.ServerSpec.SERVER_THREAD_NAME;
 
 /**
  * Aquiver is apex context, can use method configure

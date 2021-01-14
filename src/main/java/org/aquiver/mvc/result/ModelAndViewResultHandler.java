@@ -32,7 +32,7 @@ import org.aquiver.ResultHandler;
 import org.aquiver.ViewHandler;
 import org.aquiver.ViewHandlerResolver;
 import org.aquiver.mvc.RequestResult;
-import org.aquiver.server.Const;
+import org.aquiver.ServerSpec;
 
 /**
  * @author WangYi
@@ -51,7 +51,7 @@ public final class ModelAndViewResultHandler implements ResultHandler {
   @Override
   public void handle(RequestContext ctx, RequestResult result) throws Exception {
     ModelAndView modelAndView = (ModelAndView) result.getResultObject();
-    String suffix = this.environment.get(Const.PATH_SERVER_VIEW_SUFFIX, Const.SERVER_VIEW_SUFFIX);
+    String suffix = this.environment.get(ServerSpec.PATH_SERVER_VIEW_SUFFIX, ServerSpec.SERVER_VIEW_SUFFIX);
     ViewHandler lookup = this.viewHandlerResolver.lookup(suffix);
     lookup.render(ctx, modelAndView.htmlPath());
   }

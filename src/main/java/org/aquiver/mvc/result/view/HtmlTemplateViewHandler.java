@@ -28,7 +28,7 @@ import org.apex.io.FileBaseResource;
 import org.apex.io.Resource;
 import org.aquiver.RequestContext;
 import org.aquiver.ResponseBuilder;
-import org.aquiver.server.Const;
+import org.aquiver.ServerSpec;
 
 import java.net.URL;
 import java.nio.file.Files;
@@ -42,12 +42,12 @@ public final class HtmlTemplateViewHandler extends AbstractTemplateViewHandler {
 
   @Override
   public String getPrefix() {
-    return environment.get(Const.PATH_SERVER_VIEW_PREFIX, "");
+    return environment.get(ServerSpec.PATH_SERVER_VIEW_PREFIX, "");
   }
 
   @Override
   public String getSuffix() {
-    return Const.SERVER_VIEW_SUFFIX;
+    return ServerSpec.SERVER_VIEW_SUFFIX;
   }
 
   @Override

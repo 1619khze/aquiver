@@ -28,7 +28,7 @@ import org.aquiver.Aquiver;
 import org.aquiver.RequestContext;
 import org.aquiver.ResponseBuilder;
 import org.aquiver.ViewHandler;
-import org.aquiver.server.Const;
+import org.aquiver.ServerSpec;
 
 import java.io.File;
 import java.net.URL;
@@ -50,7 +50,7 @@ public abstract class AbstractTemplateViewHandler implements ViewHandler {
       viewPath = "/" + getPrefix() + viewPath;
     }
 
-    viewPath = Const.SERVER_TEMPLATES_FOLDER + File.separator + viewPath;
+    viewPath = ServerSpec.SERVER_TEMPLATES_FOLDER + File.separator + viewPath;
     if (!viewPath.endsWith(getSuffix())) {
       viewPath = viewPath + "." + getSuffix();
     }

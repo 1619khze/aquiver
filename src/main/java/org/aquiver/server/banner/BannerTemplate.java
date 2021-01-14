@@ -23,7 +23,7 @@
  */
 package org.aquiver.server.banner;
 
-import org.aquiver.server.Const;
+import org.aquiver.ServerSpec;
 
 import java.io.PrintStream;
 
@@ -42,7 +42,7 @@ public abstract class BannerTemplate implements Banner {
   @Override
   public void printBanner(PrintStream printStream, String bannerText, String bannerFont) {
     this.prePrintBannerText(printStream, bannerText, bannerFont);
-    final String padding = setUpPadding(Const.STRAP_LINE_SIZE);
+    final String padding = setUpPadding(ServerSpec.STRAP_LINE_SIZE);
     this.printTextAndVersion(printStream, padding);
   }
 }

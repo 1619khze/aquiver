@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.server;
+package org.aquiver;
 
 import org.aquiver.Aquiver;
 
@@ -29,14 +29,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-public interface Const {
+public interface ServerSpec {
   Integer SERVER_PORT = 8080;
   Integer SERVER_SESSION_TIMEOUT = 1800;
+  Integer STRAP_LINE_SIZE = 42;
+
   Boolean SERVER_SSL = false;
   Boolean SERVER_CORS = false;
   Boolean SERVER_CONTENT_COMPRESSOR = false;
   Boolean SERVER_SESSION_ENABLE = true;
-  Integer STRAP_LINE_SIZE = 42;
 
   String SERVER_ADDRESS = "localhost";
   String AQUIVER_VERSION = "(v1.0.0 RELEASE)";
