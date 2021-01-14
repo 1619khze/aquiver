@@ -84,6 +84,7 @@ public class NettyServer implements Server {
    */
   private final Banner defaultBanner = new NettyServerBanner();
   private final ServerBootstrap serverBootstrap = new ServerBootstrap();
+  private final WebContextInitializer initializer = new WebContextInitializer();
 
   /**
    * Netty builds long connection service.
@@ -112,6 +113,7 @@ public class NettyServer implements Server {
 
     this.aquiver = aquiver;
     this.environment = this.aquiver.environment();
+    this.initializer.initialize(aquiver);
     this.printBanner();
 
     final String bootClsName = this.aquiver.bootClsName();
@@ -132,21 +134,9 @@ public class NettyServer implements Server {
     log.info("The configuration file loaded by this application startup is {}", bootConfName);
 
     this.initSsl();
-    this.initWebHook();
     this.startServer(startMs);
     this.watchEnv();
     this.shutdownHook();
-  }
-
-  /**
-   * Initialize apex
-   */
-  private void initWebHook() throws Exception {
-    final WebContextInitializer webContextInitializer = new WebContextInitializer();
-    log.info("ApexContext initialization completed");
-    log.info("Environment initialization completed");
-
-    webContextInitializer.initialize(aquiver);
   }
 
   /**
