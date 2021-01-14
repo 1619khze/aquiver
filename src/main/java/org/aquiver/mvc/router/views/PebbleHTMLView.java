@@ -43,16 +43,6 @@ public class PebbleHTMLView implements HTMLView {
   }
 
   /**
-   * Get the support view type.
-   *
-   * @return ViewType
-   */
-  @Override
-  public ViewType viewType() {
-    return ViewType.HTML;
-  }
-
-  /**
    * Get the content of the returned view
    *
    * @param htmlPath   html path
