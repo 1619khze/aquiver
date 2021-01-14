@@ -140,7 +140,7 @@ public class Aquiver {
 
   // Components needed for dependency injection
   private final Apex apex = Apex.of();
-  private final ApexContext apexContext = ApexContext.instance();
+  private final ApexContext apexContext = ApexContext.of();
 
   // A series of components used
   private final RestfulRouter restfulRouter = apexContext.addBean(RestfulRouter.class);
