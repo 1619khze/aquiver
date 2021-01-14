@@ -45,10 +45,11 @@ public final class ParamArgumentGetter implements AnnotationArgumentGetter {
     if (StringUtils.isEmpty(requestParam) || "null".equals(requestParam)) {
       if (!"".equals(param.defaultValue())) {
         return context.getParameter().getType().cast(param.defaultValue());
-      }
-      if (param.required()) {
-        throw new IllegalArgumentException("This parameter is required: "
-                + context.getParameter().getName());
+      } else{
+        if (param.required()) {
+          throw new IllegalArgumentException("This parameter is required: "
+                  + context.getParameter().getName());
+        }
       }
     } else {
       return context.getParameter().getType().cast(requestParam);
