@@ -26,9 +26,10 @@ package org.aquiver.mvc.result.view;
 import io.netty.handler.codec.http.FullHttpResponse;
 import org.aquiver.RequestContext;
 import org.aquiver.ResponseBuilder;
+import org.aquiver.ServerSpec;
+import org.aquiver.ViewHandlerType;
 import org.aquiver.mvc.router.views.HTMLView;
 import org.aquiver.mvc.router.views.PebbleHTMLView;
-import org.aquiver.ServerSpec;
 
 import java.io.IOException;
 import java.util.HashMap;

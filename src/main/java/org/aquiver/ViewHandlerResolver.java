@@ -67,7 +67,7 @@ public class ViewHandlerResolver {
 
     ViewHandler viewHandler = context.addBean(viewHandlerClass);
     String type = viewHandler.getType();
-    if (viewHandler.getHandlerType().equals(ViewHandler.ViewHandlerType.DATA_VIEW)) {
+    if (viewHandler.getHandlerType().equals(ViewHandlerType.DATA_VIEW)) {
       type = type + dataViewMark();
     }
     this.viewHandlerMap.put(type, viewHandler);

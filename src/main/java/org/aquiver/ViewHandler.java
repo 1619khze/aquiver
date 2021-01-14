@@ -39,8 +39,4 @@ public interface ViewHandler {
   default ViewHandlerType getHandlerType() {
     return ViewHandlerType.DATA_VIEW;
   }
-
-  enum ViewHandlerType {
-    TEMPLATE_VIEW, DATA_VIEW
-  }
 }

@@ -29,6 +29,7 @@ import org.apex.io.Resource;
 import org.aquiver.RequestContext;
 import org.aquiver.ResponseBuilder;
 import org.aquiver.ServerSpec;
+import org.aquiver.ViewHandlerType;
 
 import java.net.URL;
 import java.nio.file.Files;

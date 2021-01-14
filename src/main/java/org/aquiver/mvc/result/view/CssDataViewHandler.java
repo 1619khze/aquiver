@@ -24,6 +24,7 @@
 package org.aquiver.mvc.result.view;
 
 import org.aquiver.Request;
+import org.aquiver.ViewHandlerType;
 import org.aquiver.mvc.http.MediaType;
 
 /**
