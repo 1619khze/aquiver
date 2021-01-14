@@ -29,7 +29,7 @@ import org.apex.annotation.PropertyBean;
 import org.apex.annotation.Scheduled;
 import org.apex.annotation.Singleton;
 import org.aquiver.hook.InitializeHook;
-import org.aquiver.hook.InitializeWebSocketHook;
+import org.aquiver.hook.WebSocketHook;
 import org.aquiver.hook.RestfulRouterHook;
 import org.aquiver.hook.RouteAdviceHook;
 import org.aquiver.mvc.annotation.Path;
@@ -52,7 +52,7 @@ public class WebHookInitializer {
 
   public WebHookInitializer() {
     this.registerWebHook(new RestfulRouterHook());
-    this.registerWebHook(new InitializeWebSocketHook());
+    this.registerWebHook(new WebSocketHook());
     this.registerWebHook(new RouteAdviceHook());
   }
 
