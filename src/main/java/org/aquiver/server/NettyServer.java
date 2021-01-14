@@ -36,7 +36,7 @@ import org.apache.commons.lang3.JavaVersion;
 import org.apache.commons.lang3.SystemUtils;
 import org.apex.Environment;
 import org.aquiver.Aquiver;
-import org.aquiver.WebHookInitializer;
+import org.aquiver.WebContextInitializer;
 import org.aquiver.server.banner.Banner;
 import org.aquiver.server.watcher.GlobalEnvListener;
 import org.aquiver.server.watcher.GlobalEnvTask;
@@ -48,7 +48,6 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Paths;
 import java.security.cert.CertificateException;
-import java.util.Map;
 import java.util.Objects;
 
 import static org.aquiver.ServerSpec.DEFAULT_ACCEPT_THREAD_COUNT;
@@ -143,15 +142,11 @@ public class NettyServer implements Server {
    * Initialize apex
    */
   private void initWebHook() throws Exception {
-    final WebHookInitializer webHookInitializer = new WebHookInitializer();
-
-    final Map<String, Object> instances
-            = aquiver.apexContext().instances();
-
+    final WebContextInitializer webContextInitializer = new WebContextInitializer();
     log.info("ApexContext initialization completed");
     log.info("Environment initialization completed");
 
-    webHookInitializer.initialize(instances, aquiver);
+    webContextInitializer.initialize(aquiver);
   }
 
   /**

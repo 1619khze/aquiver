@@ -58,7 +58,7 @@ public class StaticFileServerHandler {
       return;
     }
 
-    final ChannelHandlerContext ctx = requestContext.channelContext();
+    final ChannelHandlerContext ctx = requestContext.nettyContext();
     final File html = new File(resource.toURI());
 
     if (requestContext.is100ContinueExpected()) {

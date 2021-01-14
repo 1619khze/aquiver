@@ -1,3 +1,4 @@
+
 /*
  * MIT License
  *
@@ -30,7 +31,7 @@ import io.netty.channel.ChannelHandlerContext;
  * @since 2020/10/20
  */
 public interface RequestChannel {
-  ChannelHandlerContext channelContext();
+  ChannelHandlerContext nettyContext();
 
   void closeChannel();
 

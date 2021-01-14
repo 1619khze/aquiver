@@ -44,7 +44,7 @@ public final class FileUploadArgumentGetter implements AnnotationArgumentGetter 
     String name = parameter.getName();
     if (MultipartFile.class.isAssignableFrom(parameter.getType()) && fileUploads.containsKey(name)) {
       io.netty.handler.codec.http.multipart.FileUpload fileUpload = fileUploads.get(name);
-      return MultipartFileUtils.createMultipartFile(fileUpload, requestContext.channelContext());
+      return MultipartFileUtils.createMultipartFile(fileUpload, requestContext.nettyContext());
     }
     return null;
   }

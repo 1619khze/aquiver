@@ -49,7 +49,7 @@ public final class MultiFileUploadArgumentGetter implements AnnotationArgumentGe
       for (Map.Entry<String, FileUpload> entry : fileUploads.entrySet()) {
         FileUpload value = entry.getValue();
         MultipartFile multipartFile = MultipartFileUtils.createMultipartFile(
-                value, requestContext.channelContext());
+                value, requestContext.nettyContext());
         multipartFiles.add(multipartFile);
       }
     }

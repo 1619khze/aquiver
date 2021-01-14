@@ -35,7 +35,7 @@ public final class MultipartFileArgumentGetter implements TypeArgumentGetter<Mul
   @Override
   public MultipartFile get(RequestContext context) {
     final MultipartFile multipartFile = new MultipartFile();
-    multipartFile.channelContext(context.channelContext());
+    multipartFile.channelContext(context.nettyContext());
     return multipartFile;
   }
 

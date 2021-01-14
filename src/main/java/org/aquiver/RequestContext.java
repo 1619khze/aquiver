@@ -48,7 +48,7 @@ import static java.util.Objects.requireNonNull;
  * @author WangYi
  * @since 2020/6/27
  */
-public class RequestContext implements Request, Response, RequestChannel {
+public class RequestContext implements Request, Response, RequestChannel{
   private final static ThreadLocal<RequestContext> threadContext = new InheritableThreadLocal<>();
   private final HttpRequest httpRequest;
   private final HttpResponse response;
@@ -100,7 +100,7 @@ public class RequestContext implements Request, Response, RequestChannel {
   }
 
   @Override
-  public ChannelHandlerContext channelContext() {
+  public ChannelHandlerContext nettyContext() {
     return this.context;
   }
 
