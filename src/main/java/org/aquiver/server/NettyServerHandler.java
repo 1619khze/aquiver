@@ -33,7 +33,7 @@ import io.netty.handler.codec.http.HttpRequest;
 import org.apex.ApexContext;
 import org.aquiver.Aquiver;
 import org.aquiver.NoRouteFoundException;
-import org.aquiver.RegexBypassRequestUrls;
+import org.aquiver.bypass.RegexBypassRequestUrls;
 import org.aquiver.RequestContext;
 import org.aquiver.ResultHandler;
 import org.aquiver.ResultHandlerResolver;

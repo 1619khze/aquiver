@@ -21,76 +21,64 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver;
+package org.aquiver.bypass;
 
-import org.apache.commons.lang3.StringUtils;
+import org.aquiver.Request;
 import org.aquiver.mvc.BypassRequestUrls;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * @author WangYi
  * @since 2020/9/17
  */
-public class RegexBypassRequestUrls implements BypassRequestUrls {
-  public static final String DEFAULT_PATTERNS = "^(/static/).+$";
-  private final List<Pattern> patternList = new ArrayList<Pattern>(8);
-  private String patterns = DEFAULT_PATTERNS;
-  private Map<String, Boolean> cache;
+public class PrefixSuffixBypassRequestUrls implements BypassRequestUrls {
+  private final List<String> prefixs = new ArrayList<>();
+  private final List<String> suffixs = new ArrayList<>();
+  private final Map<String, Boolean> cache = new HashMap<>();
 
-  public RegexBypassRequestUrls() {
-    if (cache != null) {
-      cache.put(ServerSpec.FAVICON_PATH, Boolean.TRUE);
-    }
-
-    if (patterns != null && patterns.length() > 0) {
-      for (String pattern : StringUtils.split(patterns, ',')) {
-        pattern = StringUtils.trimToNull(pattern);
-        if (pattern != null) {
-          patternList.add(Pattern.compile(pattern));
-        }
-      }
-    }
+  public void setPrefixs(List<String> prefixs) {
+    this.prefixs.addAll(prefixs);
   }
 
-  public void setPatterns(String patterns) {
-    this.patterns = patterns;
+  public void setSuffixs(List<String> suffixs) {
+    this.suffixs.addAll(suffixs);
   }
 
-  public void setCache(boolean enabled) {
-    if (enabled) {
-      cache = new HashMap<>(128);
-    }
+  public void setCache(Map<String, Boolean> cache) {
+    this.cache.putAll(cache);
   }
 
   @Override
   public boolean accept(Request request, String path) {
-    if (cache != null) {
-      Boolean found = cache.get(path);
-      if (found != null) {
-        return found == Boolean.TRUE;
-      }
-    } else {
-      // special code for no-cache
-      if (ServerSpec.FAVICON_PATH.equals(path)) {
-        return true;
-      }
+    if (!cache.isEmpty() && cache.containsKey(path)) {
+      return cache.get(path);
     }
 
-    for (Pattern pattern : patternList) {
-      if (pattern.matcher(path).matches()) {
-        if (cache != null) {
+    if (!prefixs.isEmpty()) {
+      for (String prefix : prefixs) {
+        if (path.startsWith(prefix)) {
           cache.put(path, Boolean.TRUE);
         }
         return true;
       }
     }
 
-    if (cache != null) {
+    if (!suffixs.isEmpty()) {
+      for (String suffix : suffixs) {
+        if (path.endsWith(suffix)) {
+          if (cache != null) {
+            cache.put(path, Boolean.TRUE);
+          }
+          return true;
+        }
+      }
+    }
+
+    if (cache.isEmpty()) {
       cache.put(path, Boolean.FALSE);
     }
     return false;
