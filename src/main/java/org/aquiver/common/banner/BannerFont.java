@@ -21,32 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.server.ansi;
+package org.aquiver.common.banner;
 
 /**
  * @author WangYi
- * @version 1.0
- * @since 2019/1/16
+ * @since 2019/5/24
  */
-public enum AnsiColor {
-  RESET("\u001B[0m"),
-  BLACK("\u001B[30m"),
-  RED("\u001B[31m"),
-  GREEN("\u001B[32m"),
-  YELLOW("\u001B[33m"),
-  BLUE("\u001B[34m"),
-  PURPLE("\u001B[35m"),
-  CYAN("\u001B[36m"),
-  WHITE("\u001B[37m");
-
-  private final String code;
-
-  AnsiColor(String code) {
-    this.code = code;
-  }
-
-  @Override
-  public String toString() {
-    return this.code;
-  }
+public interface BannerFont {
+  String FONT_3_D = "3-D";
+  String FONT_3D_ASCII = "3D-ASCII";
+  String FONT_3D_DIAGONAL = "3D_Diagonal";
+  String FONT_DEFAULT = "Standard";
 }

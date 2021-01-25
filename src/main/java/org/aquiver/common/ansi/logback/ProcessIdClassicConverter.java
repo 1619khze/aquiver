@@ -21,10 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.server.banner;
+package org.aquiver.common.ansi.logback;
 
-import java.io.PrintStream;
+import ch.qos.logback.classic.pattern.ClassicConverter;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 
-public interface Banner {
-  void printBanner(PrintStream printStream, String bannerText, String bannerFont);
+import java.lang.management.ManagementFactory;
+
+public class ProcessIdClassicConverter extends ClassicConverter {
+
+  @Override
+  public String convert(ILoggingEvent iLoggingEvent) {
+    return ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
+  }
 }

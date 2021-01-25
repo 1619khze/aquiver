@@ -21,28 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.server.banner;
-
-import org.aquiver.ServerSpec;
-
-import java.io.PrintStream;
+package org.aquiver.common.ansi;
 
 /**
  * @author WangYi
- * @since 2019/5/13
+ * @version 1.0
+ * @since 2019/1/16
  */
-public abstract class BannerTemplate implements Banner {
-
-  public abstract void prePrintBannerText(PrintStream printStream, String bannerText, String bannerFont);
-
-  public abstract String setUpPadding(Integer strapLineSize);
-
-  public abstract void printTextAndVersion(PrintStream printStream, String padding);
+public interface AnsiElement {
 
   @Override
-  public void printBanner(PrintStream printStream, String bannerText, String bannerFont) {
-    this.prePrintBannerText(printStream, bannerText, bannerFont);
-    final String padding = setUpPadding(ServerSpec.STRAP_LINE_SIZE);
-    this.printTextAndVersion(printStream, padding);
-  }
+  String toString();
 }

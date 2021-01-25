@@ -21,28 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.server.ansi.logback;
+package org.aquiver.common.banner;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.pattern.color.ANSIConstants;
-import ch.qos.logback.core.pattern.color.ForegroundCompositeConverterBase;
+import org.aquiver.ServerSpec;
 
-public class LogBackAnsiConverter extends ForegroundCompositeConverterBase<ILoggingEvent> {
+import java.io.PrintStream;
+
+/**
+ * @author WangYi
+ * @since 2019/5/13
+ */
+public abstract class BannerTemplate implements Banner {
+
+  public abstract void prePrintBannerText(PrintStream printStream, String bannerText, String bannerFont);
+
+  public abstract String setUpPadding(Integer strapLineSize);
+
+  public abstract void printTextAndVersion(PrintStream printStream, String padding);
 
   @Override
-  protected String getForegroundColorCode(ILoggingEvent iLoggingEvent) {
-    switch (iLoggingEvent.getLevel().toInt()) {
-      case Level.ERROR_INT:
-        return ANSIConstants.RED_FG;
-      case Level.WARN_INT:
-        return ANSIConstants.YELLOW_FG;
-      case Level.INFO_INT:
-        return ANSIConstants.GREEN_FG;
-      case Level.DEBUG_INT:
-        return ANSIConstants.MAGENTA_FG;
-      default:
-        return null;
-    }
+  public void printBanner(PrintStream printStream, String bannerText, String bannerFont) {
+    this.prePrintBannerText(printStream, bannerText, bannerFont);
+    final String padding = setUpPadding(ServerSpec.STRAP_LINE_SIZE);
+    this.printTextAndVersion(printStream, padding);
   }
 }

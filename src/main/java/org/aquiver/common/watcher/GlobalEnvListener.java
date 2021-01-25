@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.server.watcher;
+package org.aquiver.common.watcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

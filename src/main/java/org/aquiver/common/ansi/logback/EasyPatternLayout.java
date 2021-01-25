@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.server.ansi.logback;
+package org.aquiver.common.ansi.logback;
 
 import ch.qos.logback.classic.pattern.CallerDataConverter;
 import ch.qos.logback.classic.pattern.ClassOfCallerConverter;

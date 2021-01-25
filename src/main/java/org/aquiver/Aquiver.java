@@ -35,7 +35,7 @@ import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.session.SessionManager;
 import org.aquiver.server.NettyServer;
 import org.aquiver.server.Server;
-import org.aquiver.server.banner.BannerFont;
+import org.aquiver.common.banner.BannerFont;
 import org.aquiver.websocket.WebSocketChannel;
 import org.aquiver.websocket.WebSocketResolver;
 import org.slf4j.Logger;

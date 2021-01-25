@@ -37,9 +37,9 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apex.Environment;
 import org.aquiver.Aquiver;
 import org.aquiver.WebContextInitializer;
-import org.aquiver.server.banner.Banner;
-import org.aquiver.server.watcher.GlobalEnvListener;
-import org.aquiver.server.watcher.GlobalEnvTask;
+import org.aquiver.common.banner.Banner;
+import org.aquiver.common.watcher.GlobalEnvListener;
+import org.aquiver.common.watcher.GlobalEnvTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

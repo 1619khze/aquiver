@@ -21,15 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.server.banner;
+package org.aquiver.common.watcher;
 
-/**
- * @author WangYi
- * @since 2019/5/24
- */
-public interface BannerFont {
-  String FONT_3_D = "3-D";
-  String FONT_3D_ASCII = "3D-ASCII";
-  String FONT_3D_DIAGONAL = "3D_Diagonal";
-  String FONT_DEFAULT = "Standard";
+import java.nio.file.Path;
+
+public interface WatcherListener {
+
+  void onCreate(Path file);
+
+  void onModify(Path file);
+
+  void onDelete(Path file);
 }

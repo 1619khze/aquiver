@@ -21,15 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.server.watcher;
+package org.aquiver.common.banner;
 
-import java.nio.file.Path;
+import java.io.PrintStream;
 
-public interface WatcherListener {
-
-  void onCreate(Path file);
-
-  void onModify(Path file);
-
-  void onDelete(Path file);
+public interface Banner {
+  void printBanner(PrintStream printStream, String bannerText, String bannerFont);
 }

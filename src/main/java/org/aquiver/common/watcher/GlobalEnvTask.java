@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.server.watcher;
+package org.aquiver.common.watcher;
 
 import java.io.FilenameFilter;
 import java.io.IOException;
