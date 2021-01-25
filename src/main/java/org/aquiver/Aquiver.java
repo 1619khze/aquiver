@@ -33,7 +33,7 @@ import org.aquiver.mvc.http.HttpMethod;
 import org.aquiver.mvc.interceptor.Interceptor;
 import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.session.SessionManager;
-import org.aquiver.server.NettyServer;
+import org.aquiver.server.netty.NettyServer;
 import org.aquiver.server.Server;
 import org.aquiver.common.banner.BannerFont;
 import org.aquiver.websocket.WebSocketChannel;
@@ -203,6 +203,17 @@ public class Aquiver {
       log.info("Un supported encoding", e);
     }
     return decode;
+  }
+
+  public boolean epollIsAvailable() {
+    try {
+      Object obj = Class.forName("io.netty.channel.epoll.Epoll")
+          .getMethod("isAvailable").invoke(null);
+      return null != obj && Boolean.parseBoolean(obj.toString())
+          && System.getProperty("os.name").toLowerCase().contains("linux");
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   public static String urlDecode(String path) throws UnsupportedEncodingException {

@@ -21,13 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.server;
+package org.aquiver.common.banner;
 
 import io.leego.banana.BananaUtils;
 import org.aquiver.ServerSpec;
 import org.aquiver.common.ansi.AnsiColor;
 import org.aquiver.common.ansi.AnsiOutput;
-import org.aquiver.common.banner.BannerTemplate;
 
 import java.io.PrintStream;
 
@@ -35,7 +34,7 @@ import java.io.PrintStream;
  * @author WangYi
  * @since 2019/5/13
  */
-public class NettyServerBanner extends BannerTemplate {
+public class SimpleBanner extends BannerTemplate {
 
   @Override
   public void prePrintBannerText(PrintStream printStream, String bannerText, String bannerFont) {

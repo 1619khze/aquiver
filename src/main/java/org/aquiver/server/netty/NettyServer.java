@@ -21,13 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.server;
+package org.aquiver.server.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
@@ -40,6 +44,8 @@ import org.aquiver.WebContextInitializer;
 import org.aquiver.common.banner.Banner;
 import org.aquiver.common.watcher.GlobalEnvListener;
 import org.aquiver.common.watcher.GlobalEnvTask;
+import org.aquiver.common.banner.SimpleBanner;
+import org.aquiver.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +88,7 @@ public class NettyServer implements Server {
   /**
    * Banner and bootstrap when service starts.
    */
-  private final Banner defaultBanner = new NettyServerBanner();
+  private final Banner defaultBanner = new SimpleBanner();
   private final ServerBootstrap serverBootstrap = new ServerBootstrap();
   private final WebContextInitializer initializer = new WebContextInitializer();
 
@@ -165,7 +171,7 @@ public class NettyServer implements Server {
       log.info("SSL PrivateKey Pass: {}", sslPrivateKeyPass);
 
       sslContext = SslContextBuilder.forServer(setKeyCertFileAndPriKey(sslCert, ssc.certificate()),
-              setKeyCertFileAndPriKey(sslPrivateKey, ssc.privateKey()), sslPrivateKeyPass).build();
+          setKeyCertFileAndPriKey(sslPrivateKey, ssc.privateKey()), sslPrivateKeyPass).build();
     }
 
     log.info("Current netty server ssl startup status: {}", ssl);
@@ -199,30 +205,25 @@ public class NettyServer implements Server {
    * @throws Exception Common exception
    */
   private void startServer(long startTime) throws Exception {
-
     ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
 
     this.serverBootstrap.childHandler(new NettyServerInitializer(sslContext));
 
-    int acceptThreadCount = environment.getInt(PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT, DEFAULT_ACCEPT_THREAD_COUNT);
-    int ioThreadCount = environment.getInt(PATH_SERVER_NETTY_IO_THREAD_COUNT, DEFAULT_IO_THREAD_COUNT);
+    final int acceptThreadCount = environment.getInt(PATH_SERVER_NETTY_ACCEPT_THREAD_COUNT, DEFAULT_ACCEPT_THREAD_COUNT);
+    final int ioThreadCount = environment.getInt(PATH_SERVER_NETTY_IO_THREAD_COUNT, DEFAULT_IO_THREAD_COUNT);
 
-    NettyServerGroup nettyServerGroup;
-
-    if (EventLoopKit.epollIsAvailable()) {
-      nettyServerGroup = EventLoopKit.epollGroup(acceptThreadCount, ioThreadCount);
+    if (aquiver.epollIsAvailable()) {
+      this.bossGroup = new EpollEventLoopGroup(acceptThreadCount, withThreadName("epoll-boss@"));
+      this.workerGroup = new EpollEventLoopGroup(ioThreadCount, withThreadName("epoll-worker@"));
+      this.serverBootstrap.channel(EpollServerSocketChannel.class);
     } else {
-      nettyServerGroup = EventLoopKit.nioGroup(acceptThreadCount, ioThreadCount);
+      this.bossGroup = new NioEventLoopGroup(acceptThreadCount, withThreadName("nio-boss@"));
+      this.workerGroup = new NioEventLoopGroup(ioThreadCount, withThreadName("nio-worker@"));
+      this.serverBootstrap.channel(NioServerSocketChannel.class);
     }
 
-    this.bossGroup = nettyServerGroup.getBossGroup();
-    this.workerGroup = nettyServerGroup.getWorkGroup();
-
-    this.serverBootstrap.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
-            .channel(nettyServerGroup.getChannelClass());
-
-    log.info("The IO mode of the application startup is: {}",
-            EventLoopKit.judgeMode(nettyServerGroup.getChannelClass().getSimpleName()));
+    this.serverBootstrap.group(bossGroup, workerGroup).option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
+    log.info("The IO mode of the application startup is: {}", aquiver.epollIsAvailable() ? "Epoll" : "Nio");
 
     this.stop = false;
 
@@ -236,6 +237,10 @@ public class NettyServer implements Server {
 
     log.info("Aquiver started on port(s): {} (com.aquiver.http) with context path ''", port);
     log.info("Started {} in {} ms (JVM running for {} ms)", aquiver.bootClsName(), startUpTime, jvmStartTime);
+  }
+
+  private NettyThreadFactory withThreadName(String s) {
+    return new NettyThreadFactory(s);
   }
 
   /**

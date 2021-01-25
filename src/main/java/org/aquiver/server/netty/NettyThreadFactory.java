@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.aquiver.server;
+package org.aquiver.server.netty;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.LongAdder;
