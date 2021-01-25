@@ -36,7 +36,6 @@ import org.aquiver.NoRouteFoundException;
 import org.aquiver.RequestContext;
 import org.aquiver.ResultHandler;
 import org.aquiver.ResultHandlerResolver;
-import org.aquiver.mvc.BypassRequestUrls;
 import org.aquiver.mvc.RequestResult;
 import org.aquiver.mvc.argument.MethodArgumentGetter;
 import org.aquiver.mvc.handler.RouteAdviceHandlerResolver;
@@ -45,6 +44,8 @@ import org.aquiver.mvc.interceptor.AspectInterceptorChain;
 import org.aquiver.mvc.interceptor.Interceptor;
 import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.RouteInfo;
+import org.aquiver.urls.BypassRequestUrls;
+import org.aquiver.urls.RegexBypassRequestUrls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
