@@ -38,6 +38,7 @@ import org.aquiver.server.Server;
 import org.aquiver.common.banner.BannerFont;
 import org.aquiver.websocket.WebSocketChannel;
 import org.aquiver.websocket.WebSocketResolver;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,6 +119,7 @@ public class Aquiver {
   private final SessionManager sessionManager = new SessionManager();
   private Environment environment = Apex.of().environment();
   private String bootConfName = PATH_CONFIG_PROPERTIES;
+  private ExecutorService aquiverExecutorService;
   private boolean started = false;
 
   // Some content that may be needed.
@@ -125,7 +127,6 @@ public class Aquiver {
   private Class<?> bootCls;
   private String bannerText;
   private String bannerFont;
-  private ExecutorService reusableExecutor;
   private String sessionKey;
   private Integer sessionTimeout;
   private String[] mainArgs;
@@ -687,6 +688,7 @@ public class Aquiver {
 
   /**
    * Get apex instance
+   *
    * @return apex instance
    */
   public Apex apex() {
@@ -695,6 +697,7 @@ public class Aquiver {
 
   /**
    * Get apexContext instance
+   *
    * @return ApexContext instance
    */
   public ApexContext apexContext() {
@@ -714,7 +717,7 @@ public class Aquiver {
     } catch (Exception e) {
       log.error("An exception occurred while loading the configuration", e);
     }
-    this.reusableExecutor.execute(() -> {
+    this.aquiverExecutorService.execute(() -> {
       try {
         this.bootCls = bootClass;
         this.nettyServer.start(this);
@@ -726,7 +729,7 @@ public class Aquiver {
         log.error("An exception occurred while the service started", e);
       } finally {
         log.info("SingleExecutor graceful shutdown");
-        this.reusableExecutor.shutdown();
+        this.aquiverExecutorService.shutdown();
       }
     });
     this.started = true;
@@ -753,8 +756,8 @@ public class Aquiver {
     final AquiverThreadFactory aquiverThreadFactory = new AquiverThreadFactory(SERVER_THREAD_NAME);
     final LinkedBlockingQueue<Runnable> runnableQueue = new LinkedBlockingQueue<>(16);
     final ThreadPoolExecutor.AbortPolicy abortPolicy = new ThreadPoolExecutor.AbortPolicy();
-    this.reusableExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
-            TimeUnit.MILLISECONDS, runnableQueue, aquiverThreadFactory, abortPolicy);
+    this.aquiverExecutorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
+        TimeUnit.MILLISECONDS, runnableQueue, aquiverThreadFactory, abortPolicy);
   }
 
   /**
@@ -765,7 +768,7 @@ public class Aquiver {
   public Aquiver await() {
     if (!this.started) {
       throw new IllegalStateException("Server hasn't been started. " +
-              "Call start() before calling this method.");
+          "Call start() before calling this method.");
     }
     try {
       this.countDownLatch.await();
@@ -805,7 +808,7 @@ public class Aquiver {
      * create a thread is rejected
      */
     @Override
-    public Thread newThread(Runnable runnable) {
+    public Thread newThread(@NonNull Runnable runnable) {
       return new Thread(runnable, prefix + "thread-" + threadNumber.intValue());
     }
   }
