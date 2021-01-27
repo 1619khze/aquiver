@@ -27,18 +27,17 @@ import org.apache.commons.lang3.Validate;
 import org.apex.Apex;
 import org.apex.ApexContext;
 import org.apex.Environment;
+import org.aquiver.common.banner.BannerFont;
 import org.aquiver.mvc.handler.RouteAdviceHandler;
 import org.aquiver.mvc.handler.RouteAdviceHandlerResolver;
 import org.aquiver.mvc.http.HttpMethod;
 import org.aquiver.mvc.interceptor.Interceptor;
 import org.aquiver.mvc.router.RestfulRouter;
 import org.aquiver.mvc.router.session.SessionManager;
-import org.aquiver.server.netty.NettyServer;
 import org.aquiver.server.Server;
-import org.aquiver.common.banner.BannerFont;
+import org.aquiver.server.netty.NettyServer;
 import org.aquiver.websocket.WebSocketChannel;
 import org.aquiver.websocket.WebSocketResolver;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -808,7 +807,7 @@ public class Aquiver {
      * create a thread is rejected
      */
     @Override
-    public Thread newThread(@NonNull Runnable runnable) {
+    public Thread newThread(Runnable runnable) {
       return new Thread(runnable, prefix + "thread-" + threadNumber.intValue());
     }
   }
