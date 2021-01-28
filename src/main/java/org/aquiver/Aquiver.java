@@ -23,6 +23,7 @@
  */
 package org.aquiver;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apex.Apex;
 import org.apex.ApexContext;
@@ -149,7 +150,9 @@ public class Aquiver {
 
   private static final List<Interceptor> interceptors = new ArrayList<>();
 
-  private Aquiver() {}
+  private Aquiver() {
+    //nothings
+  }
 
   /**
    * Return Aquiver instants
@@ -235,7 +238,7 @@ public class Aquiver {
    * Set the print banner text
    */
   public Aquiver bannerText(String bannerText) {
-    Validate.notNull(this.bannerText, "bannerText was already set to %s", this.bannerText);
+    Validate.isTrue(StringUtils.isBlank(this.bannerText), "bannerText was already set to %s", this.bannerText);
     this.bannerText = requireNonNull(bannerText);
     this.environment.add(PATH_APP_BANNER_TEXT, bannerText);
     return this;
@@ -245,7 +248,7 @@ public class Aquiver {
    * Set the print banner font
    */
   public Aquiver bannerFont(String bannerFont) {
-    Validate.notNull(this.bannerFont, "bannerFont was already set to %s", this.bannerFont);
+    Validate.isTrue(StringUtils.isBlank(this.bannerFont), "bannerFont was already set to %s", this.bannerFont);
     this.bannerFont = requireNonNull(bannerFont);
     this.environment.add(PATH_APP_BANNER_FONT, bannerFont);
     return this;
@@ -255,7 +258,7 @@ public class Aquiver {
    * Set the print banner name
    */
   public Aquiver bootConfName(String bootConfName) {
-    Validate.notNull(this.bootConfName, "bootConfName was already set to %s", this.bootConfName);
+    Validate.isTrue(StringUtils.isBlank(this.bootConfName), "bootConfName was already set to %s", this.bootConfName);
     this.bootConfName = requireNonNull(bootConfName);
     this.environment.add(PATH_CONFIG_PROPERTIES, bootConfName);
     return this;
@@ -267,7 +270,7 @@ public class Aquiver {
    * @param viewSuffix view suffix
    */
   public Aquiver viewSuffix(String viewSuffix) {
-    Validate.notNull(this.viewSuffix, "viewSuffix was already set to %s", this.viewSuffix);
+    Validate.isTrue(StringUtils.isBlank(this.viewSuffix), "viewSuffix was already set to %s", this.viewSuffix);
     this.viewSuffix = requireNonNull(viewSuffix);
     this.environment.add(PATH_SERVER_VIEW_SUFFIX, viewSuffix);
     return this;
@@ -279,7 +282,7 @@ public class Aquiver {
    * @param folder template folder
    */
   public Aquiver templateFolder(String folder) {
-    Validate.notNull(this.templateFolder, "templateFolder was already set to %s", this.templateFolder);
+    Validate.isTrue(StringUtils.isBlank(this.templateFolder), "templateFolder was already set to %s", this.templateFolder);
     this.templateFolder = requireNonNull(folder);
     this.environment.add(PATH_SERVER_TEMPLATES_FOLDER, folder);
     return this;
@@ -304,7 +307,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver sessionKey(String sessionKey) {
-    Validate.notNull(this.sessionKey, "sessionKey was already set to %s", this.sessionKey);
+    Validate.isTrue(StringUtils.isBlank(this.sessionKey), "sessionKey was already set to %s", this.sessionKey);
     this.sessionKey = requireNonNull(sessionKey);
     this.environment.add(PATH_SERVER_SESSION_KEY, sessionKey);
     return this;
@@ -329,7 +332,7 @@ public class Aquiver {
    * @return this
    */
   public Aquiver sessionTimeout(Integer sessionTimeout) {
-    Validate.notNull(this.sessionTimeout, "sessionTimeout was already set to %s", this.sessionTimeout);
+    Validate.isTrue(this.sessionTimeout != null || sessionTimeout > 0, "sessionTimeout was already set to %s", this.sessionTimeout);
     this.sessionTimeout = requireNonNull(sessionTimeout);
     this.environment.add(PATH_SERVER_SESSION_TIMEOUT, sessionTimeout);
     return this;
